@@ -15,7 +15,7 @@ timezone: Asia/Taipei
 # 如果是用户/组织主页：https://你的用户名.github.io
 # 如果是项目仓库：https://你的用户名.github.io/仓库名
 url: ""
-baseurl: ""
+baseurl: "/blog"
 
 # 构建设置
 markdown: kramdown
