@@ -1,0 +1,98 @@
+---
+layout: default
+---
+
+<!-- 返回栏 -->
+<div class="post-header-bar">
+  <div class="container post-header-bar-inner">
+    <a href="{{ '/#articles' | relative_url }}" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m12 19-7-7 7-7"/>
+        <path d="M19 12H5"/>
+      </svg>
+      返回文章列表
+    </a>
+  </div>
+</div>
+
+<!-- 文章正文 -->
+<article class="post-article">
+  <div class="container">
+    {% if page.tags %}
+    <div class="post-tags">
+      {% for tag in page.tags %}
+      <span class="tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <h1 class="post-title">{{ page.title }}</h1>
+
+    <div class="post-meta">
+      <span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="4" rx="2"/>
+          <path d="M16 2v4"/>
+          <path d="M8 2v4"/>
+          <path d="M3 10h18"/>
+        </svg>
+        {{ page.date | date: '%Y 年 %m 月 %d 日' }}
+      </span>
+      {% if page.read_time %}
+      <span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        {{ page.read_time }} 分钟阅读
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="post-content">
+      {{ content }}
+    </div>
+
+    <!-- 返回文章列表 -->
+    <div class="back-to-list">
+      <a href="{{ '/#articles' | relative_url }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m12 19-7-7 7-7"/>
+          <path d="M19 12H5"/>
+        </svg>
+        返回文章列表
+      </a>
+    </div>
+
+    <!-- 上下篇导航 -->
+    <div class="post-nav">
+      {% if page.previous %}
+      <a href="{{ page.previous.url | relative_url }}" class="post-nav-card prev">
+        <div class="post-nav-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+          上一篇
+        </div>
+        <p class="post-nav-title">{{ page.previous.title }}</p>
+      </a>
+      {% else %}
+      <div class="post-nav-empty"></div>
+      {% endif %}
+
+      {% if page.next %}
+      <a href="{{ page.next.url | relative_url }}" class="post-nav-card next">
+        <div class="post-nav-label">
+          下一篇
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m9 18 6-6-6-6"/>
+          </svg>
+        </div>
+        <p class="post-nav-title">{{ page.next.title }}</p>
+      </a>
+      {% else %}
+      <div class="post-nav-empty"></div>
+      {% endif %}
+    </div>
+  </div>
+</article>

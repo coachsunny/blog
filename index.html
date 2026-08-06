@@ -1,0 +1,104 @@
+---
+layout: default
+title: 首页
+description: 心茶记 - 一个关于心理运作机制的探索空间，以教练的视角记录关于模式、情绪与觉察的真实体验与思考。
+---
+
+<!-- Hero 区域 -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-tag fade-in">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+      </svg>
+      欢迎来到心茶记
+    </div>
+    <h1 class="hero-title fade-in fade-in-delay-1">
+      一杯安静的时光，<br/>
+      一颗<span class="accent">慢慢了解自己</span>的心
+    </h1>
+    <p class="hero-subtitle fade-in fade-in-delay-2">
+      这里是一个关于心理运作机制的探索空间。<br/>
+      以教练的视角，记录关于模式、情绪与觉察的真实体验与思考。<br/>
+      不追求速效答案，只愿陪你慢慢看见。
+    </p>
+    <div class="hero-buttons fade-in fade-in-delay-3">
+      <a href="#articles" class="btn btn-primary">
+        开始阅读
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"/>
+          <path d="m12 5 7 7-7 7"/>
+        </svg>
+      </a>
+      <a href="{{ '/about/' | relative_url }}" class="btn btn-outline">
+        关于我
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- 文章列表 -->
+<section id="articles" class="section">
+  <div class="container">
+    <div class="section-header scroll-fade">
+      <p class="section-eyebrow">Latest Posts</p>
+      <h2 class="section-title">最新文章</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="post-list">
+      {% for post in site.posts %}
+      <a href="{{ post.url | relative_url }}" class="post-card scroll-fade">
+        <div class="post-card-meta">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="4" rx="2"/>
+              <path d="M16 2v4"/>
+              <path d="M8 2v4"/>
+              <path d="M3 10h18"/>
+            </svg>
+            {{ post.date | date: '%Y 年 %m 月 %d 日' }}
+          </span>
+          {% if post.read_time %}
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            {{ post.read_time }} 分钟
+          </span>
+          {% endif %}
+        </div>
+        <h3 class="post-card-title">{{ post.title }}</h3>
+        <p class="post-card-excerpt">{{ post.description | default: post.excerpt | strip_html | truncate: 120 }}</p>
+        {% if post.tags %}
+        <div class="post-card-tags">
+          {% for tag in post.tags %}
+          <span class="tag">{{ tag }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <div class="post-card-readmore">
+          阅读全文
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/>
+            <path d="m12 5 7 7-7 7"/>
+          </svg>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- 引言金句区 -->
+<section class="quote-section">
+  <div class="container">
+    <blockquote class="quote-text scroll-fade">
+      "你不需要变得更好才能被爱，<br/>
+      你只需要先看见，此刻的自己已经足够好。"
+    </blockquote>
+    <p class="quote-author">— 心茶记</p>
+  </div>
+</section>

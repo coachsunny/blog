@@ -1,0 +1,73 @@
+# ============================================
+# 心茶记 · Jekyll 博客配置文件
+# ============================================
+
+# 站点基本信息
+title: 心茶记
+tagline: 一杯安静的时光
+description: 一个关于心理运作机制的探索空间，以教练的视角记录关于模式、情绪与觉察的真实体验与思考。
+author: 林安
+email: hello@xinchaji.com
+lang: zh-CN
+timezone: Asia/Taipei
+
+# 站点 URL（部署到 GitHub Pages 后修改为你的实际地址）
+# 如果是用户/组织主页：https://你的用户名.github.io
+# 如果是项目仓库：https://你的用户名.github.io/仓库名
+url: ""
+baseurl: ""
+
+# 构建设置
+markdown: kramdown
+highlighter: rouge
+permalink: /post/:title/
+
+# 分页（如果文章多了可以开启）
+# paginate: 10
+# paginate_path: "/page:num/"
+
+# 默认 Front Matter
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+
+# 网站导航
+nav:
+  - title: 首页
+    url: /
+  - title: 文章
+    url: /#articles
+  - title: 关于
+    url: /about/
+
+# 社交链接（可选，以后可以加）
+# social:
+#   github: yourusername
+#   twitter: yourusername
+
+# 排除文件
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .git
+  - .gitignore
+
+# 插件（GitHub Pages 支持的插件）
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# 文章列表显示设置
+excerpt_separator: <!--more-->
