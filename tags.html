@@ -1,0 +1,79 @@
+---
+layout: default
+title: 文章标签
+permalink: /tags/
+description: 按标签浏览心茶记的所有文章，找到你感兴趣的主题。
+---
+
+<!-- 页面标题 -->
+<section class="hero" style="padding: 64px 0 32px;">
+  <div class="container">
+    <div class="hero-tag fade-in">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+        <line x1="7" y1="7" x2="7.01" y2="7"/>
+      </svg>
+      文章标签
+    </div>
+    <h1 class="hero-title fade-in fade-in-delay-1" style="font-size: clamp(24px, 4vw, 36px);">
+      按主题，找到你想读的文章
+    </h1>
+    <p class="hero-subtitle fade-in fade-in-delay-2" style="margin-bottom: 0;">
+      每一篇文章都有它的主题标签，点击下方标签，快速找到你感兴趣的内容。
+    </p>
+  </div>
+</section>
+
+<!-- 标签云 -->
+<section class="section" style="padding: 32px 0;">
+  <div class="container">
+    <div class="tag-cloud scroll-fade">
+      {% assign tags = site.tags | sort %}
+      {% for tag in tags %}
+      <a href="#tag-{{ tag[0] | slugify }}" class="tag tag-lg">
+        {{ tag[0] }}
+        <span class="tag-count">{{ tag[1].size }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- 按标签分类的文章列表 -->
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    {% assign tags = site.tags | sort %}
+    {% for tag in tags %}
+    <div id="tag-{{ tag[0] | slugify }}" class="tag-section scroll-fade">
+      <div class="tag-section-header">
+        <h2 class="tag-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+            <line x1="7" y1="7" x2="7.01" y2="7"/>
+          </svg>
+          {{ tag[0] }}
+        </h2>
+        <span class="tag-section-count">共 {{ tag[1].size }} 篇</span>
+      </div>
+
+      <div class="tag-post-list">
+        {% for post in tag[1] %}
+        <a href="{{ post.url | relative_url }}" class="tag-post-item">
+          <div class="tag-post-date">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="4" rx="2"/>
+              <path d="M16 2v4"/>
+              <path d="M8 2v4"/>
+              <path d="M3 10h18"/>
+            </svg>
+            {{ post.date | date: '%Y-%m-%d' }}
+          </div>
+          <h3 class="tag-post-title">{{ post.title }}</h3>
+          <p class="tag-post-excerpt">{{ post.description | default: post.excerpt | strip_html | truncate: 80 }}</p>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>

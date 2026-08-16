@@ -75,7 +75,7 @@ description: 心茶记 - 一个关于心理运作机制的探索空间，以教�
         {% if post.tags %}
         <div class="post-card-tags">
           {% for tag in post.tags %}
-          <span class="tag">{{ tag }}</span>
+          <a href="{{ '/tags/' | relative_url }}#tag-{{ tag | slugify }}" class="tag">{{ tag }}</a>
           {% endfor %}
         </div>
         {% endif %}

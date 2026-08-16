@@ -45,6 +45,8 @@ nav:
     url: /
   - title: 文章
     url: /#articles
+  - title: 标签
+    url: /tags/
   - title: 关于
     url: /about/
 
