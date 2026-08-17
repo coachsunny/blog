@@ -73,9 +73,9 @@
   <!-- 繁簡轉換腳本 -->
   <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
   <script>
-  (function() {
-    const converter_s2t = OpenCC.Converter('s2t');
-    const converter_t2s = OpenCC.Converter('t2s');
+  document.addEventListener('DOMContentLoaded', function() {
+    const s2t = OpenCC.Converter('s2t');
+    const t2s = OpenCC.Converter('t2s');
     let currentLang = localStorage.getItem('blog_lang') || 'simplified';
     const langBtn = document.getElementById('langToggle');
     
@@ -84,32 +84,35 @@
     }
     
     function convertPage() {
-      const body = document.body;
-      const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, null, false);
-      let node;
-      while (node = walker.nextNode()) {
-        if (node.parentElement && node.parentElement.tagName !== 'SCRIPT' && node.parentElement.tagName !== 'STYLE' && node.parentElement.tagName !== 'CODE' && node.parentElement.tagName !== 'PRE') {
-          if (currentLang === 'traditional') {
-            node.nodeValue = converter_s2t(node.nodeValue);
-          } else {
-            node.nodeValue = converter_t2s(node.nodeValue);
+      const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, a, span, time, .post-title, .post-excerpt, .post-meta, .card-title, .card-text, .footer-brand, .footer-copy, .navbar-brand');
+      elements.forEach(function(el) {
+        // 跳過包含子元素的情況，只處理純文字節點
+        el.childNodes.forEach(function(node) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            if (currentLang === 'traditional') {
+              node.nodeValue = s2t(node.nodeValue);
+            } else {
+              node.nodeValue = t2s(node.nodeValue);
+            }
           }
-        }
-      }
+        });
+      });
+      // 也處理 title
+      document.title = currentLang === 'traditional' ? s2t(document.title) : t2s(document.title);
     }
     
     langBtn.addEventListener('click', function() {
       currentLang = currentLang === 'simplified' ? 'traditional' : 'simplified';
       localStorage.setItem('blog_lang', currentLang);
       updateButtonText();
-      convertPage();
+      location.reload(); // 重新載入以確保正確轉換
     });
     
     updateButtonText();
     if (currentLang === 'traditional') {
       convertPage();
     }
-  })();
+  });
   </script>
 
   <main>
