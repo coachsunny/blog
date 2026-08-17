@@ -9,6 +9,24 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="{{ '/css/style.css' | relative_url }}" />
+  <style>
+    .lang-btn {
+      background: transparent;
+      border: 1px solid var(--border-color, #e2e8f0);
+      color: var(--text-muted, #64748b);
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .lang-btn:hover {
+      background: var(--bg-card, #fff);
+      color: var(--primary, #2563eb);
+      border-color: var(--primary, #2563eb);
+    }
+  </style>
   {% seo %}
   {% feed_meta %}
 </head>
@@ -45,9 +63,54 @@
             </a>
           </li>
         {% endfor %}
+        <li class="lang-toggle">
+          <button id="langToggle" class="lang-btn" title="切換繁簡">简</button>
+        </li>
       </ul>
     </div>
   </nav>
+
+  <!-- 繁簡轉換腳本 -->
+  <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
+  <script>
+  (function() {
+    const converter_s2t = OpenCC.Converter('s2t');
+    const converter_t2s = OpenCC.Converter('t2s');
+    let currentLang = localStorage.getItem('blog_lang') || 'simplified';
+    const langBtn = document.getElementById('langToggle');
+    
+    function updateButtonText() {
+      langBtn.textContent = currentLang === 'simplified' ? '简' : '繁';
+    }
+    
+    function convertPage() {
+      const body = document.body;
+      const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, null, false);
+      let node;
+      while (node = walker.nextNode()) {
+        if (node.parentElement && node.parentElement.tagName !== 'SCRIPT' && node.parentElement.tagName !== 'STYLE' && node.parentElement.tagName !== 'CODE' && node.parentElement.tagName !== 'PRE') {
+          if (currentLang === 'traditional') {
+            node.nodeValue = converter_s2t(node.nodeValue);
+          } else {
+            node.nodeValue = converter_t2s(node.nodeValue);
+          }
+        }
+      }
+    }
+    
+    langBtn.addEventListener('click', function() {
+      currentLang = currentLang === 'simplified' ? 'traditional' : 'simplified';
+      localStorage.setItem('blog_lang', currentLang);
+      updateButtonText();
+      convertPage();
+    });
+    
+    updateButtonText();
+    if (currentLang === 'traditional') {
+      convertPage();
+    }
+  })();
+  </script>
 
   <main>
     {{ content }}
