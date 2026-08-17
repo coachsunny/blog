@@ -12,19 +12,21 @@
   <style>
     .lang-btn {
       background: transparent;
-      border: 1px solid var(--border-color, #e2e8f0);
-      color: var(--text-muted, #64748b);
-      padding: 4px 10px;
-      border-radius: 6px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
       cursor: pointer;
       font-size: 13px;
       font-weight: 500;
-      transition: all 0.2s;
+      font-family: var(--font-sans, sans-serif);
+      transition: all 0.2s ease;
+      line-height: 1.5;
     }
     .lang-btn:hover {
-      background: var(--bg-card, #fff);
-      color: var(--primary, #2563eb);
-      border-color: var(--primary, #2563eb);
+      background-color: hsla(145, 22%, 42%, 0.1);
+      color: var(--primary-dark);
+      border-color: var(--primary);
     }
   </style>
   {% seo %}
@@ -64,56 +66,11 @@
           </li>
         {% endfor %}
         <li class="lang-toggle">
-          <button id="langToggle" class="lang-btn" title="切換繁簡">简</button>
+          <button id="langToggle" class="lang-btn" title="切换繁简">简</button>
         </li>
       </ul>
     </div>
   </nav>
-
-  <!-- 繁簡轉換腳本 -->
-  <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
-  <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const s2t = OpenCC.Converter('s2t');
-    const t2s = OpenCC.Converter('t2s');
-    let currentLang = localStorage.getItem('blog_lang') || 'simplified';
-    const langBtn = document.getElementById('langToggle');
-    
-    function updateButtonText() {
-      langBtn.textContent = currentLang === 'simplified' ? '简' : '繁';
-    }
-    
-    function convertPage() {
-      const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, a, span, time, .post-title, .post-excerpt, .post-meta, .card-title, .card-text, .footer-brand, .footer-copy, .navbar-brand');
-      elements.forEach(function(el) {
-        // 跳過包含子元素的情況，只處理純文字節點
-        el.childNodes.forEach(function(node) {
-          if (node.nodeType === Node.TEXT_NODE) {
-            if (currentLang === 'traditional') {
-              node.nodeValue = s2t(node.nodeValue);
-            } else {
-              node.nodeValue = t2s(node.nodeValue);
-            }
-          }
-        });
-      });
-      // 也處理 title
-      document.title = currentLang === 'traditional' ? s2t(document.title) : t2s(document.title);
-    }
-    
-    langBtn.addEventListener('click', function() {
-      currentLang = currentLang === 'simplified' ? 'traditional' : 'simplified';
-      localStorage.setItem('blog_lang', currentLang);
-      updateButtonText();
-      location.reload(); // 重新載入以確保正確轉換
-    });
-    
-    updateButtonText();
-    if (currentLang === 'traditional') {
-      convertPage();
-    }
-  });
-  </script>
 
   <main>
     {{ content }}
@@ -148,5 +105,86 @@
   </button>
 
   <script src="{{ '/js/main.js' | relative_url }}"></script>
+
+  <!-- 繁简转换脚本 -->
+  <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
+  <script>
+  (function() {
+    'use strict';
+
+    // 等待 OpenCC 库加载完成
+    function waitForOpenCC(callback) {
+      if (typeof OpenCC !== 'undefined') {
+        callback();
+      } else {
+        setTimeout(function() { waitForOpenCC(callback); }, 50);
+      }
+    }
+
+    waitForOpenCC(function() {
+      const s2t = OpenCC.Converter({ from: 'cn', to: 'tw' });
+      const t2s = OpenCC.Converter({ from: 'tw', to: 'cn' });
+
+      let currentLang = localStorage.getItem('blog_lang') || 'simplified';
+      const langBtn = document.getElementById('langToggle');
+
+      function updateButtonText() {
+        if (langBtn) {
+          langBtn.textContent = currentLang === 'simplified' ? '简' : '繁';
+          langBtn.title = currentLang === 'simplified' ? '切换为繁体' : '切换为简体';
+        }
+      }
+
+      // 递归处理所有文本节点
+      function convertTextNodes(node, converter) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (node.nodeValue && node.nodeValue.trim()) {
+            node.nodeValue = converter(node.nodeValue);
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          // 跳过 script、style、textarea、input 等元素
+          const tag = node.tagName.toLowerCase();
+          if (tag === 'script' || tag === 'style' || tag === 'textarea' || tag === 'input' || tag === 'code' || tag === 'pre') {
+            return;
+          }
+          // 跳过语言切换按钮本身
+          if (node.id === 'langToggle') {
+            return;
+          }
+          for (let i = 0; i < node.childNodes.length; i++) {
+            convertTextNodes(node.childNodes[i], converter);
+          }
+        }
+      }
+
+      function convertPage() {
+        const converter = currentLang === 'traditional' ? s2t : t2s;
+        convertTextNodes(document.body, converter);
+        // 也转换 title
+        document.title = converter(document.title);
+      }
+
+      if (langBtn) {
+        langBtn.addEventListener('click', function() {
+          currentLang = currentLang === 'simplified' ? 'traditional' : 'simplified';
+          localStorage.setItem('blog_lang', currentLang);
+          updateButtonText();
+          location.reload();
+        });
+      }
+
+      updateButtonText();
+
+      if (currentLang === 'traditional') {
+        // 等页面完全渲染后再转换
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', convertPage);
+        } else {
+          convertPage();
+        }
+      }
+    });
+  })();
+  </script>
 </body>
 </html>
