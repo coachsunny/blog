@@ -49,7 +49,7 @@ description: 心茶记 - 一个关于心理运作机制的探索空间，以教�
 
     <div class="post-list">
       {% for post in site.posts %}
-      <a href="{{ post.url | relative_url }}" class="post-card scroll-fade">
+      <div class="post-card scroll-fade">
         <div class="post-card-meta">
           <span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -70,7 +70,7 @@ description: 心茶记 - 一个关于心理运作机制的探索空间，以教�
           </span>
           {% endif %}
         </div>
-        <h3 class="post-card-title">{{ post.title }}</h3>
+        <h3 class="post-card-title"><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
         <p class="post-card-excerpt">{{ post.description | default: post.excerpt | strip_html | truncate: 120 }}</p>
         {% if post.tags %}
         <div class="post-card-tags">
@@ -79,14 +79,14 @@ description: 心茶记 - 一个关于心理运作机制的探索空间，以教�
           {% endfor %}
         </div>
         {% endif %}
-        <div class="post-card-readmore">
+        <a href="{{ post.url | relative_url }}" class="post-card-readmore">
           阅读全文
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14"/>
             <path d="m12 5 7 7-7 7"/>
           </svg>
-        </div>
-      </a>
+        </a>
+      </div>
       {% endfor %}
     </div>
   </div>

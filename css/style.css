@@ -374,7 +374,7 @@ button {
   border-color: hsla(145, 22%, 42%, 0.3);
 }
 
-.post-card:hover .post-card-title {
+.post-card:hover .post-card-title a {
   color: var(--primary);
 }
 
@@ -408,6 +408,11 @@ button {
   transition: color 0.2s ease;
 }
 
+.post-card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .post-card-excerpt {
   font-size: 15px;
   line-height: 1.75;
@@ -436,6 +441,7 @@ button {
   opacity: 0;
   transform: translateX(-8px);
   transition: all 0.3s ease;
+  text-decoration: none;
 }
 
 .post-card:hover .post-card-readmore {
