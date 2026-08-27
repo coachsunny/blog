@@ -457,6 +457,21 @@ button {
   color: var(--primary-dark);
   font-size: 12px;
   line-height: 1.6;
+  font-family: var(--font-sans, sans-serif);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: default;
+}
+
+a.tag {
+  cursor: pointer;
+}
+
+a.tag:hover {
+  background-color: hsla(145, 22%, 42%, 0.2);
+  color: var(--primary-dark);
+  text-decoration: none;
 }
 
 /* ---------- 引言金句区 ---------- */
