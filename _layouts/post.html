@@ -2,6 +2,32 @@
 layout: default
 ---
 
+<!-- 文章结构化数据（JSON-LD，用于 SEO 与 AI 推荐） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": {{ page.title | jsonify }},
+  "description": {{ page.description | default: page.excerpt | strip_html | jsonify }},
+  "datePublished": "{{ page.date | date_to_xmlschema }}",
+  "dateModified": "{{ page.date | date_to_xmlschema }}",
+  "author": {
+    "@type": "Person",
+    "name": "Sunny",
+    "url": "{{ '/about/' | prepend: site.url | prepend: site.baseurl }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ site.title }}",
+    "url": "{{ '/' | prepend: site.url | prepend: site.baseurl }}"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ page.url | prepend: site.url | prepend: site.baseurl }}"
+  }
+}
+</script>
+
 <!-- 返回栏 -->
 <div class="post-header-bar">
   <div class="container post-header-bar-inner">

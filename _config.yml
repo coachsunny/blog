@@ -14,7 +14,7 @@ timezone: Asia/Taipei
 # 站点 URL（部署到 GitHub Pages 后修改为你的实际地址）
 # 如果是用户/组织主页：https://你的用户名.github.io
 # 如果是项目仓库：https://你的用户名.github.io/仓库名
-url: ""
+url: "https://coachsunny.github.io"
 baseurl: "/blog"
 
 # 构建设置

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://coachsunny.github.io/blog/sitemap.xml

@@ -5,6 +5,38 @@ permalink: /about/
 description: 关于心茶记和它的作者 Sunny——一名专注于心理运作机制探索的教练，相信看见即疗愈，温柔而真实。
 ---
 
+<!-- 作者结构化数据（JSON-LD，强化专业权威性） -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Sunny",
+  "jobTitle": "专业教练（ICF-ACC）",
+  "description": "专注于人生教练、企业教练与亲子教练，以教练视角探索心理运作机制，帮助人们看见内在模式，拥有更多选择的自由。",
+  "url": "{{ '/about/' | prepend: site.url | prepend: site.baseurl }}",
+  "knowsAbout": [
+    "教练技术",
+    "人生教练",
+    "企业教练",
+    "亲子教练",
+    "自我成长",
+    "心理运作机制",
+    "情绪管理",
+    "沟通技巧",
+    "习惯养成",
+    "正向心理学"
+  ],
+  "alumniOf": {
+    "@type": "Organization",
+    "name": "国际教练联盟（ICF）"
+  },
+  "memberOf": {
+    "@type": "Organization",
+    "name": "中华专业教练发展协会"
+  }
+}
+</script>
+
 <!-- 关于页头部 -->
 <section class="about-hero">
   <div class="container">
