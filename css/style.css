@@ -6,26 +6,27 @@
 
 /* ---------- 变量 ---------- */
 :root {
-  /* 颜色系统 */
-  --bg: hsl(40, 30%, 96%);           /* 暖奶油白纸面底 */
-  --bg-card: hsl(44, 35%, 98%);       /* 卡片底 */
-  --text: hsl(28, 25%, 22%);          /* 深棕墨色正文 */
-  --text-muted: hsl(28, 15%, 45%);    /* 辅助文字 */
-  --primary: hsl(145, 22%, 42%);      /* 鼠尾草绿主色 */
-  --primary-light: hsl(145, 25%, 92%);/* 鼠尾草绿淡底 */
-  --primary-dark: hsl(145, 25%, 30%); /* 鼠尾草绿深 */
-  --border: hsl(35, 20%, 86%);        /* 暖灰边框 */
-  --shadow: 0 2px 12px hsla(0, 0%, 0%, 0.02),
-            0 1px 2px -1px hsla(0, 0%, 0%, 0.02);
-  --shadow-md: 0 2px 12px hsla(0, 0%, 0%, 0.03),
-               0 4px 6px -1px hsla(0, 0%, 0%, 0.03);
+  /* 颜色系统：温润茶香与鼠尾草绿 */
+  --bg: hsl(40, 28%, 96%);           /* 暖奶油白纸面底 */
+  --bg-card: hsl(44, 35%, 98.5%);     /* 卡片温润底 */
+  --text: hsl(28, 25%, 21%);          /* 深棕墨色正文 */
+  --text-muted: hsl(28, 14%, 43%);    /* 辅助文字（对比度更清晰） */
+  --primary: hsl(145, 24%, 40%);      /* 鼠尾草绿主色 */
+  --primary-light: hsl(145, 26%, 93%);/* 鼠尾草绿淡底 */
+  --primary-dark: hsl(145, 28%, 28%); /* 鼠尾草绿深色 */
+  --border: hsl(35, 18%, 86%);        /* 暖灰边框 */
+  --shadow: 0 2px 12px hsla(28, 20%, 15%, 0.03),
+            0 1px 3px hsla(28, 20%, 15%, 0.02);
+  --shadow-md: 0 4px 16px hsla(28, 20%, 15%, 0.04),
+               0 2px 6px hsla(28, 20%, 15%, 0.03);
 
-  /* 字体 */
-  --font-serif: 'Noto Serif SC', 'Source Han Serif SC', SimSun, Georgia,
-                'Times New Roman', Times, serif;
-  --font-sans: 'Noto Sans SC', -apple-system, BlinkMacSystemFont,
-               'Segoe UI', Roboto, 'PingFang SC', 'Microsoft Yahei',
-               sans-serif;
+  /* 字体系统：完整支持繁简中文与高质量衬线/无衬线字形 */
+  --font-serif: 'Noto Serif TC', 'Noto Serif SC', 'Source Han Serif TC', 'Source Han Serif SC',
+                'Songti TC', 'Songti SC', 'BiauKai', SimSun, Georgia,
+                'Times New Roman', serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Noto Sans TC', 'Noto Sans SC',
+               'PingFang TC', 'PingFang SC', 'Microsoft JhengHei', 'Microsoft Yahei',
+               'Segoe UI', Roboto, sans-serif;
 
   /* 间距 */
   --radius: 12px;
@@ -50,7 +51,8 @@ html {
 body {
   font-family: var(--font-sans);
   font-size: 16px;
-  line-height: 1.8;
+  line-height: 1.85;
+  letter-spacing: 0.015em;
   color: var(--text);
   background-color: var(--bg);
   min-height: 100vh;
@@ -789,51 +791,145 @@ a.tag:hover {
 
 /* 正文排版 */
 .post-content {
-  font-size: 16px;
-  line-height: 1.9;
+  font-size: 16.5px;
+  line-height: 1.95;
+  letter-spacing: 0.018em;
   color: var(--text);
+  word-break: break-word;
+}
+
+/* 隐藏文章开头的重复 H1 标题（因模板已渲染 post-title） */
+.post-content > h1:first-child {
+  display: none;
 }
 
 .post-content p {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .post-content h2 {
   font-family: var(--font-serif);
-  font-size: clamp(20px, 2.8vw, 24px);
+  font-size: clamp(20px, 3vw, 25px);
   font-weight: 600;
   color: var(--text);
-  margin-top: 48px;
-  margin-bottom: 16px;
-  padding-left: 12px;
-  border-left: 3px solid var(--primary);
-  line-height: 1.5;
+  margin-top: 52px;
+  margin-bottom: 20px;
+  padding-left: 14px;
+  border-left: 3.5px solid var(--primary);
+  line-height: 1.45;
+  letter-spacing: 0.01em;
 }
 
 .post-content h2:first-of-type {
   margin-top: 0;
 }
 
-.post-content blockquote {
-  margin: 32px 0;
-  padding: 20px 24px;
-  border-left: 4px solid var(--primary);
-  background-color: var(--primary-light);
-  border-radius: 0 10px 10px 0;
-  font-style: italic;
+.post-content h3 {
   font-family: var(--font-serif);
-  font-size: 17px;
+  font-size: clamp(17px, 2.4vw, 20px);
+  font-weight: 600;
   color: var(--text);
-  line-height: 1.8;
+  margin-top: 36px;
+  margin-bottom: 14px;
+  line-height: 1.5;
+  padding-left: 4px;
+}
+
+.post-content h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 28px;
+  margin-bottom: 12px;
+}
+
+/* 引用块（温润书卷感，移除中文不适用的斜体） */
+.post-content blockquote {
+  margin: 36px 0;
+  padding: 22px 28px;
+  border-left: 4px solid var(--primary);
+  background: linear-gradient(135deg, hsla(145, 25%, 92%, 0.65), hsla(44, 35%, 98%, 0.75));
+  border-radius: 0 12px 12px 0;
+  font-style: normal;
+  font-family: var(--font-serif);
+  font-size: 16.5px;
+  color: var(--text);
+  line-height: 1.9;
+  box-shadow: 0 1px 3px hsla(28, 20%, 15%, 0.02);
+}
+
+.post-content blockquote p {
+  margin-bottom: 14px;
 }
 
 .post-content blockquote p:last-child {
   margin-bottom: 0;
 }
 
+/* 列表排版 */
+.post-content ul,
+.post-content ol {
+  margin: 18px 0 24px;
+  padding-left: 26px;
+}
+
+.post-content li {
+  margin-bottom: 10px;
+  line-height: 1.85;
+}
+
+.post-content li:last-child {
+  margin-bottom: 0;
+}
+
+/* 分隔线 */
+.post-content hr {
+  margin: 44px auto;
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  width: 80%;
+}
+
 .post-content strong {
   font-weight: 600;
   color: var(--text);
+}
+
+/* 文章内超链接 */
+.post-content a {
+  color: var(--primary-dark);
+  text-decoration: underline;
+  text-decoration-color: hsla(145, 22%, 42%, 0.35);
+  text-underline-offset: 4px;
+  transition: all 0.2s ease;
+}
+
+.post-content a:hover {
+  color: var(--primary);
+  text-decoration-color: var(--primary);
+}
+
+/* 教练反思与觉察提问卡片 */
+.coaching-box,
+.reflection-box {
+  margin: 36px 0;
+  padding: 24px 28px;
+  background-color: hsla(145, 24%, 40%, 0.05);
+  border: 1px solid hsla(145, 24%, 40%, 0.2);
+  border-radius: var(--radius-lg);
+  line-height: 1.85;
+}
+
+.coaching-box-title {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* 上下篇导航 */
@@ -978,9 +1074,16 @@ a.tag:hover {
 }
 
 @media (max-width: 768px) {
-  /* 移动端导航 */
+  /* 移动端导航与触摸尺寸 */
   .menu-toggle {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 8px;
+    margin-right: -8px;
+    color: var(--text);
   }
 
   .navbar-links {
@@ -991,12 +1094,13 @@ a.tag:hover {
     flex-direction: column;
     align-items: stretch;
     gap: 0;
-    background-color: hsla(40, 30%, 96%, 0.98);
+    background-color: hsla(40, 28%, 96%, 0.98);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
-    padding: 8px 24px 16px;
+    padding: 8px 20px 20px;
     display: none;
+    box-shadow: var(--shadow-md);
   }
 
   .navbar-links.open {
@@ -1013,7 +1117,7 @@ a.tag:hover {
 
   .navbar-links a {
     display: block;
-    padding: 12px 0;
+    padding: 14px 4px;
     font-size: 15px;
   }
 
@@ -1021,17 +1125,38 @@ a.tag:hover {
     display: none;
   }
 
-  /* 间距调整 */
+  .navbar-links .lang-toggle {
+    padding-top: 14px;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .navbar-links .lang-toggle .lang-btn {
+    padding: 6px 18px;
+    font-size: 14px;
+  }
+
+  /* 移动端文章头部优化：取消二级 sticky，释放阅读视野 */
+  .post-header-bar {
+    position: static;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .post-header-bar-inner {
+    height: 44px;
+  }
+
+  /* 间距与卡片调整 */
   .hero {
-    padding: 64px 0 80px;
+    padding: 56px 0 68px;
   }
 
   .section {
-    padding: 64px 0;
+    padding: 56px 0;
   }
 
   .post-card {
-    padding: 20px 22px;
+    padding: 20px 20px;
   }
 
   .values-grid {
@@ -1044,7 +1169,42 @@ a.tag:hover {
   }
 
   .post-article {
-    padding: 32px 0 64px;
+    padding: 28px 0 56px;
+  }
+
+  .post-title {
+    font-size: clamp(22px, 5.5vw, 28px);
+    line-height: 1.4;
+    margin-bottom: 18px;
+  }
+
+  .post-meta {
+    gap: 16px;
+    font-size: 13px;
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .post-content {
+    font-size: 16px;
+    line-height: 1.9;
+  }
+
+  .post-content p {
+    margin-bottom: 20px;
+  }
+
+  .post-content h2 {
+    margin-top: 40px;
+    margin-bottom: 16px;
+    font-size: 21px;
+  }
+
+  .post-content blockquote {
+    margin: 28px 0;
+    padding: 18px 20px;
+    font-size: 15.5px;
   }
 
   .post-nav {
@@ -1057,6 +1217,26 @@ a.tag:hover {
 
   .post-nav-card.next .post-nav-label {
     justify-content: flex-start;
+  }
+}
+
+/* 手机小屏幕边距与触控体验 */
+@media (max-width: 640px) {
+  .container,
+  .container-wide {
+    padding: 0 18px;
+  }
+
+  .navbar-inner {
+    padding: 0 18px;
+    height: 58px;
+  }
+
+  .back-to-top {
+    right: 16px;
+    bottom: 24px;
+    width: 42px;
+    height: 42px;
   }
 }
 
