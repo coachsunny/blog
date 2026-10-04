@@ -539,12 +539,49 @@ a.tag:hover {
   color: var(--primary);
 }
 
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.footer-btn:hover {
+  color: var(--primary-dark);
+  border-color: var(--primary);
+  background-color: hsla(145, 24%, 40%, 0.08);
+}
+
+.footer-btn svg {
+  width: 15px;
+  height: 15px;
+  color: var(--primary);
+}
+
 .footer-email {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--text-muted);
+  padding: 4px 0;
 }
 
 .footer-email:hover {
@@ -930,6 +967,219 @@ a.tag:hover {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* 读者微信群邀请卡片 */
+.community-card {
+  margin: 56px 0 24px;
+  padding: 32px 36px;
+  background: linear-gradient(135deg, hsla(145, 25%, 94%, 0.8), hsla(44, 35%, 98.5%, 0.95));
+  border: 1px solid hsla(145, 24%, 40%, 0.22);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.community-card-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.community-content {
+  flex: 1;
+}
+
+.community-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  background-color: hsla(145, 24%, 40%, 0.12);
+  color: var(--primary-dark);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.community-badge svg {
+  width: 14px;
+  height: 14px;
+  color: var(--primary);
+}
+
+.community-title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.community-desc {
+  font-size: 14.5px;
+  line-height: 1.8;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.community-note {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: hsla(28, 14%, 43%, 0.85);
+}
+
+.community-note a {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+.community-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.qr-wrapper {
+  width: 156px;
+  height: 156px;
+  background-color: #fff;
+  padding: 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.qr-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.qr-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+@media (max-width: 680px) {
+  .community-card {
+    padding: 24px 20px;
+    margin: 40px 0 20px;
+  }
+  .community-card-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 24px;
+  }
+  .community-badge {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .qr-wrapper {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+/* 微信社群全局弹窗 */
+.wechat-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background-color: hsla(0, 0%, 0%, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.wechat-modal.active {
+  display: flex;
+}
+
+.wechat-modal-box {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  max-width: 360px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 12px 32px hsla(0, 0%, 0%, 0.18);
+  position: relative;
+  border: 1px solid var(--border);
+  animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.wechat-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: var(--text-muted);
+  padding: 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.wechat-modal-close:hover {
+  color: var(--text);
+  background-color: hsla(0, 0%, 0%, 0.05);
+}
+
+.wechat-modal-title {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.wechat-modal-desc {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+.wechat-modal-qr {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 12px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.wechat-modal-qr img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.wechat-modal-hint {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 /* 上下篇导航 */

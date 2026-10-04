@@ -121,4 +121,34 @@
       observer.observe(el);
     });
   }
+
+  // ---------- 微信社群弹窗控制 ----------
+  const wechatBtn = document.getElementById('wechatBtn');
+  const wechatModal = document.getElementById('wechatModal');
+  const wechatModalClose = document.getElementById('wechatModalClose');
+
+  if (wechatBtn && wechatModal) {
+    wechatBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      wechatModal.classList.add('active');
+    });
+
+    if (wechatModalClose) {
+      wechatModalClose.addEventListener('click', function () {
+        wechatModal.classList.remove('active');
+      });
+    }
+
+    wechatModal.addEventListener('click', function (e) {
+      if (e.target === wechatModal) {
+        wechatModal.classList.remove('active');
+      }
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && wechatModal.classList.contains('active')) {
+        wechatModal.classList.remove('active');
+      }
+    });
+  }
 })();

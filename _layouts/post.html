@@ -79,6 +79,35 @@ layout: default
       {{ content }}
     </div>
 
+    <!-- 读者交流群 / 微信社群邀请卡片 -->
+    <div class="community-card">
+      <div class="community-card-inner">
+        <div class="community-content">
+          <div class="community-badge">
+            <svg class="leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+            </svg>
+            心茶记 · 读者交流群
+          </div>
+          <h3 class="community-title">在文字之外，一起静心同行</h3>
+          <p class="community-desc">
+            文字有时安静，但探索自我的路上，你并不孤单。<br/>
+            欢迎扫码加入「心茶記」微信交流群，与同频伙伴探讨觉察、交流心得。新文章发布时也会在群内第一时间分享。
+          </p>
+          <p class="community-note">
+            💡 微信群二维码若提示过期，可邮件联系：<a href="mailto:{{ site.email }}">{{ site.email }}</a> 获取最新入口
+          </p>
+        </div>
+        <div class="community-qr">
+          <div class="qr-wrapper">
+            <img src="{{ '/assets/wechat-group-qr.png' | relative_url }}" alt="心茶記微信群二維碼" />
+          </div>
+          <span class="qr-label">微信扫一扫 · 加入群聊</span>
+        </div>
+      </div>
+    </div>
+
     <!-- 返回文章列表 -->
     <div class="back-to-list">
       <a href="{{ '/#articles' | relative_url }}">
