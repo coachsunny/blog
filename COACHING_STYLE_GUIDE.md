@@ -198,6 +198,22 @@ flowchart TD
   * **一鍵複製富文本檔**：`04_方格子_富文本預覽.html`、`07_知乎_富文本預覽.html`（點兩下用瀏覽器開啟，內建「一鍵複製富文本」按鈕，貼上編輯器即可完美保留標題、引言框、粗體與清單）
   * （同時保留 `.txt` 以利向下相容）
 
+### 4. 外部連結（URL）規範【重要避坑守則】
+
+為了避免讀者點擊失效連結，所有社群貼文中的網站網址**必須嚴格遵循以下規範，絕不可自行腦補或臆測網域**：
+
+* ✅ **心茶記部落格首頁**：`https://coachsunny.github.io/blog/`
+* ✅ **單篇文章永久連結 (Permalink)**：`https://coachsunny.github.io/blog/post/<slug>/`
+  * 範例：`https://coachsunny.github.io/blog/post/language-and-cognitive-differences/`
+  * 命名來源：直接取自 `_posts/YYYY-MM-DD-<slug>.md` 檔案名稱中的 `<slug>`。
+* ❌ **嚴禁使用的錯誤網域**：
+  * 嚴禁使用 `https://sunnycoach.com/...`（❌ 此網域未綁定或不存在）
+  * 嚴禁使用 `https://coachsunny.com/...`（❌ 錯誤網域）
+  * 嚴禁使用 `https://sunnycoach.github.io/...`（❌ 帳號名稱顛倒）
+* ⚠️ **小紅書平台特別規範**：
+  * 嚴禁出現任何 `http://` 或 `https://` 超連結（防官方限流）。
+  * 統一使用品牌關鍵字引導：`🔍 完整深度長文收錄於個人專欄《心茶記》（瀏覽器搜尋「心茶記 Sunny」即可閱讀全篇 ☕）`。
+
 ---
 
 ## 🚫 七、 文章起頭多樣性庫與「一週防疲勞」機制 (Opening Variety & Anti-Fatigue Rule)
