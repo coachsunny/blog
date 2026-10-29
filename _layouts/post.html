@@ -79,7 +79,7 @@ layout: default
       {{ content }}
     </div>
 
-    <!-- 读者交流群 / 微信社群邀请卡片 -->
+    <!-- 读者交流 / 微信 & LINE 社群邀请卡片 -->
     <div class="community-card">
       <div class="community-card-inner">
         <div class="community-content">
@@ -88,22 +88,30 @@ layout: default
               <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
               <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
             </svg>
-            心茶记 · 读者交流群
+            心茶记 · 读者社群
           </div>
           <h3 class="community-title">在文字之外，一起静心同行</h3>
           <p class="community-desc">
             文字有时安静，但探索自我的路上，你并不孤单。<br/>
-            欢迎扫码加入「心茶記」微信交流群，与同频伙伴探讨觉察、交流心得。新文章发布时也会在群内第一时间分享。
+            欢迎加入「心茶記」读者社群，与同频伙伴探讨觉察、交流心得。
           </p>
           <p class="community-note">
-            💡 微信群二维码若提示过期，可邮件联系：<a href="mailto:{{ site.email }}">{{ site.email }}</a> 获取最新入口
+            💡 二维码永久有效：台湾及海外读者可扫码加入 <strong>LINE 社群</strong>；微信读者扫码添加 <strong>Coach Sunny</strong>（备注「心茶记」），将邀请您进入读者群。
           </p>
         </div>
-        <div class="community-qr">
-          <div class="qr-wrapper">
-            <img src="{{ '/assets/wechat-group-qr.png' | relative_url }}" alt="心茶記微信群二維碼" />
+        <div class="community-qrs">
+          <div class="community-qr-item">
+            <div class="qr-wrapper">
+              <img src="{{ '/assets/line-qr.png' | relative_url }}" alt="心茶記 LINE 社群二维码" />
+            </div>
+            <span class="qr-label">LINE · 扫码加入社群</span>
           </div>
-          <span class="qr-label">微信扫一扫 · 加入群聊</span>
+          <div class="community-qr-item">
+            <div class="qr-wrapper">
+              <img src="{{ '/assets/wechat-qr.png' | relative_url }}" alt="Sunny 教练个人微信二维码" />
+            </div>
+            <span class="qr-label">微信 · 加好友邀请入群</span>
+          </div>
         </div>
       </div>
     </div>
