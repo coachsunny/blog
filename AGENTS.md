@@ -73,3 +73,22 @@
    - 面向大陸高知讀者，維持原創簡體深度排版。
 3. **發布前漢字檢驗機制**：
    - 任何產製或批次生成結束前，必須掃描確認 `04_方格子.md`、`04_方格子.txt`、`04_方格子_富文本預覽.html` 之簡體字元出現率為 0。
+
+---
+
+## 🛠️ 五、 專案核心工作區技能 (Workspace Skills)
+
+本專案於 `.agents/skills/` 內建 3 套全自動化工作區技能，供 AI 助理隨時調用：
+
+1. **`mindtea-publish`** ([`SKILL.md`](file:///d:/blog/.agents/skills/mindtea-publish/SKILL.md))：
+   - 統籌「文章撰寫 $\rightarrow$ 封面生成 $\rightarrow$ 12 件套社群分發包產製 $\rightarrow$ 兩岸防呆檢驗 $\rightarrow$ Git 部署」端到端全流程。
+   - 核心腳本：`node .agents/skills/mindtea-publish/scripts/generate_social_package.js <文章路徑>`。
+2. **`cross-strait-localization`** ([`SKILL.md`](file:///d:/blog/.agents/skills/cross-strait-localization/SKILL.md))：
+   - 內建教育部國字標準與 OpenCC 簡繁雙向辭庫，負責兩岸語彙在地化轉換與發布防呆檢驗。
+   - 核心腳本：
+     - 發布前檢驗器：`node .agents/skills/cross-strait-localization/scripts/lint_social_posts.js <目錄名稱或--all>`。
+     - 雙向轉換器：`node .agents/skills/cross-strait-localization/scripts/convert_text.js`。
+3. **`zen-cover-designer`** ([`SKILL.md`](file:///d:/blog/.agents/skills/zen-cover-designer/SKILL.md))：
+   - 維護《心茶記》東方茶禪美學規範、主題隱喻提示詞庫、零文字水印鐵律。
+   - 自動將生成圖片雙目錄同步備份至 `social_posts/YYYY-MM-DD_主題名/cover.jpg` 與 `social_assets/<slug>.jpg`。
+   - 核心腳本：`node .agents/skills/zen-cover-designer/scripts/archive_cover.js <來源圖片路徑> <postSlug> <targetSocialDirName>`。
