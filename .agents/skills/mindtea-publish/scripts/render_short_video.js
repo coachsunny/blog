@@ -38,10 +38,36 @@ function findFFmpeg() {
   throw new Error('找不到 FFmpeg 執行檔，請確認已安裝 FFmpeg。');
 }
 
+function findEdgeTTS() {
+  try {
+    execSync('edge-tts --version', { stdio: 'ignore' });
+    return 'edge-tts';
+  } catch (e) {}
+
+  const pythonScriptDir = path.join(process.env.LOCALAPPDATA || '', 'Programs/Python/Python312/Scripts');
+  const edgeTtsExe = path.join(pythonScriptDir, 'edge-tts.exe');
+  if (fs.existsSync(edgeTtsExe)) {
+    return edgeTtsExe;
+  }
+  return null;
+}
+
 /**
- * Synthesize voiceover using Windows Speech Synthesis
+ * Synthesize voiceover using Edge Neural TTS (with SAPI fallback)
  */
-function synthesizeVoice(text, outWavPath) {
+function synthesizeVoice(text, outAudioPath) {
+  const edgeTts = findEdgeTTS();
+
+  if (edgeTts) {
+    console.log('🎤 使用微軟自然神經語音引擎 (zh-TW-YunJheNeural，降速 -15% 溫潤教練音質)...');
+    const vttPath = outAudioPath.replace(/\.[^.]+$/, '.vtt');
+    const cmd = `"${edgeTts}" --voice zh-TW-YunJheNeural --rate="-15%" --pitch="-5Hz" --text "${text.replace(/"/g, '\\"')}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
+    execSync(cmd, { stdio: 'inherit' });
+    return;
+  }
+
+  // Fallback to SAPI
+  console.log('🎤 使用本機 SAPI 語音引擎...');
   const psCode = `
 Add-Type -AssemblyName System.Speech
 $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
@@ -50,8 +76,8 @@ $voice = $installed | Where-Object { $_.VoiceInfo.Name -like "*Hanhan*" -or $_.V
 if ($voice) {
     $synth.SelectVoice($voice.VoiceInfo.Name)
 }
-$synth.Rate = 0
-$synth.SetOutputToWaveFile('${outWavPath.replace(/\\/g, '\\\\')}')
+$synth.Rate = -1
+$synth.SetOutputToWaveFile('${outAudioPath.replace(/\\/g, '\\\\')}')
 $synth.Speak('${text.replace(/'/g, "''")}')
 $synth.Dispose()
 `;
@@ -102,7 +128,7 @@ function renderShortVideo(targetFolder) {
   const folder = path.resolve(targetFolder);
 
   const coverPath = path.join(folder, 'cover.jpg').replace(/\\/g, '/');
-  const voicePath = path.join(folder, 'voiceover.wav').replace(/\\/g, '/');
+  let voicePath = path.join(folder, 'voiceover_coach.mp3').replace(/\\/g, '/');
   const assPath = path.join(folder, 'subtitles.ass').replace(/\\/g, '/');
   const outVideo = path.join(folder, 'short_video.mp4').replace(/\\/g, '/');
   const scriptPath = path.join(folder, '08_短視頻腳本.txt');
@@ -113,16 +139,21 @@ function renderShortVideo(targetFolder) {
 
   // 1. Synthesize voice if not exists
   if (!fs.existsSync(voicePath)) {
-    console.log('🎤 正在生成 AI 語音旁白...');
-    let text = '好好說話為什麼這麼難？因為我們總想證明自己「贏」。開口前，請留白三秒：第一秒，鬆開咬緊的牙關；第二秒問自己：我是想爭輸贏，還是想解決問題？第三秒點亮好奇：看著對方的眼睛，去聽聽他的世界，正在經歷什麼。所有真實的人生，皆在相遇之中。搜尋《心茶記》，找回對話的初心。';
-    if (fs.existsSync(scriptPath)) {
-      const scriptContent = fs.readFileSync(scriptPath, 'utf8');
-      const m = scriptContent.match(/【二、 旁白純文字.*?】\r?\n([\s\S]*?)(?:\r?\n=|$)/);
-      if (m && m[1].trim()) {
-        text = m[1].trim();
+    const fallbackWav = path.join(folder, 'voiceover.wav').replace(/\\/g, '/');
+    if (fs.existsSync(fallbackWav)) {
+      voicePath = fallbackWav;
+    } else {
+      console.log('🎤 正在生成 AI 自然神經語音旁白...');
+      let text = '好好說話……為什麼這麼難？因為我們的心裡，總想證明自己贏。開口前，請給自己留白三秒：第一秒，鬆開咬緊的牙關，讓肩膀沉下去；第二秒問問自己：我現在是想爭輸贏，還是想解決問題？第三秒，點亮好奇：看著對方的眼睛，去聽聽他的世界，正在經歷什麼。所有真實的人生，皆在相遇之中。搜尋《心茶記》，找回對話的初心。';
+      if (fs.existsSync(scriptPath)) {
+        const scriptContent = fs.readFileSync(scriptPath, 'utf8');
+        const m = scriptContent.match(/【二、 旁白純文字.*?】\r?\n([\s\S]*?)(?:\r?\n=|$)/);
+        if (m && m[1].trim()) {
+          text = m[1].trim();
+        }
       }
+      synthesizeVoice(text, voicePath);
     }
-    synthesizeVoice(text, voicePath);
   }
 
   // 2. Generate subtitles if not exists

@@ -10,6 +10,9 @@ _drafts/
 # 系統檔案
 .DS_Store
 Thumbs.db
+node_modules/
+package-lock.json
+package.json
 
 # IDE 與編輯器
 *.swp
