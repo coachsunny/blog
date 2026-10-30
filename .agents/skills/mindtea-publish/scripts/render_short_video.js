@@ -53,13 +53,15 @@ function findEdgeTTS() {
 }
 
 /**
- * Synthesize voiceover using Edge Neural TTS (with SAPI fallback)
+ * Synthesize voiceover using Edge Neural TTS
+ * 依作者 Sunny 性別規範：嚴格限定使用男性沉穩教練音 (zh-TW-YunJheNeural)
+ * 參數：語速 -15% 留白節奏、音調 -5Hz 沉穩安定
  */
 function synthesizeVoice(text, outAudioPath) {
   const edgeTts = findEdgeTTS();
 
   if (edgeTts) {
-    console.log('🎤 使用微軟自然神經語音引擎 (zh-TW-YunJheNeural，降速 -15% 溫潤教練音質)...');
+    console.log('🎤 使用微軟自然神經語音引擎 (zh-TW-YunJheNeural，作者 Sunny 男性沉穩教練音質)...');
     const vttPath = outAudioPath.replace(/\.[^.]+$/, '.vtt');
     const cmd = `"${edgeTts}" --voice zh-TW-YunJheNeural --rate="-15%" --pitch="-5Hz" --text "${text.replace(/"/g, '\\"')}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
     execSync(cmd, { stdio: 'inherit' });

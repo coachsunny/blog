@@ -59,6 +59,7 @@
 9. `07_知乎_富文本預覽.html`（內建「一鍵複製富文本」按鈕）
 10. `08_短視頻腳本.txt`（30 秒短影音分鏡腳本：含五大風格模型輪替、秒數分鏡、純旁白與 AI 畫面生成提示詞）
 11. `cover.jpg`（溫暖原木茶几、陶杯、晨光、無任何文字或浮水印，並同步備份至 `social_assets/<slug>.jpg`）
+12. `short_video.mp4`（可選/按需渲染：1080×1920 直式高清。**作者性別鐵律**：作者 Sunny 為男性教練，所有語音旁白**嚴格限定男性沉穩教練音 `zh-TW-YunJheNeural`**，語速 `-15%`、音調 `-5Hz`，嚴禁女聲與機械音）
 
 ---
 
@@ -82,8 +83,10 @@
 本專案於 `.agents/skills/` 內建 3 套全自動化工作區技能，供 AI 助理隨時調用：
 
 1. **`mindtea-publish`** ([`SKILL.md`](file:///d:/blog/.agents/skills/mindtea-publish/SKILL.md))：
-   - 統籌「文章撰寫 $\rightarrow$ 封面生成 $\rightarrow$ 12 件套社群分發包產製 $\rightarrow$ 兩岸防呆檢驗 $\rightarrow$ Git 部署」端到端全流程。
-   - 核心腳本：`node .agents/skills/mindtea-publish/scripts/generate_social_package.js <文章路徑>`。
+   - 統籌「文章撰寫 $\rightarrow$ 封面生成 $\rightarrow$ 13 項社群分發包產製 $\rightarrow$ 9:16 短影音渲染 $\rightarrow$ 兩岸防呆檢驗 $\rightarrow$ Git 部署」端到端全流程。
+   - 核心腳本：
+     - 社群分發包產生器：`node .agents/skills/mindtea-publish/scripts/generate_social_package.js <文章路徑>`。
+     - 短影音自動渲染器：`node .agents/skills/mindtea-publish/scripts/render_short_video.js <社群目錄路徑>`（嚴格限定男性沉穩教練音）。
 2. **`cross-strait-localization`** ([`SKILL.md`](file:///d:/blog/.agents/skills/cross-strait-localization/SKILL.md))：
    - 內建教育部國字標準與 OpenCC 簡繁雙向辭庫，負責兩岸語彙在地化轉換與發布防呆檢驗。
    - 核心腳本：
