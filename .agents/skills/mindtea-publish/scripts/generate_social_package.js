@@ -39,7 +39,7 @@ function parsePostFrontmatter(content) {
   return { metadata, body };
 }
 
-function generateSocialPackage(postFilePath) {
+function generateSocialPackage(postFilePath, customFolderName) {
   const repoRoot = findRepoRoot(__dirname);
   const fullPostPath = path.isAbsolute(postFilePath) ? postFilePath : path.resolve(repoRoot, postFilePath);
 
@@ -49,7 +49,12 @@ function generateSocialPackage(postFilePath) {
 
   const fileContent = fs.readFileSync(fullPostPath, 'utf8');
   const fileName = path.basename(fullPostPath, '.md');
-  const { metadata, body } = parsePostFrontmatter(fileContent);
+  const { metadata, body: rawBody } = parsePostFrontmatter(fileContent);
+
+  // Clean Jekyll liquid relative_url and leading H1 if duplicated
+  const body = rawBody
+    .replace(/^\s*#\s+[^\r\n]+\r?\n+/, '')
+    .replace(/\{\{\s*['"]\/post\/([^'"]+)['"]\s*\|\s*relative_url\s*\}\}/g, 'https://coachsunny.github.io/blog/post/$1');
 
   // Extract date and slug
   const dateMatch = fileName.match(/^(\d{4}-\d{2}-\d{2})-(.*)$/);
@@ -60,9 +65,17 @@ function generateSocialPackage(postFilePath) {
   const permalink = `https://coachsunny.github.io/blog/post/${postSlug}/`;
   const blogHome = `https://coachsunny.github.io/blog/`;
 
+  // Localized Traditional Chinese Body & Title
+  const titleTc = s2tw(postTitle);
+  const bodyTc = s2tw(body);
+
+  // Simplified Body & Title
+  const titleSc = tw2s(postTitle);
+  const bodySc = tw2s(body);
+
   // Folder name in social_posts/: YYYY-MM-DD_主題名
-  const safeTitle = postTitle.split(/[:：\s]/)[0].replace(/[^\u4e00-\u9fa5a-zA-Z0-9_-]/g, '');
-  const folderName = `${postDate}_${safeTitle}`;
+  const safeTitle = titleTc.split(/[:：\s]/)[0].replace(/[^\u4e00-\u9fa5a-zA-Z0-9_-]/g, '');
+  const folderName = customFolderName || `${postDate}_${safeTitle}`;
   const targetDir = path.join(repoRoot, 'social_posts', folderName);
 
   if (!fs.existsSync(targetDir)) {
@@ -72,14 +85,6 @@ function generateSocialPackage(postFilePath) {
   console.log(`\n📦 開始為《${postTitle}》建立 12 項社群分發資產...`);
   console.log(`📁 目標目錄: ${targetDir}`);
   console.log(`🔗 永久連結: ${permalink}\n`);
-
-  // Localized Traditional Chinese Body & Title
-  const titleTc = s2tw(postTitle);
-  const bodyTc = s2tw(body);
-
-  // Simplified Body & Title
-  const titleSc = tw2s(postTitle);
-  const bodySc = tw2s(body);
 
   // 1. 04_方格子 (100% Traditional Chinese with Taiwan vocabulary & bio)
   const fanggeziFooter = `
@@ -232,8 +237,10 @@ if (require.main === module) {
   const repoRoot = findRepoRoot(__dirname);
 
   let postPath = null;
+  let customFolder = null;
   if (args.length > 0) {
     postPath = args[0];
+    customFolder = args[1] || null;
   } else {
     // Find latest post in _posts
     const postsDir = path.join(repoRoot, '_posts');
@@ -246,7 +253,7 @@ if (require.main === module) {
 
   if (postPath) {
     try {
-      generateSocialPackage(postPath);
+      generateSocialPackage(postPath, customFolder);
     } catch (e) {
       console.error('❌ 生成失敗:', e.message);
       process.exit(1);
