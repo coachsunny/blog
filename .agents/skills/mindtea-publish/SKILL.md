@@ -99,7 +99,17 @@ node .agents/skills/mindtea-publish/scripts/generate_social_package.js _posts/YY
 
 ---
 
-### 步驟 4：發布前防呆檢驗 (Linter)
+### 步驟 4：短影音自動渲染（可選，直接產出 MP4）
+
+若需直接將 30 秒腳本與封面合成為直式短影片，可執行：
+```bash
+node .agents/skills/mindtea-publish/scripts/render_short_video.js social_posts/YYYY-MM-DD_主題名
+```
+腳本將自動調用 Windows 繁體語音合成引擎與 FFmpeg，輸出 1080x1920 (9:16) 高清 `short_video.mp4`（含雙層景深虛化背景、微推鏡頭、精確字幕與音訊）。
+
+---
+
+### 步驟 5：發布前防呆檢驗 (Linter)
 
 `generate_social_package.js` 會自動觸發 Linter，亦可單獨執行：
 ```bash
@@ -126,6 +136,8 @@ git push origin main
 
 ## 依賴與資源路徑
 
+- 短影音全自動渲染器：[`scripts/render_short_video.js`](./scripts/render_short_video.js)
+- 短影音分鏡腳本產生器：[`scripts/generate_video_script.js`](./scripts/generate_video_script.js)
 - 分發包產生器：[`scripts/generate_social_package.js`](./scripts/generate_social_package.js)
 - 富文本 HTML 產生器：[`scripts/render_rich_text_html.js`](./scripts/render_rich_text_html.js)
 - 雙向在地化技能：[`cross-strait-localization`](../cross-strait-localization/SKILL.md)
