@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { s2tw, tw2s } = require('../../cross-strait-localization/scripts/convert_text.js');
 const { renderMarkdownToHtmlFile } = require('./render_rich_text_html.js');
+const { createVideoScriptContent } = require('./generate_video_script.js');
 
 function findRepoRoot(startDir) {
   let cur = startDir;
@@ -210,13 +211,20 @@ ${tw2s(leadParagraphTc).slice(0, 100)}...
 `;
   fs.writeFileSync(path.join(targetDir, '06_小紅書.txt'), xhsContent, 'utf8');
 
+  // 8. 08_短視頻腳本.txt (30-second Short Video Script based on 5 Archetypes)
+  const videoScriptPath = path.join(targetDir, '08_短視頻腳本.txt');
+  if (!fs.existsSync(videoScriptPath)) {
+    const videoScript = createVideoScriptContent(titleTc, bodyTc, postSlug);
+    fs.writeFileSync(videoScriptPath, videoScript, 'utf8');
+  }
+
   // Check cover image
   const coverTarget = path.join(targetDir, 'cover.jpg');
   if (!fs.existsSync(coverTarget)) {
     console.log(`⚠️  提醒: 目前目錄尚未生成 cover.jpg，請使用 zen-cover-designer 技能生成並歸檔封面。`);
   }
 
-  console.log(`✅ 12 項資產產製完成！`);
+  console.log(`✅ 13 項社群與短影音資產產製完成！`);
 
   // Run linter on this folder
   console.log(`\n🔍 正在執行發布前 Linter 檢驗...`);

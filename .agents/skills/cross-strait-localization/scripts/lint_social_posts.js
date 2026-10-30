@@ -62,6 +62,7 @@ function lintDirectory(dirPath, repoRoot) {
     '07_知乎.md',
     '07_知乎.txt',
     '07_知乎_富文本預覽.html',
+    '08_短視頻腳本.txt',
     'cover.jpg'
   ];
 
