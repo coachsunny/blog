@@ -63,8 +63,16 @@ function synthesizeVoice(text, outAudioPath) {
   if (edgeTts) {
     console.log('🎤 使用微軟自然神經語音引擎 (zh-TW-YunJheNeural，作者 Sunny 男性沉穩教練音質)...');
     const vttPath = outAudioPath.replace(/\.[^.]+$/, '.vtt');
-    const cmd = `"${edgeTts}" --voice zh-TW-YunJheNeural --rate="-15%" --pitch="-5Hz" --text "${text.replace(/"/g, '\\"')}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
-    execSync(cmd, { stdio: 'inherit' });
+    const tmpTextFile = outAudioPath.replace(/\.[^.]+$/, '.text.tmp');
+    fs.writeFileSync(tmpTextFile, text, 'utf8');
+    try {
+      const cmd = `"${edgeTts}" --voice zh-TW-YunJheNeural --rate="-15%" --pitch="-5Hz" -f "${tmpTextFile}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
+      execSync(cmd, { stdio: 'inherit' });
+    } finally {
+      if (fs.existsSync(tmpTextFile)) {
+        fs.unlinkSync(tmpTextFile);
+      }
+    }
     return;
   }
 
@@ -87,10 +95,52 @@ $synth.Dispose()
   execSync(`powershell -EncodedCommand ${b64}`, { stdio: 'ignore' });
 }
 
+function vttTimeToAss(vttTime) {
+  const clean = vttTime.replace(',', '.');
+  const parts = clean.split(':');
+  const h = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  const s = parseFloat(parts[2]);
+  return `${h}:${String(m).padStart(2, '0')}:${s.toFixed(2).padStart(5, '0')}`;
+}
+
 /**
- * Generate .ass subtitle file
+ * Generate .ass subtitle file (dynamically from VTT if available)
  */
-function createAssSubtitles(assPath, linesData) {
+function createAssSubtitles(assPath, vttPath) {
+  let dialogueEvents = '';
+
+  if (vttPath && fs.existsSync(vttPath)) {
+    const vttContent = fs.readFileSync(vttPath, 'utf8');
+    const blocks = vttContent.trim().split(/\r?\n\r?\n/);
+
+    dialogueEvents += 'Dialogue: 0,0:00:00.00,0:01:00.00,Watermark,,0,0,0,,🍵 心茶記 · 晨光微光 ｜ 30秒心智沈澱\n';
+
+    for (const b of blocks) {
+      const lines = b.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const timeLine = lines.find(l => l.includes('-->'));
+      if (!timeLine) continue;
+      const [start, end] = timeLine.split('-->').map(s => s.trim());
+      const text = lines.slice(lines.indexOf(timeLine) + 1).join(' ').trim();
+      if (!text) continue;
+      dialogueEvents += `Dialogue: 0,${vttTimeToAss(start)},${vttTimeToAss(end)},Default,,0,0,0,,${text}\n`;
+    }
+  }
+
+  if (!dialogueEvents) {
+    dialogueEvents = `Dialogue: 0,0:00:00.00,0:00:34.00,Watermark,,0,0,0,,🍵 心茶記 · 晨光微光 ｜ 30秒心智沈澱
+Dialogue: 0,0:00:00.00,0:00:04.50,TitleCard,,0,0,0,,好好說一句話，為什麼這麼難？
+Dialogue: 0,0:00:00.00,0:00:04.50,Default,,0,0,0,,因為我們總想證明自己「贏」
+Dialogue: 0,0:00:04.50,0:00:14.00,TitleCard,,0,0,0,,【開口前的三秒留白】
+Dialogue: 0,0:00:04.50,0:00:09.00,Default,,0,0,0,,第一秒，鬆開咬緊的牙關
+Dialogue: 0,0:00:09.00,0:00:14.00,Default,,0,0,0,,第二秒問自己：我是想爭輸贏，還是想解決問題？
+Dialogue: 0,0:00:14.00,0:00:23.50,TitleCard,,0,0,0,,【第三秒：點亮好奇】
+Dialogue: 0,0:00:14.00,0:00:23.50,Default,,0,0,0,,看著對方的眼睛，去聽聽他的世界正在經歷什麼
+Dialogue: 0,0:00:23.50,0:00:34.00,TitleCard,,0,0,0,,所有真實的人生，皆在相遇之中
+Dialogue: 0,0:00:23.50,0:00:34.00,Default,,0,0,0,,搜尋《心茶記》，找回對話的初心
+`;
+  }
+
   const assContent = `[Script Info]
 Title: Mind Tea Journal Short Video
 ScriptType: v4.00+
@@ -102,23 +152,14 @@ PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Microsoft JhengHei,56,&H00FFFFFF,&H000000FF,&H00182C1F,&H80000000,-1,0,0,0,100,100,2,0,1,3.5,2,2,40,40,360,1
+Style: Default,Microsoft JhengHei,54,&H00FFFFFF,&H000000FF,&H00182C1F,&H80000000,-1,0,0,0,100,100,2,0,1,3.5,2,2,40,40,360,1
 Style: TitleCard,Microsoft JhengHei,68,&H00E6F0E8,&H000000FF,&H0024442F,&H90000000,-1,0,0,0,100,100,4,0,1,4,3,8,40,40,320,1
 Style: Watermark,Microsoft JhengHei,38,&H00D0DDD3,&H000000FF,&H001C3524,&H00000000,0,0,0,0,100,100,2,0,1,2,1,8,40,40,160,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-Dialogue: 0,0:00:00.00,0:00:34.00,Watermark,,0,0,0,,🍵 心茶記 · 晨光微光 ｜ 30秒心智沈澱
-Dialogue: 0,0:00:00.00,0:00:04.50,TitleCard,,0,0,0,,好好說一句話，為什麼這麼難？
-Dialogue: 0,0:00:00.00,0:00:04.50,Default,,0,0,0,,因為我們總想證明自己「贏」
-Dialogue: 0,0:00:04.50,0:00:14.00,TitleCard,,0,0,0,,【開口前的三秒留白】
-Dialogue: 0,0:00:04.50,0:00:09.00,Default,,0,0,0,,第一秒，鬆開咬緊的牙關
-Dialogue: 0,0:00:09.00,0:00:14.00,Default,,0,0,0,,第二秒問自己：我是想爭輸贏，還是想解決問題？
-Dialogue: 0,0:00:14.00,0:00:23.50,TitleCard,,0,0,0,,【第三秒：點亮好奇】
-Dialogue: 0,0:00:14.00,0:00:23.50,Default,,0,0,0,,看著對方的眼睛，去聽聽他的世界正在經歷什麼
-Dialogue: 0,0:00:23.50,0:00:34.00,TitleCard,,0,0,0,,所有真實的人生，皆在相遇之中
-Dialogue: 0,0:00:23.50,0:00:34.00,Default,,0,0,0,,搜尋《心茶記》，找回對話的初心
-`;
+${dialogueEvents}`;
+
   fs.writeFileSync(assPath, assContent, 'utf8');
 }
 
@@ -149,19 +190,28 @@ function renderShortVideo(targetFolder) {
       let text = '好好說話……為什麼這麼難？因為我們的心裡，總想證明自己贏。開口前，請給自己留白三秒：第一秒，鬆開咬緊的牙關，讓肩膀沉下去；第二秒問問自己：我現在是想爭輸贏，還是想解決問題？第三秒，點亮好奇：看著對方的眼睛，去聽聽他的世界，正在經歷什麼。所有真實的人生，皆在相遇之中。搜尋《心茶記》，找回對話的初心。';
       if (fs.existsSync(scriptPath)) {
         const scriptContent = fs.readFileSync(scriptPath, 'utf8');
-        const m = scriptContent.match(/【二、 旁白純文字.*?】\r?\n([\s\S]*?)(?:\r?\n=|$)/);
-        if (m && m[1].trim()) {
-          text = m[1].trim();
+        const m = scriptContent.match(/【二、\s*旁白純文字.*?】\r?\n([\s\S]*?)(?:\r?\n【三、|$)/);
+        if (m && m[1]) {
+          const cleaned = m[1]
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line && !line.startsWith('=') && !line.startsWith('-'))
+            .join('');
+          if (cleaned) {
+            text = cleaned;
+          }
         }
       }
       synthesizeVoice(text, voicePath);
     }
   }
 
+  const vttPath = voicePath.replace(/\.[^.]+$/, '.vtt');
+
   // 2. Generate subtitles if not exists
   if (!fs.existsSync(assPath)) {
     console.log('📝 正在生成動態字幕與排版...');
-    createAssSubtitles(assPath);
+    createAssSubtitles(assPath, vttPath);
   }
 
   // 3. Render video
