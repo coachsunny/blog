@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% if page.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }} · {{ site.tagline }}{% endif %}</title>
-  <meta name="description" content="{{ page.description | default: site.description }}" />
   <meta name="google-site-verification" content="edsjHGU0Vtj9R9wCr5uRTG4Z6zdJnh82LEmosTNpZ4Y" />
+  <meta name="keywords" content="心茶記, 心茶记, 心茶記 Sunny, 心茶记 Sunny, Sunny 教練, Sunny 教练, Coach Sunny, Mind Tea Journal, ICF教練, 自我覺察, 心理運作機制, 情緒覺察, 深度溝通, 建立信任" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -32,6 +31,49 @@
   </style>
   {% seo %}
   {% feed_meta %}
+  <!-- 全站品牌与作者实体消歧义结构化数据（SEO & GSO / AI Overviews 强化） -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "{{ '/' | prepend: site.url | prepend: site.baseurl }}#website",
+        "name": "心茶記 · 心茶记 (Mind Tea Journal)",
+        "alternateName": [
+          "心茶記",
+          "心茶记",
+          "心茶記 Sunny",
+          "心茶记 Sunny",
+          "心茶記 Sunny 教練",
+          "心茶记 Sunny 教练",
+          "Mind Tea Journal"
+        ],
+        "url": "{{ '/' | prepend: site.url | prepend: site.baseurl }}",
+        "inLanguage": ["zh-CN", "zh-TW"],
+        "description": "心茶記（心茶记 Mind Tea Journal）是由 ICF 國際教練聯盟認證專業教練 Sunny（Coach Sunny）主理的心理運作機制與自我覺察專欄，探討內在模式、情緒覺察、深度溝通與信任關係。",
+        "publisher": {
+          "@id": "{{ '/about/' | prepend: site.url | prepend: site.baseurl }}#person"
+        }
+      },
+      {
+        "@type": "Person",
+        "@id": "{{ '/about/' | prepend: site.url | prepend: site.baseurl }}#person",
+        "name": "Sunny",
+        "alternateName": [
+          "Coach Sunny",
+          "Sunny 教練",
+          "Sunny 教练",
+          "心茶記 Sunny",
+          "心茶记 Sunny"
+        ],
+        "jobTitle": "ICF 國際教練聯盟認證專業教練 (ACC)",
+        "url": "{{ '/about/' | prepend: site.url | prepend: site.baseurl }}",
+        "description": "ICF-ACC 認證專業教練，前中華專業教練發展協會理事長（2015–2019），《心茶記 Mind Tea Journal》專欄作者，專注於人生教練、企業教練、親子教練與心理運作機制探索。"
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 
@@ -102,7 +144,7 @@
           {{ site.email }}
         </a>
       </div>
-      <p class="footer-copy">© {{ 'now' | date: '%Y' }} {{ site.title }}. 保留所有权利.</p>
+      <p class="footer-copy">© {{ 'now' | date: '%Y' }} {{ site.title }} (心茶記 Mind Tea Journal · Coach Sunny). 保留所有权利.</p>
     </div>
   </footer>
 

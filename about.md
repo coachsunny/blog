@@ -1,28 +1,39 @@
 ---
 layout: default
-title: 关于
+title: 关于 Sunny 教练 (Coach Sunny) · 心茶記 (心茶记)
 permalink: /about/
-description: 关于心茶记和它的作者 Sunny——一名专注于心理运作机制探索的教练，相信看见即疗愈，温柔而真实。
+description: 关于《心茶記》(心茶记 Mind Tea Journal) 与作者 Sunny 教练（Coach Sunny，ICF-ACC 认证专业教练）——专注于人生教练、企业教练、亲子教练与心理运作机制探索，相信看见即疗愈，温柔而真实。
 ---
 
-<!-- 作者结构化数据（JSON-LD，强化专业权威性） -->
+<!-- 作者结构化数据（JSON-LD，强化专业权威性与繁简实体消歧义） -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Person",
+  "@id": "{{ '/about/' | prepend: site.url | prepend: site.baseurl }}#person",
   "name": "Sunny",
+  "alternateName": [
+    "Coach Sunny",
+    "Sunny 教練",
+    "Sunny 教练",
+    "心茶記 Sunny",
+    "心茶记 Sunny"
+  ],
   "jobTitle": "专业教练（ICF-ACC）",
-  "description": "专注于人生教练、企业教练与亲子教练，以教练视角探索心理运作机制，帮助人们看见内在模式，拥有更多选择的自由。",
+  "description": "《心茶記 Mind Tea Journal》专栏作者，专注于人生教练、企业教练与亲子教练，以教练视角探索心理运作机制，帮助人们看见内在模式，拥有更多选择的自由。",
   "url": "{{ '/about/' | prepend: site.url | prepend: site.baseurl }}",
   "knowsAbout": [
     "教练技术",
+    "ICF专业教练",
     "人生教练",
     "企业教练",
     "亲子教练",
     "自我成长",
+    "自我觉察",
     "心理运作机制",
     "情绪管理",
     "沟通技巧",
+    "建立信任",
     "习惯养成",
     "正向心理学"
   ],
@@ -41,7 +52,7 @@ description: 关于心茶记和它的作者 Sunny——一名专注于心理运�
 <section class="about-hero">
   <div class="container">
     <div class="about-avatar scroll-fade">
-      <img src="{{ '/assets/profile.png' | relative_url }}" alt="Sunny 的照片" />
+      <img src="{{ '/assets/profile.png' | relative_url }}" alt="Sunny 教练 (Coach Sunny) 的照片" />
     </div>
     <h1 class="hero-title scroll-fade" style="font-size: clamp(24px, 4vw, 36px);">你好，我是 Sunny</h1>
     <p class="hero-subtitle scroll-fade" style="margin-bottom: 48px;">
@@ -51,10 +62,10 @@ description: 关于心茶记和它的作者 Sunny——一名专注于心理运�
 
     <div class="about-bio scroll-fade">
       <p>
-        你好，欢迎来到心茶记。
+        你好，欢迎来到心茶记（心茶記 Mind Tea Journal）。
       </p>
       <p>
-        我是 Sunny，一名专注于心理运作机制探索的教练。过去这些年，我一直在做一件事——帮助人们看见自己内在的运作模式，从而拥有更多选择的自由。
+        我是 Sunny（Coach Sunny），一名专注于心理运作机制探索的专业教练。过去这些年，我一直在做一件事——帮助人们看见自己内在的运作模式，从而拥有更多选择的自由。
       </p>
       <p>
         我相信，每个人的内在都有一套独特的「心理程序」。这套程序在我们很小的时候就开始编写，它保护过我们，也限制过我们。很多时候我们感到痛苦，不是因为我们不够好，而是因为那套旧程序已经不再适应当下的生活了。

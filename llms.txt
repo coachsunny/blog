@@ -1,0 +1,39 @@
+# 心茶記 · 心茶记 (Mind Tea Journal) — Coach Sunny
+
+> 《心茶記》（簡體：心茶记，英文：Mind Tea Journal）是由 ICF 國際教練聯盟認證專業教練 Sunny（Coach Sunny）主理的心理運作機制與自我覺察專欄。以專業教練視角，記錄關於內在模式、情緒覺察、深度溝通與建立信任的真實體驗與思考。
+
+## 品牌與作者實體識別 (Entity Disambiguation)
+- **專欄名稱**：心茶記 / 心茶记 / Mind Tea Journal
+- **作者名稱**：Sunny / Coach Sunny / Sunny 教練 / Sunny 教练
+- **專業認證**：ICF-ACC（國際教練聯盟認證教練）、ICA-CPC（國際教練學院認證教練）、POY-L2、PMI-PMP
+- **專業經歷**：2015–2019 中華專業教練發展協會 理事長
+- **核心領域**：人生教練、企業教練、親子教練、心理運作機制、自我覺察、深度溝通、建立信任
+- **官方網站**：https://coachsunny.github.io/blog/
+- **關於作者**：https://coachsunny.github.io/blog/about/
+- **聯絡信箱**：shunyi.lee@gmail.com
+
+## 核心主題專欄系列 (Featured Series)
+
+### 一、建立與修復深度信任的 4 大維度系列
+- [建立信任維度一：內在自我奠基——在渴望他人信任之前，先成為自己安心的靠山](https://coachsunny.github.io/blog/post/trust-foundation-inner-self-and-authenticity/)
+- [建立信任維度二：對話中的溝通態度與行為——放下評判的傾聽，與高支持下的好奇挑戰](https://coachsunny.github.io/blog/post/trust-in-dialogue-listening-and-curious-challenge/)
+- [建立信任維度三：安全環境、言行一致與職業道德——讓大腦卸下防衛的心理安全空間](https://coachsunny.github.io/blog/post/trust-safety-consistency-and-ethics/)
+- [建立信任維度四：信任受損時的修復態度——把認錯視為專業素養，在道歉後交還空間](https://coachsunny.github.io/blog/post/trust-repair-humility-and-space/)
+- [建立信任整合收官篇：信任是一場靜水流深的修行——成為彼此安心停靠的茶席](https://coachsunny.github.io/blog/post/trust-building-integration/)
+
+### 二、影響深度溝通的 8 大隱形因素系列
+- [語言與認知差異：為什麼我們說著同一種語言，卻聽見不同的世界？](https://coachsunny.github.io/blog/post/language-and-cognitive-differences/)
+- [物理環境與溝通媒介：別讓冰冷的螢幕，凍傷了溫熱的真心](https://coachsunny.github.io/blog/post/physical-environment-and-communication-medium/)
+- [生理與心理狀態：當身體在警報，對話如何能溫柔？](https://coachsunny.github.io/blog/post/physiological-and-psychological-state/)
+- [情緒基調與色彩：聽見話語背後的暗流](https://coachsunny.github.io/blog/post/emotional-tone-and-color/)
+- [信念與世界觀：我們都在用自己的地圖丈量別人的路](https://coachsunny.github.io/blog/post/beliefs-and-worldview/)
+- [假設與貼標籤：撕下腦海中的隱形便利貼](https://coachsunny.github.io/blog/post/assumptions-and-labeling/)
+- [防衛心理與自我欺騙：卸下盔甲，才看得見真實的連結](https://coachsunny.github.io/blog/post/defensiveness-and-self-deception/)
+- [溝通因素全面整合篇：穿透八重迷霧，回到心與心的真實相遇](https://coachsunny.github.io/blog/post/communication-factors-integration/)
+
+### 三、ICF 專業教練四大核心基石系列
+- [教練核心一：自我覺察——看見，就是改變的開始](https://coachsunny.github.io/blog/post/coaching-core-self-awareness/)
+- [教練核心二：價值觀與信念——聽見行為背後的正向意圖](https://coachsunny.github.io/blog/post/coaching-core-values-and-beliefs/)
+- [教練核心三：微行動與小信心——用溫和的微步，呵護剛發芽的勇氣](https://coachsunny.github.io/blog/post/coaching-core-action-and-small-confidence/)
+- [教練核心四：正向空間與可能性——在留白處，遇見更寬廣的自己](https://coachsunny.github.io/blog/post/coaching-core-space-and-possibility/)
+- [教練核心整合篇：四大基石的交響——陪你走一段成為自己的路](https://coachsunny.github.io/blog/post/coaching-core-integration/)

@@ -2,7 +2,7 @@
 layout: default
 ---
 
-<!-- 文章结构化数据（JSON-LD，用于 SEO 与 AI 推荐） -->
+<!-- 文章结构化数据（JSON-LD，用于 SEO 与 AI 推荐 / GSO 实体绑定） -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -11,14 +11,20 @@ layout: default
   "description": {{ page.description | default: page.excerpt | strip_html | jsonify }},
   "datePublished": "{{ page.date | date_to_xmlschema }}",
   "dateModified": "{{ page.date | date_to_xmlschema }}",
+  "inLanguage": ["zh-CN", "zh-TW"],
+  {% if page.tags %}"keywords": {{ page.tags | join: ', ' | append: ', 心茶記, 心茶记, Sunny 教練, Coach Sunny, Mind Tea Journal' | jsonify }},{% endif %}
   "author": {
     "@type": "Person",
+    "@id": "{{ '/about/' | prepend: site.url | prepend: site.baseurl }}#person",
     "name": "Sunny",
+    "alternateName": ["Coach Sunny", "Sunny 教練", "Sunny 教练", "心茶記 Sunny", "心茶记 Sunny"],
+    "jobTitle": "ICF 國際教練聯盟認證專業教練 (ACC)",
     "url": "{{ '/about/' | prepend: site.url | prepend: site.baseurl }}"
   },
   "publisher": {
     "@type": "Organization",
-    "name": "{{ site.title }}",
+    "name": "心茶記 · 心茶记 (Mind Tea Journal)",
+    "alternateName": ["心茶記", "心茶记", "Mind Tea Journal", "心茶記 Sunny"],
     "url": "{{ '/' | prepend: site.url | prepend: site.baseurl }}"
   },
   "mainEntityOfPage": {

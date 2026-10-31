@@ -4,8 +4,8 @@
 
 # 站点基本信息
 title: 心茶记
-tagline: 一杯安静的时光
-description: 一个关于心理运作机制的探索空间，以教练的视角记录关于模式、情绪与觉察的真实体验与思考。
+tagline: 一杯安静的时光 · Sunny 教练 (心茶記 Mind Tea Journal)
+description: 心茶记（心茶記 Mind Tea Journal）是由 ICF 认证专业教练 Sunny（Coach Sunny）主理的心理运作机制与自我觉察专栏，以教练视角记录模式、情绪、深度沟通与内在成长的真实思考。
 author: Sunny
 email: shunyi.lee@gmail.com
 lang: zh-CN
@@ -56,13 +56,18 @@ nav:
 #   github: yourusername
 #   twitter: yourusername
 
-# 排除文件
+# 排除文件（避免内部规范与社群分发稿被编译进公开站点与 sitemap.xml）
 exclude:
   - README.md
+  - AGENTS.md
+  - GEMINI.md
+  - COACHING_STYLE_GUIDE.md
   - Gemfile
   - Gemfile.lock
   - node_modules
   - vendor
+  - social_posts
+  - .agents
   - .git
   - .gitignore
 
