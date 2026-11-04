@@ -1,4 +1,4 @@
----
+﻿---
 layout: post
 title: 深度对话的基石：自我觉察——不急着给答案，先看清自己的真实位置
 date: 2026-10-08
@@ -97,4 +97,4 @@ description: 教练对话的第一步，也是最核心的底色，是觉察。�
 
 【作者简介】  
 Sunny｜ICF 专业教练（ACC），专注探索心理运作机制、教练技术与个人成长。  
-更多深度教练随笔与哲思，欢迎访问个人专栏《心茶记》：https://coachsunny.github.io/blog/
+更多深度教练随笔与哲思，欢迎访问个人专栏《心茶记》：https://blog.portal-coachsunny.com/

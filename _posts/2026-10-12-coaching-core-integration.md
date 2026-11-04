@@ -1,4 +1,4 @@
----
+﻿---
 layout: post
 title: 让生命自然蜕变：教练对话四元素的交织——一场不求速效的深度相遇
 date: 2026-10-12
@@ -107,4 +107,4 @@ description: 自我觉察是定锚，价值观是罗盘，正向空间是微风�
 
 【作者简介】  
 Sunny｜ICF 专业教练（ACC），专注探索心理运作机制、教练技术与个人成长。  
-更多深度教练随笔与哲思，欢迎访问个人专栏《心茶记》：https://coachsunny.github.io/blog/
+更多深度教练随笔与哲思，欢迎访问个人专栏《心茶记》：https://blog.portal-coachsunny.com/

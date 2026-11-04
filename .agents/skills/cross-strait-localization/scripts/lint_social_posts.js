@@ -41,8 +41,10 @@ const PROHIBITED_DOMAINS = [
   'sunnycoach.github.io'
 ];
 
-const OFFICIAL_DOMAIN = 'https://coachsunny.github.io/blog/';
-const OFFICIAL_POST_PREFIX = 'https://coachsunny.github.io/blog/post/';
+const OFFICIAL_DOMAIN = 'https://blog.portal-coachsunny.com/';
+const OFFICIAL_POST_PREFIX = 'https://blog.portal-coachsunny.com/post/';
+const LEGACY_DOMAIN = 'https://coachsunny.github.io/blog/';
+const LEGACY_POST_PREFIX = 'https://coachsunny.github.io/blog/post/';
 
 function lintDirectory(dirPath, repoRoot) {
   const dirName = path.basename(dirPath);
@@ -145,9 +147,10 @@ function lintDirectory(dirPath, repoRoot) {
       const lines = content.split(/\r?\n/);
 
       lines.forEach((line, idx) => {
-        // Prohibited domain check
+        // Prohibited domain check (exact word boundary, avoiding false positives like portal-coachsunny.com)
         for (const badDomain of PROHIBITED_DOMAINS) {
-          if (line.includes(badDomain)) {
+          const regex = new RegExp(`(?<![\\w-])${badDomain.replace('.', '\\.')}\\b`, 'i');
+          if (regex.test(line)) {
             errors.push(`[臆測錯誤網域] ${f} 第 ${idx + 1} 行出現違規網域 "${badDomain}": "${line.trim()}"`);
           }
         }
@@ -157,8 +160,12 @@ function lintDirectory(dirPath, repoRoot) {
         if (urlMatches) {
           for (let url of urlMatches) {
             url = url.replace(/[.,;:]+$/, ''); // clean trailing punctuation
-            if (url.startsWith('https://coachsunny.github.io')) {
-              if (url !== OFFICIAL_DOMAIN && !url.startsWith(OFFICIAL_POST_PREFIX) && !url.startsWith('https://coachsunny.github.io/blog/assets/')) {
+            if (url.startsWith('https://blog.portal-coachsunny.com')) {
+              if (url !== OFFICIAL_DOMAIN && !url.startsWith(OFFICIAL_POST_PREFIX) && !url.startsWith('https://blog.portal-coachsunny.com/assets/')) {
+                warnings.push(`[URL結構異常] ${f} 第 ${idx + 1} 行出現非標準 blog 網址: ${url}`);
+              }
+            } else if (url.startsWith('https://coachsunny.github.io')) {
+              if (url !== LEGACY_DOMAIN && !url.startsWith(LEGACY_POST_PREFIX) && !url.startsWith('https://coachsunny.github.io/blog/assets/')) {
                 warnings.push(`[URL結構異常] ${f} 第 ${idx + 1} 行出現非標準 blog 網址: ${url}`);
               }
             }

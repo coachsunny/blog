@@ -202,13 +202,14 @@ flowchart TD
 
 為了避免讀者點擊失效連結，所有社群貼文中的網站網址**必須嚴格遵循以下規範，絕不可自行腦補或臆測網域**：
 
-* ✅ **心茶記部落格首頁**：`https://coachsunny.github.io/blog/`
-* ✅ **單篇文章永久連結 (Permalink)**：`https://coachsunny.github.io/blog/post/<slug>/`
-  * 範例：`https://coachsunny.github.io/blog/post/language-and-cognitive-differences/`
+* ✅ **心茶記部落格首頁**：`https://blog.portal-coachsunny.com/`
+* ✅ **單篇文章永久連結 (Permalink)**：`https://blog.portal-coachsunny.com/post/<slug>/`
+  * 範例：`https://blog.portal-coachsunny.com/post/language-and-cognitive-differences/`
   * 命名來源：直接取自 `_posts/YYYY-MM-DD-<slug>.md` 檔案名稱中的 `<slug>`。
 * ❌ **嚴禁使用的錯誤網域**：
   * 嚴禁使用 `https://sunnycoach.com/...`（❌ 此網域未綁定或不存在）
   * 嚴禁使用 `https://coachsunny.com/...`（❌ 錯誤網域）
+  * 嚴禁使用 `https://coachsunny.github.io/...`（❌ 舊網域，已切換至官方正式網域）
   * 嚴禁使用 `https://sunnycoach.github.io/...`（❌ 帳號名稱顛倒）
 * ⚠️ **小紅書平台特別規範**：
   * 嚴禁出現任何 `http://` 或 `https://` 超連結（防官方限流）。

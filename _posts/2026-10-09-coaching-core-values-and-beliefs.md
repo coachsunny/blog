@@ -1,4 +1,4 @@
----
+﻿---
 layout: post
 title: 看见冰山底层：价值观与信念——所有执着的行为，都在守护一份深层的渴望
 date: 2026-10-09
@@ -98,4 +98,4 @@ description: 为什么我们总是重复那些让自己痛苦的习惯？因为�
 
 【作者简介】  
 Sunny｜ICF 专业教练（ACC），专注探索心理运作机制、教练技术与个人成长。  
-更多深度教练随笔与哲思，欢迎访问个人专栏《心茶记》：https://coachsunny.github.io/blog/
+更多深度教练随笔与哲思，欢迎访问个人专栏《心茶记》：https://blog.portal-coachsunny.com/

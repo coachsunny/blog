@@ -1,4 +1,4 @@
----
+﻿---
 layout: post
 title: 扩展视角：别让中间的伤痛，遮蔽了整个世界的美好
 date: 2026-10-07
@@ -130,4 +130,4 @@ description: 当人陷入困境时，注意力往往像聚光灯一样死死锁�
 
 【作者简介】  
 Sunny｜ICF 专业教练（ACC），专注探索心理运作机制、教练技术与个人成长。  
-更多深度教练随笔与哲思，欢迎访问个人专栏《心茶记》：https://coachsunny.github.io/blog/
+更多深度教练随笔与哲思，欢迎访问个人专栏《心茶记》：https://blog.portal-coachsunny.com/

@@ -1,4 +1,4 @@
----
+﻿---
 layout: post
 title: 为可能留白：空间的力量——不谈障碍，只谈方法与我们真正「要什么」
 date: 2026-10-11
@@ -92,4 +92,4 @@ description: 当人深陷困局时，心智往往被障碍填满，动弹不得�
 
 【作者简介】  
 Sunny｜ICF 专业教练（ACC），专注探索心理运作机制、教练技术与个人成长。  
-更多深度教练随笔与哲思，欢迎访问个人专栏《心茶记》：https://coachsunny.github.io/blog/
+更多深度教练随笔与哲思，欢迎访问个人专栏《心茶记》：https://blog.portal-coachsunny.com/

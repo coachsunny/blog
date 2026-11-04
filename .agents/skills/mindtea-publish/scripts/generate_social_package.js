@@ -55,7 +55,7 @@ function generateSocialPackage(postFilePath, customFolderName) {
   // Clean Jekyll liquid relative_url and leading H1 if duplicated
   const body = rawBody
     .replace(/^\s*#\s+[^\r\n]+\r?\n+/, '')
-    .replace(/\{\{\s*['"]\/post\/([^'"]+)['"]\s*\|\s*relative_url\s*\}\}/g, 'https://coachsunny.github.io/blog/post/$1');
+    .replace(/\{\{\s*['"]\/post\/([^'"]+)['"]\s*\|\s*relative_url\s*\}\}/g, 'https://blog.portal-coachsunny.com/post/$1');
 
   // Extract date and slug
   const dateMatch = fileName.match(/^(\d{4}-\d{2}-\d{2})-(.*)$/);
@@ -63,8 +63,8 @@ function generateSocialPackage(postFilePath, customFolderName) {
   const postSlug = dateMatch ? dateMatch[2] : fileName;
   const postTitle = metadata.title || fileName;
 
-  const permalink = `https://coachsunny.github.io/blog/post/${postSlug}/`;
-  const blogHome = `https://coachsunny.github.io/blog/`;
+  const permalink = `https://blog.portal-coachsunny.com/post/${postSlug}/`;
+  const blogHome = `https://blog.portal-coachsunny.com/`;
 
   // Localized Traditional Chinese Body & Title
   const titleTc = s2tw(postTitle);

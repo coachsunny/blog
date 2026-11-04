@@ -8,13 +8,14 @@
 
 所有文章與社群貼文中提及的網站連結，**必須 100% 嚴格依循下列規則**，絕不可自行發明或臆測網址：
 
-* ✅ **心茶記專欄首頁**：`https://coachsunny.github.io/blog/`
-* ✅ **單篇文章永久連結 (Permalink)**：`https://coachsunny.github.io/blog/post/<slug>/`
+* ✅ **心茶記專欄首頁**：`https://blog.portal-coachsunny.com/`
+* ✅ **單篇文章永久連結 (Permalink)**：`https://blog.portal-coachsunny.com/post/<slug>/`
   * 其中的 `<slug>` 必須精準對應 `_posts/YYYY-MM-DD-<slug>.md` 檔案名稱中的 slug 部分。
-  * 範例：`https://coachsunny.github.io/blog/post/language-and-cognitive-differences/`
+  * 範例：`https://blog.portal-coachsunny.com/post/language-and-cognitive-differences/`
 * ❌ **絕對禁止出現的錯誤網域**：
   * `sunnycoach.com`（❌ 不存在或未綁定）
   * `coachsunny.com`（❌ 錯誤網域）
+  * `coachsunny.github.io`（❌ 舊網域，已切換至官方正式網域）
   * `sunnycoach.github.io`（❌ 帳號順序顛倒）
 * ⚠️ **小紅書平台特別限制**：
   * 嚴格禁止出現任何網址（包含上述正確網址，以防平台演算法限流）。

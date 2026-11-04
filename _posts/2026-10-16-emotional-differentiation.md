@@ -1,4 +1,4 @@
----
+﻿---
 layout: post
 title: 解离情绪的艺术：别把对方的暴雨，当成你的判决书
 date: 2026-10-16
@@ -94,4 +94,4 @@ description: 沟通中最深层的修养，是分清「课题的边界」：说�
 
 【作者简介】  
 Sunny｜ICF 专业教练（ACC），专注探索心理运作机制、教练技术与个人成长。  
-更多深度教练随笔与哲思，欢迎访问个人专栏《心茶记》：https://coachsunny.github.io/blog/
+更多深度教练随笔与哲思，欢迎访问个人专栏《心茶记》：https://blog.portal-coachsunny.com/
