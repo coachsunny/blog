@@ -23,7 +23,7 @@ description: >-
 2. **多平台發布防呆檢驗 (`lint_social_posts.js`)**：
    - **方格子 100% 繁體字檢驗**：基於教育部常用國字與 OpenCC 簡體字庫比對，嚴格禁止簡體字（如 `经`、`觉`、`话`、`来` 等）及大陸未在地化詞彙出現在 `04_方格子.*`。
    - **小紅書 零外部連結檢驗**：確保 `06_小紅書.txt` 嚴禁任何超連結（`http://`、`https://`、`.com`、`.io`），並強制包含「心茶記 Sunny」品牌搜尋指引。
-   - **網域防臆測檢驗**：全域掃描禁止出現臆測網域（如 `sunnycoach.com`、`coachsunny.com`），確保永久連結嚴格符合 `https://coachsunny.github.io/blog/post/<slug>/`。
+   - **網域防臆測檢驗**：全域掃描禁止出現臆測網域（如 `sunnycoach.com`、`coachsunny.com`），確保永久連結嚴格符合官方正式網域 `https://blog.portal-coachsunny.com/post/<slug>/`。
    - **資產完整性檢驗**：驗證 12 項必備社群資產無一遺漏且無 0-byte 空檔。
 
 ---
