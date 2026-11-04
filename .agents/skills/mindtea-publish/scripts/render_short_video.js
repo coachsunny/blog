@@ -120,6 +120,49 @@ function vttTimeToAss(vttTime) {
 }
 
 /**
+ * Automatically wrap CJK text to fit 9:16 vertical video width (1080px)
+ * Breaks text into balanced lines (maxChars <= 16) at natural punctuation
+ */
+function wrapCjkText(text, maxChars = 16) {
+  if (!text) return '';
+  text = text.trim();
+  if (text.includes('\\N')) {
+    return text.split(/\\N/).map(sub => wrapCjkText(sub, maxChars)).join('\\N');
+  }
+  if (text.length <= maxChars) return text;
+
+  const puncRegex = /([，、；：。？！）』」])/g;
+  let matches = [];
+  let m;
+  while ((m = puncRegex.exec(text)) !== null) {
+    matches.push(m.index + 1);
+  }
+
+  if (matches.length > 0) {
+    let bestSplit = -1;
+    for (const pos of matches) {
+      if (pos >= 8 && pos <= maxChars + 2) {
+        bestSplit = pos;
+        break;
+      }
+    }
+    if (bestSplit === -1) {
+      const half = Math.floor(text.length / 2);
+      bestSplit = matches.reduce((prev, curr) => Math.abs(curr - half) < Math.abs(prev - half) ? curr : prev);
+    }
+    if (bestSplit > 0 && bestSplit < text.length) {
+      const p1 = text.slice(0, bestSplit).trim();
+      const p2 = text.slice(bestSplit).trim();
+      return `${wrapCjkText(p1, maxChars)}\\N${wrapCjkText(p2, maxChars)}`;
+    }
+  }
+
+  const p1 = text.slice(0, maxChars);
+  const p2 = text.slice(maxChars);
+  return `${p1}\\N${wrapCjkText(p2, maxChars)}`;
+}
+
+/**
  * Generate .ass subtitle file (dynamically from VTT if available)
  */
 function createAssSubtitles(assPath, vttPath) {
@@ -136,8 +179,9 @@ function createAssSubtitles(assPath, vttPath) {
       const timeLine = lines.find(l => l.includes('-->'));
       if (!timeLine) continue;
       const [start, end] = timeLine.split('-->').map(s => s.trim());
-      const text = lines.slice(lines.indexOf(timeLine) + 1).join(' ').trim();
-      if (!text) continue;
+      const rawText = lines.slice(lines.indexOf(timeLine) + 1).join(' ').trim();
+      if (!rawText) continue;
+      const text = wrapCjkText(rawText, 16);
       dialogueEvents += `Dialogue: 0,${vttTimeToAss(start)},${vttTimeToAss(end)},Default,,0,0,0,,${text}\n`;
     }
   }
@@ -148,9 +192,9 @@ Dialogue: 0,0:00:00.00,0:00:04.50,TitleCard,,0,0,0,,好好說一句話，為什�
 Dialogue: 0,0:00:00.00,0:00:04.50,Default,,0,0,0,,因為我們總想證明自己「贏」
 Dialogue: 0,0:00:04.50,0:00:14.00,TitleCard,,0,0,0,,【開口前的三秒留白】
 Dialogue: 0,0:00:04.50,0:00:09.00,Default,,0,0,0,,第一秒，鬆開咬緊的牙關
-Dialogue: 0,0:00:09.00,0:00:14.00,Default,,0,0,0,,第二秒問自己：我是想爭輸贏，還是想解決問題？
+Dialogue: 0,0:00:09.00,0:00:14.00,Default,,0,0,0,,第二秒問自己：\\N我是想爭輸贏，還是想解決問題？
 Dialogue: 0,0:00:14.00,0:00:23.50,TitleCard,,0,0,0,,【第三秒：點亮好奇】
-Dialogue: 0,0:00:14.00,0:00:23.50,Default,,0,0,0,,看著對方的眼睛，去聽聽他的世界正在經歷什麼
+Dialogue: 0,0:00:14.00,0:00:23.50,Default,,0,0,0,,看著對方的眼睛，\\N去聽聽他的世界正在經歷什麼
 Dialogue: 0,0:00:23.50,0:00:34.00,TitleCard,,0,0,0,,所有真實的人生，皆在相遇之中
 Dialogue: 0,0:00:23.50,0:00:34.00,Default,,0,0,0,,搜尋《心茶記》，找回對話的初心
 `;
@@ -159,7 +203,7 @@ Dialogue: 0,0:00:23.50,0:00:34.00,Default,,0,0,0,,搜尋《心茶記》，找回
   const assContent = `[Script Info]
 Title: Mind Tea Journal Short Video
 ScriptType: v4.00+
-WrapStyle: 0
+WrapStyle: 1
 ScaledBorderAndShadow: yes
 YCbCr Matrix: TV.601
 PlayResX: 1080
@@ -167,9 +211,9 @@ PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Microsoft JhengHei,54,&H00FFFFFF,&H000000FF,&H00182C1F,&H80000000,-1,0,0,0,100,100,2,0,1,3.5,2,2,40,40,360,1
-Style: TitleCard,Microsoft JhengHei,68,&H00E6F0E8,&H000000FF,&H0024442F,&H90000000,-1,0,0,0,100,100,4,0,1,4,3,8,40,40,320,1
-Style: Watermark,Microsoft JhengHei,38,&H00D0DDD3,&H000000FF,&H001C3524,&H00000000,0,0,0,0,100,100,2,0,1,2,1,8,40,40,160,1
+Style: Default,Microsoft JhengHei,46,&H00FFFFFF,&H000000FF,&H00182C1F,&H80000000,-1,0,0,0,100,100,2,0,1,3.5,2,2,80,80,320,1
+Style: TitleCard,Microsoft JhengHei,60,&H00E6F0E8,&H000000FF,&H0024442F,&H90000000,-1,0,0,0,100,100,3,0,1,4,3,8,40,40,320,1
+Style: Watermark,Microsoft JhengHei,36,&H00D0DDD3,&H000000FF,&H001C3524,&H00000000,0,0,0,0,100,100,2,0,1,2,1,8,40,40,160,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
