@@ -58,12 +58,27 @@ function findEdgeTTS() {
  * 參數：語速 -15% 留白節奏、音調 -5Hz 沉穩安定
  */
 function synthesizeVoice(text, outAudioPath) {
-  const edgeTts = findEdgeTTS();
+  const pyScript = path.join(__dirname, 'synthesize_voice.py');
+  const vttPath = outAudioPath.replace(/\.[^.]+$/, '.vtt');
+  const tmpTextFile = outAudioPath.replace(/\.[^.]+$/, '.text.tmp');
 
-  if (edgeTts) {
+  if (fs.existsSync(pyScript)) {
     console.log('🎤 使用微軟自然神經語音引擎 (zh-TW-YunJheNeural，作者 Sunny 男性沉穩教練音質)...');
-    const vttPath = outAudioPath.replace(/\.[^.]+$/, '.vtt');
-    const tmpTextFile = outAudioPath.replace(/\.[^.]+$/, '.text.tmp');
+    fs.writeFileSync(tmpTextFile, text, 'utf8');
+    try {
+      const cmd = `python "${pyScript}" "${tmpTextFile}" "${outAudioPath}" "${vttPath}"`;
+      execSync(cmd, { stdio: 'inherit' });
+      return;
+    } finally {
+      if (fs.existsSync(tmpTextFile)) {
+        fs.unlinkSync(tmpTextFile);
+      }
+    }
+  }
+
+  const edgeTts = findEdgeTTS();
+  if (edgeTts) {
+    console.log('🎤 使用微軟自然神經語音 CLI (zh-TW-YunJheNeural)...');
     fs.writeFileSync(tmpTextFile, text, 'utf8');
     try {
       const cmd = `"${edgeTts}" --voice zh-TW-YunJheNeural --rate="-15%" --pitch="-5Hz" -f "${tmpTextFile}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
