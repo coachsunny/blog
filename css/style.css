@@ -947,6 +947,54 @@ a.tag:hover {
   text-decoration-color: var(--primary);
 }
 
+/* 文章内表格（温润茶席卡片风格，防止栏位挤压） */
+.post-content table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 32px 0;
+  font-size: 15px;
+  line-height: 1.75;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 2px 8px hsla(28, 20%, 15%, 0.03);
+}
+
+.post-content thead th {
+  background-color: hsla(145, 25%, 92%, 0.6);
+  color: var(--primary-dark);
+  font-family: var(--font-serif);
+  font-weight: 600;
+  text-align: left;
+  padding: 14px 18px;
+  border-bottom: 1.5px solid hsla(145, 24%, 40%, 0.2);
+}
+
+.post-content tbody td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--text);
+}
+
+.post-content tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.post-content tbody tr:nth-child(even) {
+  background-color: hsla(44, 35%, 98%, 0.6);
+}
+
+@media (max-width: 640px) {
+  .post-content table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* 教练反思与觉察提问卡片 */
 .coaching-box,
 .reflection-box {
