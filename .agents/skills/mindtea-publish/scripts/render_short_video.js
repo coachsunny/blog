@@ -62,13 +62,18 @@ function synthesizeVoice(text, outAudioPath) {
   const vttPath = outAudioPath.replace(/\.[^.]+$/, '.vtt');
   const tmpTextFile = outAudioPath.replace(/\.[^.]+$/, '.text.tmp');
 
-  if (fs.existsSync(pyScript)) {
-    console.log('🎤 使用微軟自然神經語音引擎 (zh-TW-YunJheNeural，作者 Sunny 男性沉穩教練音質)...');
+  const edgeTts = findEdgeTTS();
+  if (edgeTts) {
+    console.log('🎤 使用微軟自然神經語音 CLI (zh-TW-YunJheNeural，作者 Sunny 男性沉穩教練音質)...');
     fs.writeFileSync(tmpTextFile, text, 'utf8');
     try {
-      const cmd = `python "${pyScript}" "${tmpTextFile}" "${outAudioPath}" "${vttPath}"`;
+      const cmd = `"${edgeTts}" --voice zh-TW-YunJheNeural --rate="-15%" --pitch="-5Hz" -f "${tmpTextFile}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
       execSync(cmd, { stdio: 'inherit' });
-      return;
+      if (fs.existsSync(outAudioPath) && fs.statSync(outAudioPath).size > 1000) {
+        return;
+      }
+    } catch (err) {
+      console.warn('⚠️ edge-tts CLI 失敗，嘗試調用 Python 腳本...', err.message);
     } finally {
       if (fs.existsSync(tmpTextFile)) {
         fs.unlinkSync(tmpTextFile);
@@ -76,19 +81,20 @@ function synthesizeVoice(text, outAudioPath) {
     }
   }
 
-  const edgeTts = findEdgeTTS();
-  if (edgeTts) {
-    console.log('🎤 使用微軟自然神經語音 CLI (zh-TW-YunJheNeural)...');
+  if (fs.existsSync(pyScript)) {
+    console.log('🎤 使用微軟自然神經語音 Python 腳本 (zh-TW-YunJheNeural)...');
     fs.writeFileSync(tmpTextFile, text, 'utf8');
     try {
-      const cmd = `"${edgeTts}" --voice zh-TW-YunJheNeural --rate="-15%" --pitch="-5Hz" -f "${tmpTextFile}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
+      const cmd = `python "${pyScript}" "${tmpTextFile}" "${outAudioPath}" "${vttPath}"`;
       execSync(cmd, { stdio: 'inherit' });
+      return;
+    } catch (err) {
+      console.warn('⚠️ Python 腳本失敗，切換至 SAPI...', err.message);
     } finally {
       if (fs.existsSync(tmpTextFile)) {
         fs.unlinkSync(tmpTextFile);
       }
     }
-    return;
   }
 
   // Fallback to SAPI
@@ -275,10 +281,14 @@ function renderShortVideo(targetFolder) {
 
   // 3. Render video
   console.log(`🎬 正在使用 FFmpeg 渲染 9:16 高清短影音...`);
-  const assEscaped = assPath.replace(/\\/g, '/').replace(':', '\\:');
-  const cmd = `"${ffmpeg}" -y -loop 1 -framerate 30 -i "${coverPath}" -i "${voicePath}" -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=25:5,eq=brightness=-0.12:contrast=1.05[bg];[0:v]scale=940:-1[fg];[bg][fg]overlay=(W-w)/2:320[base];[base]subtitles='${assEscaped}'[v]" -map "[v]" -map 1:a -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${outVideo}"`;
+  const coverFileName = path.basename(coverPath);
+  const voiceFileName = path.basename(voicePath);
+  const assFileName = path.basename(assPath);
+  const outVideoFileName = path.basename(outVideo);
 
-  execSync(cmd, { stdio: 'ignore' });
+  const cmd = `"${ffmpeg}" -y -loop 1 -framerate 30 -i "${coverFileName}" -i "${voiceFileName}" -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=25:5,eq=brightness=-0.12:contrast=1.05[bg];[0:v]scale=940:-1[fg];[bg][fg]overlay=(W-w)/2:320[base];[base]subtitles=${assFileName}[v]" -map "[v]" -map 1:a -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${outVideoFileName}"`;
+
+  execSync(cmd, { cwd: folder, stdio: 'inherit' });
 
   if (fs.existsSync(outVideo)) {
     const stat = fs.statSync(outVideo);
