@@ -118,15 +118,23 @@ function lintDirectory(dirPath, repoRoot) {
     }
   }
 
-  // 3. Check Xiaohongshu (06_小紅書.txt) for 0-link rule and search guidance
+  // 3. Check Xiaohongshu (06_小紅書.txt) for 0-link rule, risk words, and search guidance
   const xhsPath = path.join(dirPath, '06_小紅書.txt');
   if (fs.existsSync(xhsPath)) {
     const xhsContent = fs.readFileSync(xhsPath, 'utf8');
     const xhsLines = xhsContent.split(/\r?\n/);
+    const XHS_RISK_TERMS = ['断食', '暴食', '节食', '减肥反弹', '催吐', '自残'];
 
     xhsLines.forEach((line, idx) => {
+      // 0-link rule
       if (/(https?:\/\/|www\.|\.com\b|\.io\b|\.org\b|\.net\b)/i.test(line)) {
         errors.push(`[小紅書外鏈違規] 06_小紅書.txt 第 ${idx + 1} 行偵測到外部連結 (平台演算法會限流): "${line.trim()}"`);
+      }
+      // Sensitive risk terms that trigger shadowban or review delay
+      for (const riskWord of XHS_RISK_TERMS) {
+        if (line.includes(riskWord)) {
+          errors.push(`[小紅書風控違規] 06_小紅書.txt 第 ${idx + 1} 行含有高危敏感詞 "${riskWord}" (易觸發身材焦慮/醫療審核風控，導致筆記卡審核或被隱形限流): "${line.trim()}"`);
+        }
       }
     });
 
@@ -134,6 +142,14 @@ function lintDirectory(dirPath, repoRoot) {
     const hasSearch = xhsContent.includes('搜尋') || xhsContent.includes('搜索');
     if (!hasBrand || !hasSearch) {
       warnings.push(`[小紅書導流提示] 06_小紅書.txt 未檢測到標準專欄搜尋引導語 (建議包含「心茶記 Sunny」搜尋指引)`);
+    }
+
+    // Title generic warning
+    if (xhsLines.length > 0) {
+      const firstLine = xhsLines[0].trim();
+      if (firstLine.includes('为什么越努力越内耗') && !firstLine.includes('尊重')) {
+        warnings.push(`[小紅書標題同質化] 首行標題過度依賴百億泛詞 "${firstLine}"，建議改用緊扣核心反差與衝突的具體金句（如包含「尊重 vs. 順從」）`);
+      }
     }
   }
 
