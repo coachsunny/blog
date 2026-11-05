@@ -1,28 +1,96 @@
 const fs = require('fs');
 const path = require('path');
 
+function convertCoachingBoxes(text) {
+  return text.replace(/<div\s+class=["'](?:coaching|reflection)-box["']>([\s\S]*?)<\/div>/gi, (match, inner) => {
+    let cleaned = inner
+      .replace(/<\/?p>/gi, '')
+      .replace(/<\/?ol>/gi, '')
+      .replace(/<\/?ul>/gi, '')
+      .trim();
+
+    let liIdx = 1;
+    cleaned = cleaned.replace(/<li>([\s\S]*?)<\/li>/gi, (m, liContent) => {
+      return `${liIdx++}. ${liContent.trim()}\n`;
+    });
+
+    const lines = cleaned.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    return lines.map(l => `> ${l}`).join('\n>\n');
+  });
+}
+
 function parseMarkdown(md) {
-  const lines = md.split(/\r?\n/);
+  // Pre-process any raw HTML coaching boxes into clean markdown blockquotes
+  const normalizedMd = convertCoachingBoxes(md || '');
+  const lines = normalizedMd.split(/\r?\n/);
   const html = [];
   let inList = false;
   let listType = '';
   let inBlockquote = false;
   let blockquoteLines = [];
 
-  function flushBlockquote() {
-    if (inBlockquote) {
-      const inner = blockquoteLines.map(l => inlineFormat(l)).join('<br/>\n');
-      html.push(`<blockquote>${inner}</blockquote>`);
-      inBlockquote = false;
-      blockquoteLines = [];
-    }
-  }
-
   function flushList() {
     if (inList) {
       html.push(`</${listType}>`);
       inList = false;
       listType = '';
+    }
+  }
+
+  function flushBlockquote() {
+    if (inBlockquote) {
+      const innerHtml = [];
+      let bqInList = false;
+      let bqListType = '';
+
+      function bqFlushList() {
+        if (bqInList) {
+          innerHtml.push(`</${bqListType}>`);
+          bqInList = false;
+          bqListType = '';
+        }
+      }
+
+      for (const rawBqLine of blockquoteLines) {
+        const bqLine = rawBqLine.trim();
+        // Empty lines within blockquotes preserve paragraph separation without breaking lists
+        if (!bqLine) {
+          continue;
+        }
+
+        const olM = bqLine.match(/^(\d+)\.\s+(.*)/);
+        if (olM) {
+          if (!bqInList || bqListType !== 'ol') {
+            bqFlushList();
+            bqInList = true;
+            bqListType = 'ol';
+            innerHtml.push('<ol>');
+          }
+          innerHtml.push(`  <li>${inlineFormat(olM[2])}</li>`);
+          continue;
+        }
+
+        const ulM = bqLine.match(/^[-*]\s+(.*)/);
+        if (ulM) {
+          if (!bqInList || bqListType !== 'ul') {
+            bqFlushList();
+            bqInList = true;
+            bqListType = 'ul';
+            innerHtml.push('<ul>');
+          }
+          innerHtml.push(`  <li>${inlineFormat(ulM[1])}</li>`);
+          continue;
+        }
+
+        bqFlushList();
+        innerHtml.push(`  <p>${inlineFormat(bqLine)}</p>`);
+      }
+      bqFlushList();
+
+      const bqStyle = 'margin: 20px 0; padding: 16px 22px; background: #f4f8f5; border-left: 4px solid #4a7c59; border-radius: 0 8px 8px 0; color: #2d4533; font-size: 15.5px;';
+      html.push(`<blockquote style="${bqStyle}">\n${innerHtml.join('\n')}\n</blockquote>`);
+      inBlockquote = false;
+      blockquoteLines = [];
     }
   }
 
@@ -34,27 +102,41 @@ function parseMarkdown(md) {
   }
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    const rawLine = lines[i];
+    const trimmed = rawLine.trim();
 
-    // Blockquote
-    if (/^>\s?(.*)/.test(line)) {
+    // Check if line is an indented quote inside an active list item
+    if (inList && /^\s+>\s?(.*)/.test(rawLine)) {
+      const quoteText = rawLine.replace(/^\s+>\s?/, '').trim();
+      const lastItemIdx = html.length - 1;
+      if (lastItemIdx >= 0 && html[lastItemIdx].endsWith('</li>')) {
+        const prevItem = html[lastItemIdx].slice(0, -5);
+        html[lastItemIdx] = `${prevItem}<br/>\n  <blockquote style="margin: 8px 0; padding: 8px 14px; border-left: 3px solid #4a7c59; background: #f4f8f5; border-radius: 4px; font-size: 14.5px;">${inlineFormat(quoteText)}</blockquote></li>`;
+      } else {
+        html.push(`<blockquote>${inlineFormat(quoteText)}</blockquote>`);
+      }
+      continue;
+    }
+
+    // Standard Blockquote (starts with >)
+    if (/^>\s?(.*)/.test(trimmed)) {
       flushList();
       inBlockquote = true;
-      blockquoteLines.push(line.replace(/^>\s?/, ''));
+      blockquoteLines.push(trimmed.replace(/^>\s?/, ''));
       continue;
     } else {
       flushBlockquote();
     }
 
     // HR
-    if (/^---$/.test(line.trim())) {
+    if (/^---$/.test(trimmed)) {
       flushList();
       html.push('<hr/>');
       continue;
     }
 
     // Headers
-    const hMatch = line.match(/^(#{1,6})\s+(.*)/);
+    const hMatch = trimmed.match(/^(#{1,6})\s+(.*)/);
     if (hMatch) {
       flushList();
       const level = hMatch[1].length;
@@ -63,7 +145,7 @@ function parseMarkdown(md) {
     }
 
     // Ordered list
-    const olMatch = line.match(/^(\d+)\.\s+(.*)/);
+    const olMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
     if (olMatch) {
       if (!inList || listType !== 'ol') {
         flushList();
@@ -76,7 +158,7 @@ function parseMarkdown(md) {
     }
 
     // Unordered list
-    const ulMatch = line.match(/^[-*]\s+(.*)/);
+    const ulMatch = trimmed.match(/^[-*]\s+(.*)/);
     if (ulMatch) {
       if (!inList || listType !== 'ul') {
         flushList();
@@ -91,12 +173,18 @@ function parseMarkdown(md) {
     flushList();
 
     // Empty line
-    if (line.trim() === '') {
+    if (trimmed === '') {
+      continue;
+    }
+
+    // Pass through raw HTML blocks without wrapping them in invalid <p>
+    if (/^<\/?(div|p|ol|ul|li|blockquote|h[1-6]|hr|table|tr|td|th|section|article)\b/i.test(trimmed)) {
+      html.push(trimmed);
       continue;
     }
 
     // Paragraph
-    html.push(`<p>${inlineFormat(line)}</p>`);
+    html.push(`<p>${inlineFormat(trimmed)}</p>`);
   }
 
   flushBlockquote();
@@ -186,6 +274,12 @@ function generateHtmlPage(title, bodyHtml, lang = 'zh-TW') {
     color: #2d4533;
     font-size: 15.5px;
   }
+  blockquote p { margin: 8px 0; }
+  blockquote p:first-child { margin-top: 0; }
+  blockquote p:last-child { margin-bottom: 0; }
+  blockquote ol, blockquote ul { margin: 10px 0; padding-left: 22px; }
+  blockquote li { margin-bottom: 6px; }
+  blockquote ol:last-child, blockquote ul:last-child { margin-bottom: 0; }
   p { margin: 16px 0; font-size: 16px; }
   hr { border: 0; height: 1px; background: #e5e3de; margin: 32px 0; }
   ul, ol { padding-left: 24px; margin: 16px 0; }

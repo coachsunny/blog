@@ -903,6 +903,22 @@ a.tag:hover {
   margin-bottom: 0;
 }
 
+.post-content blockquote ol,
+.post-content blockquote ul {
+  margin: 14px 0;
+  padding-left: 24px;
+}
+
+.post-content blockquote ol:last-child,
+.post-content blockquote ul:last-child {
+  margin-bottom: 0;
+}
+
+.post-content blockquote li {
+  margin-bottom: 8px;
+  line-height: 1.85;
+}
+
 /* 列表排版 */
 .post-content ul,
 .post-content ol {

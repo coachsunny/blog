@@ -40,6 +40,31 @@ function parsePostFrontmatter(content) {
   return { metadata, body };
 }
 
+function cleanMarkdownForSocial(md) {
+  if (!md) return '';
+  // Convert <div class="coaching-box"> or <div class="reflection-box"> into native Markdown blockquotes
+  let cleaned = md.replace(/<div\s+class=["'](?:coaching|reflection)-box["']>([\s\S]*?)<\/div>/gi, (match, inner) => {
+    let text = inner
+      .replace(/<\/?p>/gi, '')
+      .replace(/<\/?ol>/gi, '')
+      .replace(/<\/?ul>/gi, '')
+      .trim();
+
+    let liIdx = 1;
+    text = text.replace(/<li>([\s\S]*?)<\/li>/gi, (m, liContent) => {
+      return `${liIdx++}. ${liContent.trim()}\n`;
+    });
+
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    return lines.map(l => `> ${l}`).join('\n>\n');
+  });
+
+  // Strip any remaining unclosed or stray div tags
+  cleaned = cleaned.replace(/<\/?div\b[^>]*>/gi, '');
+
+  return cleaned;
+}
+
 function generateSocialPackage(postFilePath, customFolderName) {
   const repoRoot = findRepoRoot(__dirname);
   const fullPostPath = path.isAbsolute(postFilePath) ? postFilePath : path.resolve(repoRoot, postFilePath);
@@ -66,13 +91,13 @@ function generateSocialPackage(postFilePath, customFolderName) {
   const permalink = `https://blog.portal-coachsunny.com/post/${postSlug}/`;
   const blogHome = `https://blog.portal-coachsunny.com/`;
 
-  // Localized Traditional Chinese Body & Title
+  // Localized Traditional Chinese Body & Title (clean for syndication)
   const titleTc = s2tw(postTitle);
-  const bodyTc = s2tw(body);
+  const bodyTc = cleanMarkdownForSocial(s2tw(body));
 
-  // Simplified Body & Title
+  // Simplified Body & Title (clean for syndication)
   const titleSc = tw2s(postTitle);
-  const bodySc = tw2s(body);
+  const bodySc = cleanMarkdownForSocial(tw2s(body));
 
   // Folder name in social_posts/: YYYY-MM-DD_主題名
   const safeTitle = titleTc.split(/[:：\s]/)[0].replace(/[^\u4e00-\u9fa5a-zA-Z0-9_-]/g, '');
