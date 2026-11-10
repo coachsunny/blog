@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { s2tw, tw2s } = require('../../cross-strait-localization/scripts/convert_text.js');
 
 function findFFmpeg() {
   try {
@@ -62,11 +63,12 @@ function synthesizeVoice(text, outAudioPath) {
   const vttPath = outAudioPath.replace(/\.[^.]+$/, '.vtt');
   const tmpTextFile = outAudioPath.replace(/\.[^.]+$/, '.text.tmp');
 
+  const textForTts = tw2s(text);
   const utf8Env = { ...process.env, PYTHONUTF8: '1', PYTHONIOENCODING: 'utf-8' };
   const edgeTts = findEdgeTTS();
   if (edgeTts) {
     console.log('🎤 使用微軟自然神經語音 CLI (zh-TW-YunJheNeural，作者 Sunny 男性沉穩教練音質)...');
-    fs.writeFileSync(tmpTextFile, text, 'utf8');
+    fs.writeFileSync(tmpTextFile, textForTts, 'utf8');
     try {
       const cmd = `"${edgeTts}" --voice zh-TW-YunJheNeural --rate="-15%" --pitch="-5Hz" -f "${tmpTextFile}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
       execSync(cmd, { stdio: 'inherit', env: utf8Env });
@@ -84,7 +86,7 @@ function synthesizeVoice(text, outAudioPath) {
 
   if (fs.existsSync(pyScript)) {
     console.log('🎤 使用微軟自然神經語音 Python 腳本 (zh-TW-YunJheNeural)...');
-    fs.writeFileSync(tmpTextFile, text, 'utf8');
+    fs.writeFileSync(tmpTextFile, textForTts, 'utf8');
     try {
       const cmd = `python "${pyScript}" "${tmpTextFile}" "${outAudioPath}" "${vttPath}"`;
       execSync(cmd, { stdio: 'inherit', env: utf8Env });
@@ -188,7 +190,7 @@ function createAssSubtitles(assPath, vttPath) {
       const [start, end] = timeLine.split('-->').map(s => s.trim());
       const rawText = lines.slice(lines.indexOf(timeLine) + 1).join(' ').trim();
       if (!rawText) continue;
-      const text = wrapCjkText(rawText, 16);
+      const text = s2tw(wrapCjkText(rawText, 16));
       dialogueEvents += `Dialogue: 0,${vttTimeToAss(start)},${vttTimeToAss(end)},Default,,0,0,0,,${text}\n`;
     }
   }
