@@ -62,13 +62,14 @@ function synthesizeVoice(text, outAudioPath) {
   const vttPath = outAudioPath.replace(/\.[^.]+$/, '.vtt');
   const tmpTextFile = outAudioPath.replace(/\.[^.]+$/, '.text.tmp');
 
+  const utf8Env = { ...process.env, PYTHONUTF8: '1', PYTHONIOENCODING: 'utf-8' };
   const edgeTts = findEdgeTTS();
   if (edgeTts) {
     console.log('🎤 使用微軟自然神經語音 CLI (zh-TW-YunJheNeural，作者 Sunny 男性沉穩教練音質)...');
     fs.writeFileSync(tmpTextFile, text, 'utf8');
     try {
       const cmd = `"${edgeTts}" --voice zh-TW-YunJheNeural --rate="-15%" --pitch="-5Hz" -f "${tmpTextFile}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
-      execSync(cmd, { stdio: 'inherit' });
+      execSync(cmd, { stdio: 'inherit', env: utf8Env });
       if (fs.existsSync(outAudioPath) && fs.statSync(outAudioPath).size > 1000) {
         return;
       }
@@ -86,7 +87,7 @@ function synthesizeVoice(text, outAudioPath) {
     fs.writeFileSync(tmpTextFile, text, 'utf8');
     try {
       const cmd = `python "${pyScript}" "${tmpTextFile}" "${outAudioPath}" "${vttPath}"`;
-      execSync(cmd, { stdio: 'inherit' });
+      execSync(cmd, { stdio: 'inherit', env: utf8Env });
       return;
     } catch (err) {
       console.warn('⚠️ Python 腳本失敗，切換至 SAPI...', err.message);
