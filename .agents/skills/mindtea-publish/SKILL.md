@@ -54,6 +54,9 @@ flowchart TD
    cover_image: assets/social/<slug>.jpg
    ---
    ```
+5. **排版與圖卡鐵律（嚴格禁止使用 Mermaid 代碼塊）**：
+   - ❌ **絕對禁止使用 ````mermaid` 語法**：Jekyll 模板與所有社群富文本平台均未載入 Mermaid.js，使用 Mermaid 會直接暴露為生硬代碼文字破版。
+   - ✅ **流程步驟一律使用「純 HTML/CSS 自適應流程卡片」**：若需展示步驟框架，一律採用專屬茶席風格 HTML 容器（`rgba(230, 240, 232, 0.5)`、`#a3b899`、flex 自適應換行、優雅箭頭 `➔`），零依賴跨平台 100% 完美相容。
 
 ---
 
