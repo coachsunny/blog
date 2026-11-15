@@ -88,12 +88,26 @@ description: 为什么我们越努力，内心反而越焦虑、越觉得自己�
 
 你需要的是一套清晰、低阻力、能立即执行的**「心智急救与重构框架」**：
 
-```mermaid
-flowchart LR
-    A["第一步：中断运转<br>（照顾当前情绪）"] --> B["第二步：抽离身份<br>（当成墙上的挂钟）"]
-    B --> C["第三步：放下标准<br>（识别并松开Gap）"]
-    C --> D["第四步：聚焦增量<br>（今天的我 vs 昨天的我）"]
-```
+<div style="background: rgba(230, 240, 232, 0.5); border: 1px solid #a3b899; border-radius: 12px; padding: 20px; margin: 24px 0;">
+  <p style="text-align: center; margin: 0 0 16px 0; font-weight: bold; color: #2d4a3e; font-size: 1.05em;">🍵 CoachSunny 自我认可四步心法流程</p>
+  <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px;">
+    <div style="background: #ffffff; border: 1px solid #cad5c5; border-radius: 8px; padding: 10px 14px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); min-width: 130px;">
+      <strong style="color: #2d4a3e; font-size: 0.95em;">第一步：中断运转</strong><br><span style="color: #666; font-size: 0.85em;">照顾当前情绪</span>
+    </div>
+    <span style="color: #6b8e23; font-weight: bold; font-size: 1.2em;">➔</span>
+    <div style="background: #ffffff; border: 1px solid #cad5c5; border-radius: 8px; padding: 10px 14px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); min-width: 130px;">
+      <strong style="color: #2d4a3e; font-size: 0.95em;">第二步：抽离身份</strong><br><span style="color: #666; font-size: 0.85em;">当成墙上的挂钟</span>
+    </div>
+    <span style="color: #6b8e23; font-weight: bold; font-size: 1.2em;">➔</span>
+    <div style="background: #ffffff; border: 1px solid #cad5c5; border-radius: 8px; padding: 10px 14px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); min-width: 130px;">
+      <strong style="color: #2d4a3e; font-size: 0.95em;">第三步：放下标准</strong><br><span style="color: #666; font-size: 0.85em;">识别并松开Gap</span>
+    </div>
+    <span style="color: #6b8e23; font-weight: bold; font-size: 1.2em;">➔</span>
+    <div style="background: #ffffff; border: 1px solid #cad5c5; border-radius: 8px; padding: 10px 14px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); min-width: 130px;">
+      <strong style="color: #2d4a3e; font-size: 0.95em;">第四步：聚焦增量</strong><br><span style="color: #666; font-size: 0.85em;">今天的我 vs 昨天的我</span>
+    </div>
+  </div>
+</div>
 
 ### 第一步：中断运转，先照顾当下的情绪
 当脑海里的自责与焦虑像脱缰野马一样狂奔时，任何理性的反思都无法进入。
