@@ -246,11 +246,9 @@ ${leadParagraphTc.slice(0, 110)}...
 `;
   fs.writeFileSync(path.join(targetDir, '03_Threads.txt'), threadsContent, 'utf8');
 
-  // 6. 05_微信朋友圈與群.txt (Simplified Chinese, tailored dual versions)
-  const postDescSc = tw2s(metadata.description || '');
+  // 6. 05_微信朋友圈與群.txt (Simplified Chinese, single best-in-class version)
   const wechatContent = `【晨光微光 · 心茶记】
 
-【版本 A：犀利反思型】（推荐）
 ${leadParagraphSc.slice(0, 110)}...
 
 很多时候，带刺的否定并不是针对你，而是对方在失控恐惧下的粗糙防御。
@@ -261,19 +259,6 @@ ${leadParagraphSc.slice(0, 110)}...
 
 ${endingQuoteSc} 🌿
 📖 深度长文阅读：${permalink}
-
----
-
-【版本 B：现场微故事型】
-${leadParagraphSc}
-
-面对扑面而来的否定与冷水，我们习惯了非战即逃。
-但其实还有第三种可能——
-端起茶杯喝一口温水，顺着对方的力道借力打力。
-
-☕ 晨光微语：
-「${endingQuoteSc}」
-📖 完整拆解收录于《心茶记》：${permalink}
 `;
   fs.writeFileSync(path.join(targetDir, '05_微信朋友圈與群.txt'), wechatContent, 'utf8');
 
