@@ -19,6 +19,45 @@ function convertCoachingBoxes(text) {
   });
 }
 
+function convertMermaidToHtml(mermaidCode) {
+  const nodeMap = new Map();
+  const orderedNodes = [];
+  const lines = mermaidCode.split(/\r?\n/);
+
+  for (const line of lines) {
+    const nodeMatches = line.matchAll(/([A-Za-z0-9_]+)\["([^"]+)"\]|([A-Za-z0-9_]+)\[([^\]]+)\]/g);
+    for (const m of nodeMatches) {
+      const id = m[1] || m[3];
+      const text = m[2] || m[4];
+      if (!nodeMap.has(id)) {
+        nodeMap.set(id, text);
+        orderedNodes.push({ id, text });
+      }
+    }
+  }
+
+  if (orderedNodes.length > 0) {
+    const cardsHtml = orderedNodes.map((node, idx) => {
+      const parts = node.text.split(/<br\s*\/?>/i);
+      const title = parts[0] ? parts[0].trim() : '';
+      const sub = parts.slice(1).join('<br>').trim();
+      let inner = `<strong style="color: #2d4a3e; font-size: 0.95em;">${title}</strong>`;
+      if (sub) {
+        inner += `<br><span style="color: #666; font-size: 0.85em;">${sub}</span>`;
+      }
+      let card = `<div style="background: #ffffff; border: 1px solid #cad5c5; border-radius: 8px; padding: 10px 14px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); min-width: 130px;">${inner}</div>`;
+      if (idx < orderedNodes.length - 1) {
+        card += `\n    <span style="color: #6b8e23; font-weight: bold; font-size: 1.2em;">➔</span>`;
+      }
+      return card;
+    }).join('\n    ');
+
+    return `<div style="background: rgba(230, 240, 232, 0.5); border: 1px solid #a3b899; border-radius: 12px; padding: 20px; margin: 24px 0;">\n  <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px;">\n    ${cardsHtml}\n  </div>\n</div>`;
+  }
+
+  return `<pre style="background: rgba(230, 240, 232, 0.45); border: 1px solid #c8d8cf; border-radius: 8px; padding: 14px; overflow-x: auto; font-size: 14px;"><code>${mermaidCode.trim()}</code></pre>`;
+}
+
 function parseMarkdown(md) {
   // Pre-process any raw HTML coaching boxes into clean markdown blockquotes
   const normalizedMd = convertCoachingBoxes(md || '');
@@ -104,6 +143,26 @@ function parseMarkdown(md) {
   for (let i = 0; i < lines.length; i++) {
     const rawLine = lines[i];
     const trimmed = rawLine.trim();
+
+    // Fenced Code Blocks (```)
+    if (trimmed.startsWith('```')) {
+      flushList();
+      flushBlockquote();
+      const codeLang = trimmed.slice(3).trim().toLowerCase();
+      const codeLines = [];
+      i++;
+      while (i < lines.length && !lines[i].trim().startsWith('```')) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      const codeContent = codeLines.join('\n');
+      if (codeLang === 'mermaid' || codeLang === 'flowchart') {
+        html.push(convertMermaidToHtml(codeContent));
+      } else {
+        html.push(`<pre style="background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 14px; overflow-x: auto; font-size: 14px;"><code>${codeContent}</code></pre>`);
+      }
+      continue;
+    }
 
     // Check if line is an indented quote inside an active list item
     if (inList && /^\s+>\s?(.*)/.test(rawLine)) {

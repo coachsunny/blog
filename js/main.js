@@ -151,4 +151,94 @@
       }
     });
   }
+
+  // ---------- Mermaid 流程图自适应渲染与茶禅主题 ----------
+  async function renderMermaidDiagrams() {
+    const blocks = document.querySelectorAll(
+      'div.language-mermaid pre.highlight code, pre code.language-mermaid, div.language-mermaid pre code, .mermaid'
+    );
+    if (!blocks.length) return;
+
+    function doRender() {
+      if (typeof mermaid === 'undefined') return;
+
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'base',
+        themeVariables: {
+          fontFamily: "'Noto Sans TC', 'Noto Sans SC', sans-serif",
+          fontSize: '14.5px',
+          primaryColor: '#eef4f0',
+          primaryTextColor: '#2d4a3e',
+          primaryBorderColor: '#a3b899',
+          lineColor: '#6b8e23',
+          secondaryColor: '#f7faf8',
+          tertiaryColor: '#ffffff',
+          edgeLabelBackground: '#ffffff'
+        },
+        flowchart: {
+          htmlLabels: true,
+          curve: 'basis'
+        }
+      });
+
+      Array.from(blocks).forEach(async function (block, index) {
+        const code = block.textContent.trim();
+        const container = block.closest('div.language-mermaid') || block.closest('pre') || block;
+        const renderId = 'mermaid-chart-' + Date.now() + '-' + index;
+
+        try {
+          const { svg } = await mermaid.render(renderId, code);
+          const renderDiv = document.createElement('div');
+          renderDiv.className = 'mermaid-container';
+          renderDiv.innerHTML = svg;
+
+          // 若当前为繁体中文模式，转换 SVG 内部文本节点
+          if (typeof OpenCC !== 'undefined' && localStorage.getItem('blog_lang') === 'traditional') {
+            try {
+              const s2t = OpenCC.Converter({ from: 'cn', to: 'tw' });
+              const walker = document.createTreeWalker(renderDiv, NodeFilter.SHOW_TEXT, null, false);
+              let n;
+              while ((n = walker.nextNode())) {
+                if (n.nodeValue && n.nodeValue.trim()) {
+                  n.nodeValue = s2t(n.nodeValue);
+                }
+              }
+            } catch (err) {
+              console.warn('OpenCC SVG localization error:', err);
+            }
+          }
+
+          if (container.parentNode) {
+            container.parentNode.replaceChild(renderDiv, container);
+          }
+        } catch (err) {
+          console.error('Mermaid render error for chart #' + index, err);
+        }
+      });
+    }
+
+    if (typeof mermaid === 'undefined') {
+      const script = document.createElement('script');
+      const base = window.siteBaseUrl || '';
+      script.src = (base.endsWith('/') ? base.slice(0, -1) : base) + '/js/mermaid.min.js';
+      script.onload = doRender;
+      script.onerror = function () {
+        // CDN 降级备用
+        const cdnScript = document.createElement('script');
+        cdnScript.src = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js';
+        cdnScript.onload = doRender;
+        document.head.appendChild(cdnScript);
+      };
+      document.head.appendChild(script);
+    } else {
+      doRender();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderMermaidDiagrams);
+  } else {
+    renderMermaidDiagrams();
+  }
 })();

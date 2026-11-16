@@ -1033,6 +1033,44 @@ a.tag:hover {
   gap: 8px;
 }
 
+/* Mermaid 流程图自适应容器与茶席美学 */
+div.language-mermaid {
+  background: rgba(230, 240, 232, 0.45);
+  border: 1px solid #c8d8cf;
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin: 32px 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+div.language-mermaid pre {
+  margin: 0;
+  background: transparent;
+  font-family: var(--font-sans);
+  color: var(--text-muted);
+}
+
+.mermaid-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 36px 0;
+  padding: 24px 16px;
+  background: rgba(230, 240, 232, 0.45);
+  border: 1px solid #c8d8cf;
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  box-shadow: 0 2px 10px hsla(28, 20%, 15%, 0.02);
+  -webkit-overflow-scrolling: touch;
+}
+
+.mermaid-container svg {
+  max-width: 100%;
+  height: auto;
+  font-family: var(--font-sans) !important;
+}
+
 /* 读者微信群邀请卡片 */
 .community-card {
   margin: 56px 0 24px;

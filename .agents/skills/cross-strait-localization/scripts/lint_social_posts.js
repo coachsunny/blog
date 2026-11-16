@@ -212,13 +212,13 @@ function lintDirectory(dirPath, repoRoot) {
     }
   }
 
-  // 5. Check forbidden mermaid syntax (Jekyll and social platforms do not support it)
+  // 5. Check unrendered mermaid in rich-text preview HTML files
   const allDirFiles = fs.readdirSync(dirPath);
   for (const f of allDirFiles) {
-    if (f.endsWith('.md') || f.endsWith('.txt') || f.endsWith('.html')) {
+    if (f.endsWith('.html')) {
       const c = fs.readFileSync(path.join(dirPath, f), 'utf8');
       if (c.includes('```mermaid') || c.includes('```flowchart')) {
-        errors.push(`[禁止 Mermaid 語法] ${f} 包含未支援的 mermaid 代碼塊，請改用純 HTML/CSS 自適應流程卡片！`);
+        errors.push(`[富文本未轉譯] ${f} 包含未轉譯的 mermaid 代碼塊，請確保經由 render_rich_text_html 轉譯為流程卡片！`);
       }
     }
   }
