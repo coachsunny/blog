@@ -1804,3 +1804,43 @@ button:focus-visible,
     font-size: 15px;
   }
 }
+
+/* 中英双语对照推荐卡片 */
+.lang-switch-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  margin: 0 0 32px 0;
+  background: linear-gradient(135deg, hsla(145, 25%, 93%, 0.6), hsla(44, 35%, 98%, 0.8));
+  border: 1px solid hsla(145, 24%, 40%, 0.25);
+  border-radius: var(--radius);
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.lang-switch-card .lang-switch-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.lang-switch-card .lang-switch-text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+}
+
+.lang-switch-card .lang-switch-link {
+  font-weight: 600;
+  color: var(--primary-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.lang-switch-card .lang-switch-link:hover {
+  color: var(--primary);
+}

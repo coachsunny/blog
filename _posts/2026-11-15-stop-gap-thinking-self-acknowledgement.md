@@ -1,5 +1,7 @@
 ---
 layout: post
+lang: zh
+ref: stop-gap-thinking-self-acknowledgement
 title: 你不是做得不够多，你只是拿「完美标准」在给自己扣分：如何找回对自己的认可？
 date: 2026-11-15
 tags: [自我认可, 破除内耗, 认知翻转, 教练心法, 心理安全感, 自我接纳]

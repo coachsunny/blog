@@ -1,0 +1,98 @@
+---
+layout: default
+lang: en
+title: Topics & Tags · Mind Tea Journal
+permalink: /en/tags/
+description: Browse all essays and inquiries in Mind Tea Journal by topic.
+---
+
+<!-- Page Header -->
+<section class="hero" style="padding: 64px 0 32px;">
+  <div class="container">
+    <div class="hero-tag fade-in">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+        <line x1="7" y1="7" x2="7.01" y2="7"/>
+      </svg>
+      Article Topics
+    </div>
+    <h1 class="hero-title fade-in fade-in-delay-1" style="font-size: clamp(24px, 4vw, 36px);">
+      Explore Inquiries by Topic
+    </h1>
+    <p class="hero-subtitle fade-in fade-in-delay-2" style="margin-bottom: 0;">
+      Every essay is tagged by its core psychological inquiry. Click a tag below to explore related reflections.
+    </p>
+  </div>
+</section>
+
+<!-- Tag Cloud -->
+<section class="section" style="padding: 32px 0;">
+  <div class="container">
+    <div class="tag-cloud scroll-fade">
+      {% assign en_posts = site.posts | where: "lang", "en" %}
+      {% assign raw_tags = "" %}
+      {% for p in en_posts %}
+        {% for t in p.tags %}
+          {% assign raw_tags = raw_tags | append: t | append: "|||" %}
+        {% endfor %}
+      {% endfor %}
+      {% assign all_tags = raw_tags | split: "|||" | uniq | sort %}
+
+      {% for tag in all_tags %}
+        {% if tag != "" %}
+          {% assign count = 0 %}
+          {% for p in en_posts %}
+            {% if p.tags contains tag %}
+              {% assign count = count | plus: 1 %}
+            {% endif %}
+          {% endfor %}
+          <a href="#tag-{{ tag | slugify }}" class="tag tag-lg">
+            {{ tag }}
+            <span class="tag-count">{{ count }}</span>
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Tag Post Lists -->
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    {% for tag in all_tags %}
+      {% if tag != "" %}
+        <div id="tag-{{ tag | slugify }}" class="tag-section scroll-fade">
+          <div class="tag-section-header">
+            <h2 class="tag-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                <line x1="7" y1="7" x2="7.01" y2="7"/>
+              </svg>
+              {{ tag }}
+            </h2>
+          </div>
+
+          <div class="tag-post-list">
+            {% for post in en_posts %}
+              {% if post.tags contains tag %}
+              <a href="{{ post.url | relative_url }}" class="tag-post-item">
+                <div class="tag-post-date">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="18" x="3" y="4" rx="2"/>
+                    <path d="M16 2v4"/>
+                    <path d="M8 2v4"/>
+                    <path d="M3 10h18"/>
+                  </svg>
+                  {{ post.date | date: '%B %d, %Y' }}
+                </div>
+                <h3 class="tag-post-title">{{ post.title }}</h3>
+                <p class="tag-post-excerpt">{{ post.description | default: post.excerpt | strip_html | truncate: 120 }}</p>
+              </a>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>

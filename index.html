@@ -48,7 +48,8 @@ description: 心茶記（心茶记 Mind Tea Journal）是由 ICF 國際教練聯
     </div>
 
     <div class="post-list">
-      {% for post in site.posts %}
+      {% assign zh_posts = site.posts | where_exp: "item", "item.lang != 'en'" %}
+      {% for post in zh_posts %}
       <div class="post-card scroll-fade">
         <div class="post-card-meta">
           <span>

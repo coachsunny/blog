@@ -4,8 +4,11 @@
 
 # 站点基本信息
 title: 心茶记
+title_en: Mind Tea Journal
 tagline: 一杯安静的时光 · Sunny 教练 (心茶記 Mind Tea Journal)
+tagline_en: A Quiet Moment Over Tea · Coach Sunny
 description: 心茶记（心茶記 Mind Tea Journal）是由 ICF 认证专业教练 Sunny（Coach Sunny）主理的心理运作机制与自我觉察专栏，以教练视角记录模式、情绪、深度沟通与内在成长的真实思考。
+description_en: Mind Tea Journal is an inner sanctuary and coaching column by ICF Certified Professional Coach Sunny, exploring mental models, emotional awareness, authentic presence, and sustainable personal growth.
 author: Sunny
 email: shunyi.lee@gmail.com
 lang: zh-CN
@@ -34,11 +37,13 @@ defaults:
       type: "posts"
     values:
       layout: "post"
+      lang: "zh"
   - scope:
       path: ""
       type: "pages"
     values:
       layout: "default"
+      lang: "zh"
 
 # 网站导航
 nav:
@@ -50,6 +55,16 @@ nav:
     url: /tags/
   - title: 关于
     url: /about/
+
+nav_en:
+  - title: Home
+    url: /en/
+  - title: Articles
+    url: /en/#articles
+  - title: Tags
+    url: /en/tags/
+  - title: About
+    url: /en/about/
 
 # 社交链接（可选，以后可以加）
 # social:

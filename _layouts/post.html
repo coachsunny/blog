@@ -11,7 +11,7 @@ layout: default
   "description": {{ page.description | default: page.excerpt | strip_html | jsonify }},
   "datePublished": "{{ page.date | date_to_xmlschema }}",
   "dateModified": "{{ page.date | date_to_xmlschema }}",
-  "inLanguage": ["zh-CN", "zh-TW"],
+  "inLanguage": {% if page.lang == 'en' %}"en"{% else %}["zh-CN", "zh-TW"]{% endif %},
   {% if page.tags %}"keywords": {{ page.tags | join: ', ' | append: ', 心茶記, 心茶记, Sunny 教練, Coach Sunny, Mind Tea Journal' | jsonify }},{% endif %}
   "author": {
     "@type": "Person",
@@ -23,7 +23,7 @@ layout: default
   },
   "publisher": {
     "@type": "Organization",
-    "name": "心茶記 · 心茶记 (Mind Tea Journal)",
+    "name": "{% if page.lang == 'en' %}Mind Tea Journal{% else %}心茶記 · 心茶记 (Mind Tea Journal){% endif %}",
     "alternateName": ["心茶記", "心茶记", "Mind Tea Journal", "心茶記 Sunny"],
     "url": "{{ '/' | prepend: site.url | prepend: site.baseurl }}"
   },
@@ -37,12 +37,12 @@ layout: default
 <!-- 返回栏 -->
 <div class="post-header-bar">
   <div class="container post-header-bar-inner">
-    <a href="{{ '/#articles' | relative_url }}" class="back-link">
+    <a href="{% if page.lang == 'en' %}{{ '/en/#articles' | relative_url }}{% else %}{{ '/#articles' | relative_url }}{% endif %}" class="back-link">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="m12 19-7-7 7-7"/>
         <path d="M19 12H5"/>
       </svg>
-      返回文章列表
+      {% if page.lang == 'en' %}Back to Articles{% else %}返回文章列表{% endif %}
     </a>
   </div>
 </div>
@@ -53,7 +53,7 @@ layout: default
     {% if page.tags %}
     <div class="post-tags">
       {% for tag in page.tags %}
-      <a href="{{ '/tags/' | relative_url }}#tag-{{ tag | slugify }}" class="tag">{{ tag }}</a>
+      <a href="{% if page.lang == 'en' %}{{ '/en/tags/' | relative_url }}{% else %}{{ '/tags/' | relative_url }}{% endif %}#tag-{{ tag | slugify }}" class="tag">{{ tag }}</a>
       {% endfor %}
     </div>
     {% endif %}
@@ -68,7 +68,11 @@ layout: default
           <path d="M8 2v4"/>
           <path d="M3 10h18"/>
         </svg>
+        {% if page.lang == 'en' %}
+        {{ page.date | date: '%B %d, %Y' }}
+        {% else %}
         {{ page.date | date: '%Y 年 %m 月 %d 日' }}
+        {% endif %}
       </span>
       {% if page.read_time %}
       <span>
@@ -76,10 +80,41 @@ layout: default
           <circle cx="12" cy="12" r="10"/>
           <polyline points="12 6 12 12 16 14"/>
         </svg>
+        {% if page.lang == 'en' %}
+        {{ page.read_time }} min read
+        {% else %}
         {{ page.read_time }} 分钟阅读
+        {% endif %}
       </span>
       {% endif %}
     </div>
+
+    <!-- 中英双语对照推荐卡片 -->
+    {% if page.ref %}
+      {% if page.lang == 'en' %}
+        {% assign zh_counterpart = site.posts | where: "ref", page.ref | where_exp: "p", "p.lang != 'en'" | first %}
+        {% if zh_counterpart %}
+        <div class="lang-switch-card">
+          <span class="lang-switch-icon">🍵</span>
+          <div class="lang-switch-text">
+            <span>閱讀繁簡中文原文：</span>
+            <a href="{{ zh_counterpart.url | relative_url }}" class="lang-switch-link">{{ zh_counterpart.title }} →</a>
+          </div>
+        </div>
+        {% endif %}
+      {% else %}
+        {% assign en_counterpart = site.posts | where: "ref", page.ref | where: "lang", "en" | first %}
+        {% if en_counterpart %}
+        <div class="lang-switch-card">
+          <span class="lang-switch-icon">☕</span>
+          <div class="lang-switch-text">
+            <span>This article is also available in English:</span>
+            <a href="{{ en_counterpart.url | relative_url }}" class="lang-switch-link">{{ en_counterpart.title }} →</a>
+          </div>
+        </div>
+        {% endif %}
+      {% endif %}
+    {% endif %}
 
     <div class="post-content">
       {{ content }}
@@ -94,15 +129,26 @@ layout: default
               <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
               <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
             </svg>
-            心茶记 · 读者社群
+            {% if page.lang == 'en' %}Mind Tea Journal · Coach Sunny Community{% else %}心茶记 · 读者社群{% endif %}
           </div>
-          <h3 class="community-title">在文字之外，一起静心同行</h3>
+          <h3 class="community-title">
+            {% if page.lang == 'en' %}Walking Together in Stillness & Awareness{% else %}在文字之外，一起静心同行{% endif %}
+          </h3>
           <p class="community-desc">
+            {% if page.lang == 'en' %}
+            Words offer quiet reflection, but on the path of self-discovery, you are not alone.<br/>
+            Feel free to connect directly with ICF Professional Coach Sunny via LINE or WeChat, or reach out by email at <a href="mailto:{{ site.email }}" style="color:var(--primary-dark);text-decoration:underline;">{{ site.email }}</a> to discuss coaching inquiries, mental models, and personal growth.
+            {% else %}
             文字有时安静，但探索自我的路上，你并不孤单。<br/>
             欢迎扫码添加 Coach Sunny 个人 LINE 或微信（备注「心茶记」），将亲自邀请您加入读者社群，与同频伙伴探讨觉察、交流心得。
+            {% endif %}
           </p>
           <p class="community-note">
+            {% if page.lang == 'en' %}
+            💡 QR codes are personal contact cards, valid permanently. Please note "Mind Tea Journal" when adding.
+            {% else %}
             💡 二维码皆为个人名片，永久有效。添加时请备注「心茶记」，由 Sunny 亲自为您引路入群。
+            {% endif %}
           </p>
         </div>
         <div class="community-qrs">
@@ -110,13 +156,13 @@ layout: default
             <div class="qr-wrapper">
               <img src="{{ '/assets/line-qr.png' | relative_url }}" alt="Sunny 教练个人 LINE 二维码" />
             </div>
-            <span class="qr-label">LINE · 加好友邀请入群</span>
+            <span class="qr-label">{% if page.lang == 'en' %}LINE · Add Coach Sunny{% else %}LINE · 加好友邀请入群{% endif %}</span>
           </div>
           <div class="community-qr-item">
             <div class="qr-wrapper">
               <img src="{{ '/assets/wechat-qr.png' | relative_url }}" alt="Sunny 教练个人微信二维码" />
             </div>
-            <span class="qr-label">微信 · 加好友邀请入群</span>
+            <span class="qr-label">{% if page.lang == 'en' %}WeChat · Add Coach Sunny{% else %}微信 · 加好友邀请入群{% endif %}</span>
           </div>
         </div>
       </div>
@@ -124,40 +170,60 @@ layout: default
 
     <!-- 返回文章列表 -->
     <div class="back-to-list">
-      <a href="{{ '/#articles' | relative_url }}">
+      <a href="{% if page.lang == 'en' %}{{ '/en/#articles' | relative_url }}{% else %}{{ '/#articles' | relative_url }}{% endif %}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="m12 19-7-7 7-7"/>
           <path d="M19 12H5"/>
         </svg>
-        返回文章列表
+        {% if page.lang == 'en' %}Back to Articles{% else %}返回文章列表{% endif %}
       </a>
     </div>
 
-    <!-- 上下篇导航 -->
+    <!-- 上下篇导航（按语言分流） -->
     <div class="post-nav">
-      {% if page.previous %}
-      <a href="{{ page.previous.url | relative_url }}" class="post-nav-card prev">
+      {% if page.lang == 'en' %}
+        {% assign lang_posts = site.posts | where: "lang", "en" %}
+      {% else %}
+        {% assign lang_posts = site.posts | where_exp: "p", "p.lang != 'en'" %}
+      {% endif %}
+      {% assign prev_p = nil %}
+      {% assign next_p = nil %}
+      {% for p in lang_posts %}
+        {% if p.url == page.url %}
+          {% assign prev_idx = forloop.index0 | plus: 1 %}
+          {% assign next_idx = forloop.index0 | minus: 1 %}
+          {% if prev_idx < lang_posts.size %}
+            {% assign prev_p = lang_posts[prev_idx] %}
+          {% endif %}
+          {% if next_idx >= 0 %}
+            {% assign next_p = lang_posts[next_idx] %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+      {% if prev_p %}
+      <a href="{{ prev_p.url | relative_url }}" class="post-nav-card prev">
         <div class="post-nav-label">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="m15 18-6-6 6-6"/>
           </svg>
-          上一篇
+          {% if page.lang == 'en' %}Previous{% else %}上一篇{% endif %}
         </div>
-        <p class="post-nav-title">{{ page.previous.title }}</p>
+        <p class="post-nav-title">{{ prev_p.title }}</p>
       </a>
       {% else %}
       <div class="post-nav-empty"></div>
       {% endif %}
 
-      {% if page.next %}
-      <a href="{{ page.next.url | relative_url }}" class="post-nav-card next">
+      {% if next_p %}
+      <a href="{{ next_p.url | relative_url }}" class="post-nav-card next">
         <div class="post-nav-label">
-          下一篇
+          {% if page.lang == 'en' %}Next{% else %}下一篇{% endif %}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="m9 18 6-6-6-6"/>
           </svg>
         </div>
-        <p class="post-nav-title">{{ page.next.title }}</p>
+        <p class="post-nav-title">{{ next_p.title }}</p>
       </a>
       {% else %}
       <div class="post-nav-empty"></div>

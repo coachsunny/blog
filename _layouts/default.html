@@ -1,15 +1,25 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang | default: 'zh-CN' }}">
+<html lang="{{ page.lang | default: site.lang | default: 'zh-CN' }}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="edsjHGU0Vtj9R9wCr5uRTG4Z6zdJnh82LEmosTNpZ4Y" />
+  {% if page.lang == 'en' %}
+  <meta name="keywords" content="Mind Tea Journal, Coach Sunny, ICF Coach, Psychological Safety, The Gap and The Gain, Self-Awareness, Executive Coaching, Life Coaching" />
+  {% else %}
   <meta name="keywords" content="心茶記, 心茶记, 心茶記 Sunny, 心茶记 Sunny, Sunny 教練, Sunny 教练, Coach Sunny, Mind Tea Journal, ICF教練, 自我覺察, 心理運作機制, 情緒覺察, 深度溝通, 建立信任" />
+  {% endif %}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="{{ '/css/style.css' | relative_url }}" />
   <style>
+    .lang-toggle-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 6px;
+    }
     .lang-btn {
       background: transparent;
       border: 1px solid var(--border);
@@ -22,13 +32,31 @@
       font-family: var(--font-sans, sans-serif);
       transition: all 0.2s ease;
       line-height: 1.5;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .lang-btn:hover {
       background-color: hsla(145, 22%, 42%, 0.1);
       color: var(--primary-dark);
       border-color: var(--primary);
+      text-decoration: none;
+    }
+    .lang-btn.active {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+      cursor: default;
+      pointer-events: none;
     }
   </style>
+  {% if page.ref %}
+    {% assign zh_target = site.posts | where: "ref", page.ref | where_exp: "p", "p.lang != 'en'" | first %}
+    {% assign en_target = site.posts | where: "ref", page.ref | where: "lang", "en" | first %}
+    {% if zh_target %}<link rel="alternate" hreflang="zh" href="{{ zh_target.url | absolute_url }}" />{% endif %}
+    {% if en_target %}<link rel="alternate" hreflang="en" href="{{ en_target.url | absolute_url }}" />{% endif %}
+  {% endif %}
   {% seo %}
   {% feed_meta %}
   <!-- 全站品牌与作者实体消歧义结构化数据（SEO & GSO / AI Overviews 强化） -->
@@ -80,12 +108,12 @@
   <!-- 顶部导航 -->
   <nav class="navbar">
     <div class="navbar-inner">
-      <a href="{{ '/' | relative_url }}" class="navbar-brand">
+      <a href="{% if page.lang == 'en' %}{{ '/en/' | relative_url }}{% else %}{{ '/' | relative_url }}{% endif %}" class="navbar-brand">
         <svg class="leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
           <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
         </svg>
-        {{ site.title }}
+        {% if page.lang == 'en' %}{{ site.title_en | default: 'Mind Tea Journal' }}{% else %}{{ site.title }}{% endif %}
       </a>
 
       <button class="menu-toggle" aria-label="菜单" aria-expanded="false">
@@ -101,15 +129,55 @@
       </button>
 
       <ul class="navbar-links">
-        {% for item in site.nav %}
-          <li>
-            <a href="{{ item.url | relative_url }}" class="{% if page.url == item.url %}active{% endif %}">
-              {{ item.title }}
-            </a>
-          </li>
-        {% endfor %}
-        <li class="lang-toggle">
-          <button id="langToggle" class="lang-btn" title="切换繁简">简</button>
+        {% if page.lang == 'en' %}
+          {% for item in site.nav_en %}
+            <li>
+              <a href="{{ item.url | relative_url }}" class="{% if page.url == item.url %}active{% endif %}">
+                {{ item.title }}
+              </a>
+            </li>
+          {% endfor %}
+        {% else %}
+          {% for item in site.nav %}
+            <li>
+              <a href="{{ item.url | relative_url }}" class="{% if page.url == item.url %}active{% endif %}">
+                {{ item.title }}
+              </a>
+            </li>
+          {% endfor %}
+        {% endif %}
+        <li class="lang-toggle-group">
+          {% if page.lang == 'en' %}
+            {% if page.ref %}
+              {% assign zh_target = site.posts | where: "ref", page.ref | where_exp: "p", "p.lang != 'en'" | first %}
+            {% endif %}
+            {% if zh_target %}
+              {% assign zh_dest = zh_target.url %}
+            {% elsif page.url contains '/about/' %}
+              {% assign zh_dest = '/about/' %}
+            {% elsif page.url contains '/tags/' %}
+              {% assign zh_dest = '/tags/' %}
+            {% else %}
+              {% assign zh_dest = '/' %}
+            {% endif %}
+            <a href="{{ zh_dest | relative_url }}" class="lang-btn" title="切換回中文">中文</a>
+            <span class="lang-btn active">EN</span>
+          {% else %}
+            {% if page.ref %}
+              {% assign en_target = site.posts | where: "ref", page.ref | where: "lang", "en" | first %}
+            {% endif %}
+            {% if en_target %}
+              {% assign en_dest = en_target.url %}
+            {% elsif page.url contains '/about/' %}
+              {% assign en_dest = '/en/about/' %}
+            {% elsif page.url contains '/tags/' %}
+              {% assign en_dest = '/en/tags/' %}
+            {% else %}
+              {% assign en_dest = '/en/' %}
+            {% endif %}
+            <button id="langToggle" class="lang-btn" title="切换繁简">简</button>
+            <a href="{{ en_dest | relative_url }}" class="lang-btn" title="Switch to English">EN</a>
+          {% endif %}
         </li>
       </ul>
     </div>
@@ -127,14 +195,18 @@
           <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
           <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
         </svg>
-        {{ site.title }} · {{ site.tagline }}
+        {% if page.lang == 'en' %}
+          {{ site.title_en }} · {{ site.tagline_en }}
+        {% else %}
+          {{ site.title }} · {{ site.tagline }}
+        {% endif %}
       </div>
       <div class="footer-actions">
-        <button id="wechatBtn" class="footer-btn footer-wechat-btn" title="加入读者社群">
+        <button id="wechatBtn" class="footer-btn footer-wechat-btn" title="{% if page.lang == 'en' %}Connect with Sunny{% else %}加入读者社群{% endif %}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
-          加入读者社群
+          {% if page.lang == 'en' %}Connect with Sunny{% else %}加入读者社群{% endif %}
         </button>
         <a href="mailto:{{ site.email }}" class="footer-email">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -144,7 +216,13 @@
           {{ site.email }}
         </a>
       </div>
-      <p class="footer-copy">© {{ 'now' | date: '%Y' }} {{ site.title }} (心茶記 Mind Tea Journal · Coach Sunny). 保留所有权利.</p>
+      <p class="footer-copy">
+        {% if page.lang == 'en' %}
+          © {{ 'now' | date: '%Y' }} {{ site.title_en }} · Coach Sunny. All rights reserved.
+        {% else %}
+          © {{ 'now' | date: '%Y' }} {{ site.title }} (心茶記 Mind Tea Journal · Coach Sunny). 保留所有权利.
+        {% endif %}
+      </p>
     </div>
   </footer>
 
@@ -160,7 +238,8 @@
   </script>
   <script src="{{ '/js/main.js' | relative_url }}"></script>
 
-  <!-- 繁简转换脚本 -->
+  {% if page.lang != 'en' %}
+  <!-- 繁简转换脚本（仅中文页面执行） -->
   <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
   <script>
   (function() {
@@ -240,34 +319,47 @@
     });
   })();
   </script>
+  {% endif %}
 
   <!-- 读者社群二维码弹窗 -->
   <div id="wechatModal" class="wechat-modal" role="dialog" aria-modal="true" aria-labelledby="wechatModalTitle">
     <div class="wechat-modal-box">
-      <button class="wechat-modal-close" id="wechatModalClose" aria-label="关闭弹窗">
+      <button class="wechat-modal-close" id="wechatModalClose" aria-label="{% if page.lang == 'en' %}Close{% else %}关闭弹窗{% endif %}">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
       </button>
-      <h3 id="wechatModalTitle" class="wechat-modal-title">加入「心茶記」读者社群</h3>
-      <p class="wechat-modal-desc">与同频伙伴探讨觉察，新文章第一时间在群内分享</p>
+      <h3 id="wechatModalTitle" class="wechat-modal-title">
+        {% if page.lang == 'en' %}Connect with Coach Sunny{% else %}加入「心茶記」读者社群{% endif %}
+      </h3>
+      <p class="wechat-modal-desc">
+        {% if page.lang == 'en' %}
+          Explore self-awareness with like-minded companions; new reflections shared promptly
+        {% else %}
+          与同频伙伴探讨觉察，新文章第一时间在群内分享
+        {% endif %}
+      </p>
       <div class="modal-qrs-wrapper">
         <div class="modal-qr-item">
           <div class="wechat-modal-qr">
             <img src="{{ '/assets/line-qr.png' | relative_url }}" alt="Sunny 教练个人 LINE 二维码" />
           </div>
-          <p class="wechat-modal-hint">LINE · 加好友邀请入群</p>
+          <p class="wechat-modal-hint">LINE · {% if page.lang == 'en' %}Add Coach Sunny{% else %}加好友邀请入群{% endif %}</p>
         </div>
         <div class="modal-qr-item">
           <div class="wechat-modal-qr">
             <img src="{{ '/assets/wechat-qr.png' | relative_url }}" alt="Sunny 教练个人微信二维码" />
           </div>
-          <p class="wechat-modal-hint">微信 · 加好友邀请入群</p>
+          <p class="wechat-modal-hint">WeChat · {% if page.lang == 'en' %}Add Coach Sunny{% else %}加好友邀请入群{% endif %}</p>
         </div>
       </div>
       <p style="font-size:11.5px;color:var(--text-muted);margin-top:10px;line-height:1.5;">
-        💡 二维码皆为个人名片，永久有效。添加时请备注「心茶记」；亦可发邮件至 <a href="mailto:{{ site.email }}" style="color:var(--primary-dark);text-decoration:underline;">{{ site.email }}</a>
+        {% if page.lang == 'en' %}
+          💡 QR codes are personal cards, valid permanently. Please note "Mind Tea Journal" when adding; you can also email <a href="mailto:{{ site.email }}" style="color:var(--primary-dark);text-decoration:underline;">{{ site.email }}</a>
+        {% else %}
+          💡 二维码皆为个人名片，永久有效。添加时请备注「心茶记」；亦可发邮件至 <a href="mailto:{{ site.email }}" style="color:var(--primary-dark);text-decoration:underline;">{{ site.email }}</a>
+        {% endif %}
       </p>
     </div>
   </div>

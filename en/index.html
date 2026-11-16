@@ -1,0 +1,107 @@
+---
+layout: default
+lang: en
+title: Mind Tea Journal · Coach Sunny | Mental Models & Self-Awareness Sanctuary
+description: Mind Tea Journal is an inner sanctuary and coaching column by ICF Certified Professional Coach Sunny, exploring mental models, emotional awareness, authentic presence, and sustainable personal growth.
+permalink: /en/
+---
+
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-tag fade-in">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+      </svg>
+      Welcome to Mind Tea Journal · by Coach Sunny (ICF-ACC)
+    </div>
+    <h1 class="hero-title fade-in fade-in-delay-1">
+      A quiet moment over tea,<br/>
+      A heart learning to <span class="accent">truly know itself</span>
+    </h1>
+    <p class="hero-subtitle fade-in fade-in-delay-2">
+      An intentional space dedicated to decoding inner mental models.<br/>
+      Through the lens of ICF Professional Coach Sunny, reflecting on emotional patterns, depth of presence, and authentic growth.<br/>
+      Seeking no quick fixes, only walking beside you to truly see.
+    </p>
+    <div class="hero-buttons fade-in fade-in-delay-3">
+      <a href="#articles" class="btn btn-primary">
+        Start Reading
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"/>
+          <path d="m12 5 7 7-7 7"/>
+        </svg>
+      </a>
+      <a href="{{ '/en/about/' | relative_url }}" class="btn btn-outline">
+        About Coach Sunny
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Articles Section -->
+<section id="articles" class="section">
+  <div class="container">
+    <div class="section-header scroll-fade">
+      <p class="section-eyebrow">Essays & Inquiries</p>
+      <h2 class="section-title">Latest Articles</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="post-list">
+      {% assign en_posts = site.posts | where: "lang", "en" %}
+      {% for post in en_posts %}
+      <div class="post-card scroll-fade">
+        <div class="post-card-meta">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="4" rx="2"/>
+              <path d="M16 2v4"/>
+              <path d="M8 2v4"/>
+              <path d="M3 10h18"/>
+            </svg>
+            {{ post.date | date: '%B %d, %Y' }}
+          </span>
+          {% if post.read_time %}
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            {{ post.read_time }} min read
+          </span>
+          {% endif %}
+        </div>
+        <h3 class="post-card-title"><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
+        <p class="post-card-excerpt">{{ post.description | default: post.excerpt | strip_html | truncate: 150 }}</p>
+        {% if post.tags %}
+        <div class="post-card-tags">
+          {% for tag in post.tags %}
+          <a href="{{ '/en/tags/' | relative_url }}#tag-{{ tag | slugify }}" class="tag">{{ tag }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <a href="{{ post.url | relative_url }}" class="post-card-readmore">
+          Read Article
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"/>
+            <path d="m12 5 7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Quote Section -->
+<section class="quote-section">
+  <div class="container">
+    <blockquote class="quote-text scroll-fade">
+      "You don't need to become someone else to be worthy of love and acceptance;<br/>
+      You only need to notice that who you are right now is already enough."
+    </blockquote>
+    <p class="quote-author scroll-fade">—— Mind Tea Journal · Coach Sunny</p>
+  </div>
+</section>
