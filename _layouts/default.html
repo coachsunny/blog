@@ -14,39 +14,50 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="{{ '/css/style.css' | relative_url }}" />
   <style>
-    .lang-toggle-group {
+    .lang-switch-item {
+      display: flex;
+      align-items: center;
+      margin-left: 10px;
+    }
+    .lang-segmented-switch {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      margin-left: 6px;
-    }
-    .lang-btn {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      padding: 4px 12px;
+      background: rgba(163, 184, 153, 0.15);
+      border: 1px solid rgba(163, 184, 153, 0.35);
       border-radius: var(--radius-full);
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      font-family: var(--font-sans, sans-serif);
-      transition: all 0.2s ease;
-      line-height: 1.5;
-      text-decoration: none;
+      padding: 2px;
+      gap: 2px;
+    }
+    .lang-opt {
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      min-width: 28px;
+      height: 25px;
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: var(--font-sans, sans-serif);
+      color: var(--text-muted);
+      border-radius: var(--radius-full);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      line-height: 1;
+      user-select: none;
     }
-    .lang-btn:hover {
-      background-color: hsla(145, 22%, 42%, 0.1);
+    .lang-opt:hover {
       color: var(--primary-dark);
-      border-color: var(--primary);
+      background-color: rgba(163, 184, 153, 0.22);
       text-decoration: none;
     }
-    .lang-btn.active {
+    .lang-opt.active {
       background-color: var(--primary);
       color: #ffffff;
-      border-color: var(--primary);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
       cursor: default;
       pointer-events: none;
     }
@@ -146,38 +157,42 @@
             </li>
           {% endfor %}
         {% endif %}
-        <li class="lang-toggle-group">
-          {% if page.lang == 'en' %}
-            {% if page.ref %}
-              {% assign zh_target = site.posts | where: "ref", page.ref | where_exp: "p", "p.lang != 'en'" | first %}
-            {% endif %}
-            {% if zh_target %}
-              {% assign zh_dest = zh_target.url %}
-            {% elsif page.url contains '/about/' %}
-              {% assign zh_dest = '/about/' %}
-            {% elsif page.url contains '/tags/' %}
-              {% assign zh_dest = '/tags/' %}
+        <li class="lang-switch-item">
+          <div class="lang-segmented-switch">
+            {% if page.lang == 'en' %}
+              {% if page.ref %}
+                {% assign zh_target = site.posts | where: "ref", page.ref | where_exp: "p", "p.lang != 'en'" | first %}
+              {% endif %}
+              {% if zh_target %}
+                {% assign zh_dest = zh_target.url %}
+              {% elsif page.url contains '/about/' %}
+                {% assign zh_dest = '/about/' %}
+              {% elsif page.url contains '/tags/' %}
+                {% assign zh_dest = '/tags/' %}
+              {% else %}
+                {% assign zh_dest = '/' %}
+              {% endif %}
+              <a href="{{ zh_dest | relative_url }}" class="lang-opt" onclick="localStorage.setItem('blog_lang','traditional')" title="繁體中文">繁</a>
+              <a href="{{ zh_dest | relative_url }}" class="lang-opt" onclick="localStorage.setItem('blog_lang','simplified')" title="简体中文">简</a>
+              <span class="lang-opt active" title="English">EN</span>
             {% else %}
-              {% assign zh_dest = '/' %}
+              {% if page.ref %}
+                {% assign en_target = site.posts | where: "ref", page.ref | where: "lang", "en" | first %}
+              {% endif %}
+              {% if en_target %}
+                {% assign en_dest = en_target.url %}
+              {% elsif page.url contains '/about/' %}
+                {% assign en_dest = '/en/about/' %}
+              {% elsif page.url contains '/tags/' %}
+                {% assign en_dest = '/en/tags/' %}
+              {% else %}
+                {% assign en_dest = '/en/' %}
+              {% endif %}
+              <button type="button" id="btnHant" class="lang-opt" title="切換為繁體中文">繁</button>
+              <button type="button" id="btnHans" class="lang-opt" title="切换为简体中文">简</button>
+              <a href="{{ en_dest | relative_url }}" class="lang-opt" title="Switch to English">EN</a>
             {% endif %}
-            <a href="{{ zh_dest | relative_url }}" class="lang-btn" title="切換回中文">中文</a>
-            <span class="lang-btn active">EN</span>
-          {% else %}
-            {% if page.ref %}
-              {% assign en_target = site.posts | where: "ref", page.ref | where: "lang", "en" | first %}
-            {% endif %}
-            {% if en_target %}
-              {% assign en_dest = en_target.url %}
-            {% elsif page.url contains '/about/' %}
-              {% assign en_dest = '/en/about/' %}
-            {% elsif page.url contains '/tags/' %}
-              {% assign en_dest = '/en/tags/' %}
-            {% else %}
-              {% assign en_dest = '/en/' %}
-            {% endif %}
-            <button id="langToggle" class="lang-btn" title="切换繁简">简</button>
-            <a href="{{ en_dest | relative_url }}" class="lang-btn" title="Switch to English">EN</a>
-          {% endif %}
+          </div>
         </li>
       </ul>
     </div>
@@ -259,12 +274,18 @@
       const t2s = OpenCC.Converter({ from: 'tw', to: 'cn' });
 
       let currentLang = localStorage.getItem('blog_lang') || 'simplified';
-      const langBtn = document.getElementById('langToggle');
+      const btnHant = document.getElementById('btnHant');
+      const btnHans = document.getElementById('btnHans');
 
-      function updateButtonText() {
-        if (langBtn) {
-          langBtn.textContent = currentLang === 'simplified' ? '简' : '繁';
-          langBtn.title = currentLang === 'simplified' ? '切换为繁体' : '切换为简体';
+      function updateActiveButtons() {
+        if (btnHant && btnHans) {
+          if (currentLang === 'traditional') {
+            btnHant.classList.add('active');
+            btnHans.classList.remove('active');
+          } else {
+            btnHans.classList.add('active');
+            btnHant.classList.remove('active');
+          }
         }
       }
 
@@ -281,7 +302,7 @@
             return;
           }
           // 跳过语言切换按钮本身
-          if (node.id === 'langToggle') {
+          if (node.id === 'btnHant' || node.id === 'btnHans' || (node.classList && node.classList.contains('lang-opt'))) {
             return;
           }
           for (let i = 0; i < node.childNodes.length; i++) {
@@ -297,16 +318,27 @@
         document.title = converter(document.title);
       }
 
-      if (langBtn) {
-        langBtn.addEventListener('click', function() {
-          currentLang = currentLang === 'simplified' ? 'traditional' : 'simplified';
-          localStorage.setItem('blog_lang', currentLang);
-          updateButtonText();
-          location.reload();
+      if (btnHant) {
+        btnHant.addEventListener('click', function() {
+          if (currentLang !== 'traditional') {
+            currentLang = 'traditional';
+            localStorage.setItem('blog_lang', 'traditional');
+            location.reload();
+          }
         });
       }
 
-      updateButtonText();
+      if (btnHans) {
+        btnHans.addEventListener('click', function() {
+          if (currentLang !== 'simplified') {
+            currentLang = 'simplified';
+            localStorage.setItem('blog_lang', 'simplified');
+            location.reload();
+          }
+        });
+      }
+
+      updateActiveButtons();
 
       if (currentLang === 'traditional') {
         // 等页面完全渲染后再转换
