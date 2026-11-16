@@ -148,10 +148,51 @@ ICF 国际教练联盟认证专业教练（ACC）。专注于深层自我觉察�
   fs.writeFileSync(path.join(targetDir, '07_知乎.txt'), zhihuMd, 'utf8');
   renderMarkdownToHtmlFile(zhihuMd, path.join(targetDir, '07_知乎_富文本預覽.html'), titleSc, 'zh-CN');
 
+  // Strip code blocks and mermaid diagrams for clean text extraction
+  const cleanBodySc = bodySc.replace(/```[\s\S]*?```/g, '');
+  const cleanBodyTc = bodyTc.replace(/```[\s\S]*?```/g, '');
+
   // Extract a few lead paragraphs for hooks
-  const paragraphsTc = bodyTc.split(/\r?\n\r?\n/).filter(p => !p.startsWith('#') && p.trim().length > 20);
+  const paragraphsTc = cleanBodyTc.split(/\r?\n\r?\n/).filter(p => !p.startsWith('#') && p.trim().length > 20);
   const leadParagraphTc = paragraphsTc[0] || '';
   const secondParagraphTc = paragraphsTc[1] || '';
+
+  const paragraphsSc = cleanBodySc.split(/\r?\n\r?\n/).filter(p => !p.startsWith('#') && p.trim().length > 20);
+  const leadParagraphSc = paragraphsSc[0] || '';
+  const secondParagraphSc = paragraphsSc[1] || '';
+
+  // Extract core takeaways, blockquotes, and ending punchline
+  const quoteMatchesSc = Array.from(cleanBodySc.matchAll(/>\s*([^\r\n]+)/g))
+    .map(m => m[1].replace(/[*_`]/g, '').trim())
+    .filter(q => q.length > 8 && !q.startsWith('【') && !q.startsWith('http') && !q.includes('-->'));
+  
+  const boldMatchesSc = Array.from(cleanBodySc.matchAll(/\*\*([^\r\n*]{12,120})\*\*/g))
+    .map(m => m[1].trim())
+    .filter(b => !b.startsWith('【') && !b.includes('-->'));
+
+  const endingQuoteSc = boldMatchesSc[boldMatchesSc.length - 1] || quoteMatchesSc[quoteMatchesSc.length - 1] || '愿我们在喧嚣里，保有心中的宁静与澄澈。';
+  const endingQuoteTc = s2tw(endingQuoteSc);
+
+  // Extract coaching question (look for question mark in blockquotes or reflection section)
+  let questionMatchSc = quoteMatchesSc.find(q => q.includes('？') || q.includes('?')) || '如果今天遇到一盆冷水，你愿不愿意试着不接招，借对方的挑剔替自己扫清盲区？';
+  questionMatchSc = questionMatchSc.replace(/^[“”"']+|[“”"']+$/g, '').trim();
+
+  // Extract steps or subheadings (prioritize 步骤 1, 步骤 2...)
+  let stepHeadingsSc = Array.from(cleanBodySc.matchAll(/###?\s+步骤\s*\d+[：: ]\s*([^\r\n]+)/gi))
+    .map(m => m[1].replace(/[*_`]/g, '').trim());
+
+  if (stepHeadingsSc.length === 0) {
+    stepHeadingsSc = Array.from(cleanBodySc.matchAll(/###?\s+(?:[一二三四五六七八九十]+[、. ]|\d+[.、])\s*([^\r\n]+)/gi))
+      .map(m => m[1].replace(/[*_`]/g, '').trim());
+  }
+
+  // Parse tags
+  let rawTags = metadata.tags || [];
+  if (typeof rawTags === 'string') {
+    rawTags = rawTags.replace(/[\[\]'"]/g, '').split(',').map(t => t.trim()).filter(Boolean);
+  }
+  const tagsSc = rawTags.map(t => tw2s(t));
+  const tagsTc = rawTags.map(t => s2tw(t));
 
   // 3. 01_Facebook.txt (Heartfelt story narrative, Traditional Chinese)
   const fbContent = `【心茶記 · 晨光微光】${titleTc}
@@ -161,10 +202,12 @@ ${leadParagraphTc}
 ${secondParagraphTc}
 
 ☕ 喝一杯溫暖的茶，給心靈留白五分鐘。
+「${endingQuoteTc}」
+
 深層反思與完整長文收錄於專欄：
 👉 點擊閱讀全文：${permalink}
 
-#心茶記 #自我覺察 #ICF教練 #正念生活 #深層溝通
+#心茶記 #自我覺察 #ICF教練 #正念生活 #溝通心理學
 `;
   fs.writeFileSync(path.join(targetDir, '01_Facebook.txt'), fbContent, 'utf8');
 
@@ -175,7 +218,10 @@ ${secondParagraphTc}
 
 ${leadParagraphTc}
 
+${secondParagraphTc}
+
 當我們能夠超越表層的立場防禦，回到深層的覺察與傾聽時，對話才能真正轉化為彼此賦能的契機。
+「${endingQuoteTc}」
 
 🔗 閱讀專欄完整深度解析：${permalink}
 
@@ -186,10 +232,12 @@ ${leadParagraphTc}
   // 5. 03_Threads.txt (Punchy short quotes, wide spacing, Traditional Chinese)
   const threadsContent = `「${titleTc.split(/[:：]/)[0]}」
 .
-${leadParagraphTc.slice(0, 120)}...
+${leadParagraphTc.slice(0, 110)}...
 .
 有時候，慢下來不是耽擱，
 而是為了讓靈魂跟上說話的腳步。
+.
+「${endingQuoteTc}」
 .
 給自己留白三秒鐘，
 鬆開肩膀，好好聽，好好說。☕
@@ -198,41 +246,73 @@ ${leadParagraphTc.slice(0, 120)}...
 `;
   fs.writeFileSync(path.join(targetDir, '03_Threads.txt'), threadsContent, 'utf8');
 
-  // 6. 05_微信朋友圈與群.txt (Simplified Chinese, warm morning greeting & coaching question)
+  // 6. 05_微信朋友圈與群.txt (Simplified Chinese, tailored dual versions)
+  const postDescSc = tw2s(metadata.description || '');
   const wechatContent = `【晨光微光 · 心茶记】
 
-早上好 ☕
+【版本 A：犀利反思型】（推荐）
+${leadParagraphSc.slice(0, 110)}...
 
-${tw2s(leadParagraphTc).slice(0, 140)}...
+很多时候，带刺的否定并不是针对你，而是对方在失控恐惧下的粗糙防御。
+最高段位的沟通不是拔刀对撞，而是借力打力，把审判台换成合作桌。
 
-今日教练微思考：
-“在今天即将开启的对话里，你是否愿意先慢下半拍，确认彼此眼神里的温度？”
+☕ 今日教练微思考：
+“${questionMatchSc}”
 
-愿我们在喧嚣里，保有心中的宁静与澄澈 🌿
+${endingQuoteSc} 🌿
 📖 深度长文阅读：${permalink}
+
+---
+
+【版本 B：现场微故事型】
+${leadParagraphSc}
+
+面对扑面而来的否定与冷水，我们习惯了非战即逃。
+但其实还有第三种可能——
+端起茶杯喝一口温水，顺着对方的力道借力打力。
+
+☕ 晨光微语：
+「${endingQuoteSc}」
+📖 完整拆解收录于《心茶记》：${permalink}
 `;
   fs.writeFileSync(path.join(targetDir, '05_微信朋友圈與群.txt'), wechatContent, 'utf8');
 
-  // 7. 06_小紅書.txt (Pain point, emoji, ZERO external URLs, search guidance)
-  const xhsTitle = `为什么我们总是很难好好说话？🌿｜心茶记`;
+  // 7. 06_小紅書.txt (Pain point, emoji, ZERO external URLs, search guidance, 3+2 tags)
+  const xhsTitleBase = titleSc.split(/[:：]/)[0].replace(/^[别不要如何为什么]+/, '');
+  const xhsTitle = `${titleSc.split(/[:：]/)[0]}🌿｜心茶记`;
+  
+  let keyPointsText = '';
+  if (stepHeadingsSc.length > 0) {
+    keyPointsText = stepHeadingsSc.slice(0, 3).map((h, i) => `${i + 1}️⃣【${h}】`).join('\n');
+  } else {
+    keyPointsText = `1️⃣ 卸下阻力：先接纳现实，拆解对抗张力\n2️⃣ 概念降级：将毒舌标签剥离为客观事实\n3️⃣ 反客为主：把审判裁判拉进共创席`;
+  }
+
+  // 3 specific context tags + 2 domain brand tags
+  const specificTags = tagsSc.filter(t => !['心茶记', '心理学', 'ICF教练'].includes(t)).slice(0, 3);
+  while (specificTags.length < 3) {
+    specificTags.push('沟通艺术');
+  }
+  const xhsTagsFormatted = `#${specificTags.join(' #')} #心理学 #心茶记`;
+
   const xhsContent = `${xhsTitle}
 
-${tw2s(leadParagraphTc).slice(0, 100)}...
+${leadParagraphSc.slice(0, 120)}...
 
-⚠️ 阻碍沟通的 3 个隐形暗坑：
-1️⃣ 习惯用评判代替好奇
-2️⃣ 身体疲惫时情绪本能防御
-3️⃣ 忽略了场域与媒介的温度
+换作以前，你是不是心跳加速、要么拔刀互怼，要么委屈内耗一整晚？
+其实，最高段位的沟通不是证明自己对，而是借力打力，把审判台换成合作桌！
 
-💡 教练的「微步反思心法」：
-✨ 说话前深呼吸一次，松开咬紧的牙关
-✨ 区分对方的“情绪暴雨”与“客观事实”
-✨ 用好奇提问替代反唇相讥
+💡 核心破局 3 步法：
+${keyPointsText}
 
-慢慢说，慢慢听，慢慢看见。☕
+☕ 今日教练微行动：
+下次被泼冷水时，先深呼吸 3 秒：
+「${endingQuoteSc}」🔥
 
 ---
 🔍 完整深度长文收录于个人专栏《心茶记》（浏览器搜索「心茶记 Sunny」即可阅读全篇 ☕）
+
+${xhsTagsFormatted}
 `;
   fs.writeFileSync(path.join(targetDir, '06_小紅書.txt'), xhsContent, 'utf8');
 
