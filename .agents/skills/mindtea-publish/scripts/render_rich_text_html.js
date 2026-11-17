@@ -58,6 +58,58 @@ function convertMermaidToHtml(mermaidCode) {
   return `<pre style="background: rgba(230, 240, 232, 0.45); border: 1px solid #c8d8cf; border-radius: 8px; padding: 14px; overflow-x: auto; font-size: 14px;"><code>${mermaidCode.trim()}</code></pre>`;
 }
 
+function inlineFormat(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
+}
+
+function convertTableToHtml(tableLines) {
+  if (!tableLines || tableLines.length < 2) return '';
+
+  function splitRow(line) {
+    let t = line.trim();
+    if (t.startsWith('|')) t = t.substring(1);
+    if (t.endsWith('|')) t = t.substring(0, t.length - 1);
+    return t.split('|').map(c => c.trim());
+  }
+
+  const headerCells = splitRow(tableLines[0]);
+  const delimCells = splitRow(tableLines[1]);
+  const alignments = delimCells.map(cell => {
+    const left = cell.startsWith(':');
+    const right = cell.endsWith(':');
+    if (left && right) return 'center';
+    if (right) return 'right';
+    return 'left';
+  });
+
+  const theadThs = headerCells.map((cell, idx) => {
+    const align = alignments[idx] || 'left';
+    return `<th style="padding: 12px 14px; background-color: #eaf1ec; color: #1e3324; font-weight: 600; border: 1px solid #d5e2d8; font-size: 15px; text-align: ${align};">${inlineFormat(cell)}</th>`;
+  }).join('\n      ');
+
+  const theadHtml = `  <thead>\n    <tr style="border-bottom: 2px solid #a3b899;">\n      ${theadThs}\n    </tr>\n  </thead>`;
+
+  const bodyRows = [];
+  for (let r = 2; r < tableLines.length; r++) {
+    const rowCells = splitRow(tableLines[r]);
+    const isEven = (r - 2) % 2 === 1;
+    const rowBg = isEven ? '#f9fbf9' : '#ffffff';
+    const rowTds = headerCells.map((_, idx) => {
+      const cell = rowCells[idx] !== undefined ? rowCells[idx] : '';
+      const align = alignments[idx] || 'left';
+      return `<td style="padding: 12px 14px; border: 1px solid #e2ece5; color: #2c2523; font-size: 15px; text-align: ${align}; line-height: 1.6;">${inlineFormat(cell)}</td>`;
+    }).join('\n      ');
+    bodyRows.push(`    <tr style="background-color: ${rowBg}; border-bottom: 1px solid #e2ece5;">\n      ${rowTds}\n    </tr>`);
+  }
+
+  const tbodyHtml = `  <tbody>\n${bodyRows.join('\n')}\n  </tbody>`;
+
+  return `<div style="overflow-x: auto; margin: 24px 0;">\n<table style="width: 100%; border-collapse: collapse; border: 1px solid #d5e2d8; border-radius: 6px; overflow: hidden; background: #ffffff;">\n${theadHtml}\n${tbodyHtml}\n</table>\n</div>`;
+}
+
 function parseMarkdown(md) {
   // Pre-process any raw HTML coaching boxes into clean markdown blockquotes
   const normalizedMd = convertCoachingBoxes(md || '');
@@ -236,6 +288,24 @@ function parseMarkdown(md) {
       continue;
     }
 
+    // Markdown Table
+    if (trimmed.includes('|') && i + 1 < lines.length) {
+      const nextTrimmed = lines[i + 1].trim();
+      const isTableDelim = /^\|?(\s*:?-+:?\s*\|)+\s*:?-+:?\s*\|?$/.test(nextTrimmed);
+      if (isTableDelim) {
+        flushBlockquote();
+        const tableLines = [trimmed, nextTrimmed];
+        i += 2;
+        while (i < lines.length && lines[i].trim().includes('|') && lines[i].trim() !== '') {
+          tableLines.push(lines[i].trim());
+          i++;
+        }
+        i--;
+        html.push(convertTableToHtml(tableLines));
+        continue;
+      }
+    }
+
     // Pass through raw HTML blocks without wrapping them in invalid <p>
     if (/^<\/?(div|p|ol|ul|li|blockquote|h[1-6]|hr|table|tr|td|th|section|article)\b/i.test(trimmed)) {
       html.push(trimmed);
@@ -345,6 +415,10 @@ function generateHtmlPage(title, bodyHtml, lang = 'zh-TW') {
   li { margin-bottom: 8px; }
   strong { color: #1c3323; }
   a { color: #3a7550; text-decoration: underline; text-underline-offset: 3px; }
+  table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 15px; border: 1px solid #d5e2d8; border-radius: 6px; overflow: hidden; }
+  th { padding: 12px 14px; background-color: #eaf1ec; color: #1e3324; font-weight: 600; border: 1px solid #d5e2d8; font-size: 15px; }
+  td { padding: 12px 14px; border: 1px solid #e2ece5; color: #2c2523; font-size: 15px; line-height: 1.6; }
+  tr:nth-child(even) td { background-color: #f9fbf9; }
 </style>
 </head>
 <body>
