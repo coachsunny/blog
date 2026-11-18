@@ -109,9 +109,25 @@ function generateSocialPackage(postFilePath, customFolderName) {
   const titleSc = tw2s(postTitle);
   const bodySc = cleanMarkdownForSocial(tw2s(body));
 
-  // Folder name in social_posts/: YYYY-MM-DD_主題名
+  // Folder name in social_posts/: YYYY-MM-DD_主題名 (reuse existing folder if present)
   const safeTitle = titleTc.split(/[:：\s]/)[0].replace(/[^\u4e00-\u9fa5a-zA-Z0-9_-]/g, '');
-  const folderName = customFolderName || `${postDate}_${safeTitle}`;
+  let folderName = customFolderName;
+  if (!folderName) {
+    const socialPostsBase = path.join(repoRoot, 'social_posts');
+    if (fs.existsSync(socialPostsBase)) {
+      const existingFolders = fs.readdirSync(socialPostsBase).filter(f => f.startsWith(`${postDate}_`));
+      if (existingFolders.length === 1) {
+        folderName = existingFolders[0];
+      } else if (existingFolders.length > 1) {
+        // Try finding one that matches safeTitle substring
+        const match = existingFolders.find(f => f.includes(safeTitle.slice(0, 3)));
+        if (match) folderName = match;
+      }
+    }
+    if (!folderName) {
+      folderName = `${postDate}_${safeTitle}`;
+    }
+  }
   const targetDir = path.join(repoRoot, 'social_posts', folderName);
 
   if (!fs.existsSync(targetDir)) {

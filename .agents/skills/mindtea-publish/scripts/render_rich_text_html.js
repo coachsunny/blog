@@ -19,12 +19,23 @@ function convertCoachingBoxes(text) {
   });
 }
 
-function convertMermaidToHtml(mermaidCode) {
+function parseMermaid(code) {
   const nodeMap = new Map();
   const orderedNodes = [];
-  const lines = mermaidCode.split(/\r?\n/);
+  const edges = [];
+  const lines = code.split(/\r?\n/);
+  let direction = 'TD';
 
   for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('%%')) continue;
+
+    const dirMatch = trimmed.match(/^(?:flowchart|graph)\s+(TD|TB|LR|RL)/i);
+    if (dirMatch) {
+      direction = dirMatch[1].toUpperCase();
+      continue;
+    }
+
     const nodeMatches = line.matchAll(/([A-Za-z0-9_]+)\["([^"]+)"\]|([A-Za-z0-9_]+)\[([^\]]+)\]/g);
     for (const m of nodeMatches) {
       const id = m[1] || m[3];
@@ -34,28 +45,139 @@ function convertMermaidToHtml(mermaidCode) {
         orderedNodes.push({ id, text });
       }
     }
+
+    const edgeMatches = line.matchAll(/([A-Za-z0-9_]+)(?:\[[^\]]*\])?\s*(?:-->|--[^-]+-->)\s*(?:\|([^|]*)\|\s*)?([A-Za-z0-9_]+)/g);
+    for (const em of edgeMatches) {
+      edges.push({ from: em[1], to: em[3], label: em[2] ? em[2].trim() : '' });
+    }
   }
 
-  if (orderedNodes.length > 0) {
-    const cardsHtml = orderedNodes.map((node, idx) => {
-      const parts = node.text.split(/<br\s*\/?>/i);
-      const title = parts[0] ? parts[0].trim() : '';
-      const sub = parts.slice(1).join('<br>').trim();
-      let inner = `<strong style="color: #2d4a3e; font-size: 0.95em;">${title}</strong>`;
-      if (sub) {
-        inner += `<br><span style="color: #666; font-size: 0.85em;">${sub}</span>`;
-      }
-      let card = `<div style="background: #ffffff; border: 1px solid #cad5c5; border-radius: 8px; padding: 10px 14px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); min-width: 130px;">${inner}</div>`;
-      if (idx < orderedNodes.length - 1) {
-        card += `\n    <span style="color: #6b8e23; font-weight: bold; font-size: 1.2em;">➔</span>`;
+  return { direction, nodes: orderedNodes, edges, nodeMap };
+}
+
+function renderNodeCard(text) {
+  const parts = text.split(/<br\s*\/?>/i);
+  const title = parts[0] ? parts[0].trim() : '';
+  const sub = parts.slice(1).join('<br>').trim();
+  let inner = `<strong style="color: #2d4a3e; font-size: 15px;">${title}</strong>`;
+  if (sub) {
+    inner += `<div style="color: #556b5d; font-size: 13.5px; margin-top: 4px; line-height: 1.5;">${sub}</div>`;
+  }
+  return `<div style="width: 100%; box-sizing: border-box; background: #ffffff; border: 1px solid #cad5c5; border-radius: 8px; padding: 12px 16px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">${inner}</div>`;
+}
+
+function convertMermaidToHtml(mermaidCode, isTraditional = true) {
+  const { direction, nodes, edges } = parseMermaid(mermaidCode);
+  if (!nodes.length) {
+    return `<pre style="background: rgba(230, 240, 232, 0.45); border: 1px solid #c8d8cf; border-radius: 8px; padding: 14px; overflow-x: auto; font-size: 14px;"><code>${mermaidCode.trim()}</code></pre>`;
+  }
+
+  // Detect loop back to the first node
+  const firstNode = nodes[0];
+  const lastNode = nodes[nodes.length - 1];
+  const hasCycle = edges.some(e => e.to === firstNode.id && nodes.some(n => n.id === e.from));
+
+  // Check if it's a simple chain vs branching
+  const outgoingCount = {};
+  edges.forEach(e => {
+    outgoingCount[e.from] = (outgoingCount[e.from] || 0) + 1;
+  });
+  const maxOutgoing = Math.max(0, ...Object.values(outgoingCount));
+  const isBranching = maxOutgoing > 1;
+
+  // Horizontal layout is strictly reserved for short single-line LR flows
+  const allShort = nodes.every(n => !n.text.includes('<br>') && n.text.length < 15);
+  const useHorizontal = direction === 'LR' && nodes.length <= 3 && !isBranching && !hasCycle && allShort;
+
+  if (useHorizontal) {
+    const cardsHtml = nodes.map((node, idx) => {
+      let card = renderNodeCard(node.text);
+      if (idx < nodes.length - 1) {
+        card += `\n    <span style="color: #6b8e23; font-weight: bold; font-size: 1.2em; flex-shrink: 0;">➔</span>`;
       }
       return card;
     }).join('\n    ');
 
-    return `<div style="background: rgba(230, 240, 232, 0.5); border: 1px solid #a3b899; border-radius: 12px; padding: 20px; margin: 24px 0;">\n  <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px;">\n    ${cardsHtml}\n  </div>\n</div>`;
+    return `<div style="background: rgba(230, 240, 232, 0.5); border: 1px solid #a3b899; border-radius: 12px; padding: 20px; margin: 24px 0;">\n  <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">\n    ${cardsHtml}\n  </div>\n</div>`;
   }
 
-  return `<pre style="background: rgba(230, 240, 232, 0.45); border: 1px solid #c8d8cf; border-radius: 8px; padding: 14px; overflow-x: auto; font-size: 14px;"><code>${mermaidCode.trim()}</code></pre>`;
+  // Vertical Stepper Layout (Default & Universal)
+  if (!isBranching) {
+    const stepCards = [];
+    nodes.forEach((node, idx) => {
+      stepCards.push(renderNodeCard(node.text));
+      if (idx < nodes.length - 1) {
+        stepCards.push(`<div style="color: #6b8e23; font-weight: bold; font-size: 18px; line-height: 1; margin: 4px 0; text-align: center;">↓</div>`);
+      }
+    });
+
+    let loopHtml = '';
+    if (hasCycle) {
+      const loopLabel = isTraditional
+        ? '形成經驗學習的正向閉環（循環驅動下一輪具體行動）'
+        : '形成经验学习的正向闭环（循环驱动下一轮具体行动）';
+      loopHtml = `\n    <div style="color: #6b8e23; font-weight: bold; font-size: 18px; line-height: 1; margin: 4px 0; text-align: center;">↓</div>\n    <div style="margin-top: 6px; padding: 7px 16px; background: #ffffff; border: 1.5px dashed #a3b899; border-radius: 20px; color: #2d4a3e; font-size: 13.5px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: inline-flex; align-items: center; justify-content: center; gap: 6px;">\n      <span style="color: #6b8e23; font-weight: bold; font-size: 1.15em;">↺</span>\n      <span><strong>${isTraditional ? '循環閉環' : '循环闭环'}</strong>：${loopLabel}</span>\n    </div>`;
+    }
+
+    return `<div style="background: rgba(230, 240, 232, 0.5); border: 1px solid #a3b899; border-radius: 12px; padding: 22px 18px; margin: 24px 0;">\n  <div style="display: flex; flex-direction: column; align-items: center; max-width: 520px; margin: 0 auto; gap: 2px;">\n    ${stepCards.join('\n    ')}${loopHtml}\n  </div>\n</div>`;
+  }
+
+  // Branching Layout: Root node -> Parallel branch blocks
+  const rootNode = nodes[0];
+  const rootEdges = edges.filter(e => e.from === rootNode.id);
+  const branchTargets = rootEdges.map(e => e.to);
+
+  const branches = branchTargets.map(targetId => {
+    const branchNodes = [nodes.find(n => n.id === targetId)].filter(Boolean);
+    let curr = targetId;
+    while (true) {
+      const nextEdge = edges.find(e => e.from === curr && e.to !== rootNode.id);
+      if (nextEdge) {
+        const nextNode = nodes.find(n => n.id === nextEdge.to);
+        if (nextNode && !branchNodes.some(bn => bn.id === nextNode.id)) {
+          branchNodes.push(nextNode);
+          curr = nextNode.id;
+          continue;
+        }
+      }
+      break;
+    }
+    return branchNodes;
+  });
+
+  const branchBoxesHtml = branches.map((bNodes, bIdx) => {
+    const isPositive = bIdx === branches.length - 1;
+    const branchBg = isPositive ? '#f4f8f5' : '#fbf8f7';
+    const branchBorder = isPositive ? '#a3b899' : '#d8c8c5';
+    const tagText = isPositive 
+      ? (isTraditional ? '💡 破局路徑' : '💡 破局路径')
+      : (isTraditional ? `⚠️ 分支 ${bIdx + 1}` : `⚠️ 分支 ${bIdx + 1}`);
+
+    const innerCards = [];
+    bNodes.forEach((node, nIdx) => {
+      innerCards.push(renderNodeCard(node.text));
+      if (nIdx < bNodes.length - 1) {
+        innerCards.push(`<div style="color: ${isPositive ? '#6b8e23' : '#b27a76'}; font-weight: bold; font-size: 16px; line-height: 1; margin: 3px 0; text-align: center;">↓</div>`);
+      }
+    });
+
+    return `<div style="flex: 1; min-width: 240px; background: ${branchBg}; border: 1px solid ${branchBorder}; border-radius: 8px; padding: 12px; box-sizing: border-box;">
+      <div style="font-size: 13px; font-weight: bold; color: ${isPositive ? '#2d4a3e' : '#8c4e48'}; margin-bottom: 8px; text-align: center;">${tagText}</div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+        ${innerCards.join('\n        ')}
+      </div>
+    </div>`;
+  }).join('\n    ');
+
+  return `<div style="background: rgba(230, 240, 232, 0.5); border: 1px solid #a3b899; border-radius: 12px; padding: 22px 18px; margin: 24px 0;">
+  <div style="display: flex; flex-direction: column; align-items: center; max-width: 600px; margin: 0 auto; gap: 4px;">
+    ${renderNodeCard(rootNode.text)}
+    <div style="color: #6b8e23; font-weight: bold; font-size: 18px; line-height: 1; margin: 4px 0; text-align: center;">↓</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; width: 100%; justify-content: center;">
+    ${branchBoxesHtml}
+    </div>
+  </div>
+</div>`;
 }
 
 function inlineFormat(text) {
@@ -110,7 +232,7 @@ function convertTableToHtml(tableLines) {
   return `<div style="overflow-x: auto; margin: 24px 0;">\n<table style="width: 100%; border-collapse: collapse; border: 1px solid #d5e2d8; border-radius: 6px; overflow: hidden; background: #ffffff;">\n${theadHtml}\n${tbodyHtml}\n</table>\n</div>`;
 }
 
-function parseMarkdown(md) {
+function parseMarkdown(md, lang = 'zh-TW') {
   // Pre-process any raw HTML coaching boxes into clean markdown blockquotes
   const normalizedMd = convertCoachingBoxes(md || '');
   const lines = normalizedMd.split(/\r?\n/);
@@ -209,7 +331,7 @@ function parseMarkdown(md) {
       }
       const codeContent = codeLines.join('\n');
       if (codeLang === 'mermaid' || codeLang === 'flowchart') {
-        html.push(convertMermaidToHtml(codeContent));
+        html.push(convertMermaidToHtml(codeContent, lang === 'zh-TW'));
       } else {
         html.push(`<pre style="background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 14px; overflow-x: auto; font-size: 14px;"><code>${codeContent}</code></pre>`);
       }
@@ -482,7 +604,7 @@ function fallbackCopy(content, btn) {
 }
 
 function renderMarkdownToHtmlFile(markdownContent, outputPath, title = '心茶記專欄', lang = 'zh-TW') {
-  const bodyHtml = parseMarkdown(markdownContent);
+  const bodyHtml = parseMarkdown(markdownContent, lang);
   const fullHtml = generateHtmlPage(title, bodyHtml, lang);
   fs.writeFileSync(outputPath, fullHtml, 'utf8');
 }
