@@ -118,6 +118,30 @@ function lintDirectory(dirPath, repoRoot) {
     }
   }
 
+  // 2.1 Check Zhihu files (07_知乎.md, 07_知乎.txt) for 0 traditional characters
+  const zhihuFiles = ['07_知乎.md', '07_知乎.txt'];
+  const { tw2s } = require('./convert_text.js');
+  for (const zhFile of zhihuFiles) {
+    const zhPath = path.join(dirPath, zhFile);
+    if (fs.existsSync(zhPath)) {
+      const zhContent = fs.readFileSync(zhPath, 'utf8');
+      const zhLines = zhContent.split(/\r?\n/);
+      zhLines.forEach((line, idx) => {
+        const sLine = tw2s(line);
+        const foundTrad = [];
+        for (let i = 0; i < line.length; i++) {
+          if (line[i] !== sLine[i] && !['「', '」', '『', '』', '“', '”'].includes(line[i])) {
+            foundTrad.push(line[i]);
+          }
+        }
+        if (foundTrad.length > 0) {
+          const uniqueChars = Array.from(new Set(foundTrad)).join(', ');
+          errors.push(`[知乎專欄殘留繁體字] ${zhFile} 第 ${idx + 1} 行發現繁體字: [${uniqueChars}] -> "${line.trim().slice(0, 50)}"`);
+        }
+      });
+    }
+  }
+
   // 3. Check Xiaohongshu (06_小紅書.txt) for 0-link rule, risk words, and search guidance
   const xhsPath = path.join(dirPath, '06_小紅書.txt');
   if (fs.existsSync(xhsPath)) {
@@ -214,6 +238,28 @@ function lintDirectory(dirPath, repoRoot) {
           const assetCover = path.join(repoRoot, 'social_assets', `${slug}.jpg`);
           if (!fs.existsSync(assetCover)) {
             warnings.push(`[封面備份缺失] 缺少 social_assets/${slug}.jpg 備份封面`);
+          }
+
+          // Check that Chinese blog post in _posts has 0 traditional Chinese characters
+          const mainPostName = matchedPost.endsWith('-en.md') ? matchedPost.replace(/-en\.md$/, '.md') : matchedPost;
+          const postFilePath = path.join(postsDir, mainPostName);
+          if (fs.existsSync(postFilePath)) {
+            const pContent = fs.readFileSync(postFilePath, 'utf8');
+            const pLines = pContent.split(/\r?\n/);
+            const { tw2s } = require('./convert_text.js');
+            pLines.forEach((pLine, pIdx) => {
+              const sLine = tw2s(pLine);
+              const foundTrad = [];
+              for (let i = 0; i < pLine.length; i++) {
+                if (pLine[i] !== sLine[i] && !['「', '」', '『', '』', '“', '”'].includes(pLine[i])) {
+                  foundTrad.push(pLine[i]);
+                }
+              }
+              if (foundTrad.length > 0) {
+                const uniq = Array.from(new Set(foundTrad)).join(', ');
+                errors.push(`[簡體文章殘留繁體字] _posts/${mainPostName} 第 ${pIdx + 1} 行發現繁體字: [${uniq}] -> "${pLine.trim().slice(0, 50)}"`);
+              }
+            });
           }
         }
       }
