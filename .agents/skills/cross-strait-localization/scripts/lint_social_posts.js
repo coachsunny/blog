@@ -220,6 +220,9 @@ function lintDirectory(dirPath, repoRoot) {
       if (c.includes('```mermaid') || c.includes('```flowchart')) {
         errors.push(`[富文本未轉譯] ${f} 包含未轉譯的 mermaid 代碼塊，請確保經由 render_rich_text_html 轉譯為流程卡片！`);
       }
+      if (/<p>\|[^<]+\|[^<]*<\/p>/i.test(c)) {
+        errors.push(`[富文本表格未轉譯] ${f} 發現裸露的 Markdown 表格段落（如 <p>| ... |</p>），請確保經由 render_rich_text_html 轉譯為原生 <table> 表格！`);
+      }
     }
   }
 
