@@ -200,9 +200,17 @@ function lintDirectory(dirPath, repoRoot) {
       if (fs.existsSync(postsDir)) {
         const postFiles = fs.readdirSync(postsDir);
         const datePrefix = dirName.slice(0, 10);
-        const matchedPost = postFiles.find(p => p.startsWith(datePrefix));
+        const dirTheme = dirName.replace(/^\d{4}-\d{2}-\d{2}_/, '');
+        const postCandidates = postFiles.filter(p => p.startsWith(datePrefix));
+        let matchedPost = postCandidates.find(p => {
+          try {
+            const c = fs.readFileSync(path.join(postsDir, p), 'utf8');
+            return c.includes(dirTheme.slice(0, 4));
+          } catch (e) { return false; }
+        }) || postCandidates[0];
+
         if (matchedPost) {
-          const slug = matchedPost.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '');
+          const slug = matchedPost.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '').replace(/-en$/, '');
           const assetCover = path.join(repoRoot, 'social_assets', `${slug}.jpg`);
           if (!fs.existsSync(assetCover)) {
             warnings.push(`[封面備份缺失] 缺少 social_assets/${slug}.jpg 備份封面`);
