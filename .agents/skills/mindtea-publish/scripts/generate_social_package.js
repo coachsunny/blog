@@ -73,7 +73,17 @@ function generateSocialPackage(postFilePath, customFolderName) {
     throw new Error(`找不到文章檔案: ${fullPostPath}`);
   }
 
-  const fileContent = fs.readFileSync(fullPostPath, 'utf8');
+  let fileContent = fs.readFileSync(fullPostPath, 'utf8');
+  // Auto-clean _posts/ with OpenCC tw2s if any traditional characters are present (for Chinese posts)
+  if (!fullPostPath.endsWith('-en.md')) {
+    const sanitizedContent = tw2s(fileContent);
+    if (fileContent !== sanitizedContent) {
+      fs.writeFileSync(fullPostPath, sanitizedContent, 'utf8');
+      console.log(`🧹 [OpenCC 自動清洗] 偵測到 ${path.basename(fullPostPath)} 含有未轉譯繁體字，已由 OpenCC tw2s 自動清洗為 100% 簡體中文！`);
+      fileContent = sanitizedContent;
+    }
+  }
+
   const fileName = path.basename(fullPostPath, '.md');
   const { metadata, body: rawBody } = parsePostFrontmatter(fileContent);
 
