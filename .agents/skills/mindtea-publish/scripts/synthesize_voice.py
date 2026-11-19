@@ -18,12 +18,11 @@ async def synthesize(text_path, out_media, out_sub):
 
     voice = 'zh-TW-YunJheNeural'
     rate = '-15%'
-    pitch = '-5Hz'
 
     for attempt in range(3):
         try:
             print(f"[TTS] Synthesizing with {voice} (Attempt {attempt + 1}/3)...")
-            communicate = edge_tts.Communicate(text, voice, rate=rate, pitch=pitch)
+            communicate = edge_tts.Communicate(text, voice, rate=rate)
             submaker = edge_tts.SubMaker()
 
             with open(out_media, "wb") as audio_file:

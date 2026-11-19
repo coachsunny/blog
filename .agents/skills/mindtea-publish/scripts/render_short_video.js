@@ -70,7 +70,9 @@ function synthesizeVoice(text, outAudioPath) {
     console.log('🎤 使用微軟自然神經語音 CLI (zh-TW-YunJheNeural，作者 Sunny 男性沉穩教練音質)...');
     fs.writeFileSync(tmpTextFile, textForTts, 'utf8');
     try {
-      const cmd = `"${edgeTts}" --voice zh-TW-YunJheNeural --rate="-15%" --pitch="-5Hz" -f "${tmpTextFile}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
+      // 依作者性別規範：嚴格限定微軟自然神經教練男聲 zh-TW-YunJheNeural
+      // 留白語速 -15%；微軟 API 不支援同時調整 rate 與 pitch，pitch 保持自然頻率以防 NoAudioReceived
+      const cmd = `"${edgeTts}" --voice zh-TW-YunJheNeural --rate="-15%" -f "${tmpTextFile}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
       execSync(cmd, { stdio: 'inherit', env: utf8Env });
       if (fs.existsSync(outAudioPath) && fs.statSync(outAudioPath).size > 1000) {
         return;
@@ -100,23 +102,9 @@ function synthesizeVoice(text, outAudioPath) {
     }
   }
 
-  // Fallback to SAPI
-  console.log('🎤 使用本機 SAPI 語音引擎...');
-  const psCode = `
-Add-Type -AssemblyName System.Speech
-$synth = New-Object System.Speech.Synthesis.SpeechSynthesizer
-$installed = $synth.GetInstalledVoices()
-$voice = $installed | Where-Object { $_.VoiceInfo.Name -like "*Hanhan*" -or $_.VoiceInfo.Culture.Name -eq "zh-TW" } | Select-Object -First 1
-if ($voice) {
-    $synth.SelectVoice($voice.VoiceInfo.Name)
-}
-$synth.Rate = -1
-$synth.SetOutputToWaveFile('${outAudioPath.replace(/\\/g, '\\\\')}')
-$synth.Speak('${text.replace(/'/g, "''")}')
-$synth.Dispose()
-`;
-  const b64 = Buffer.from(psCode, 'utf16le').toString('base64');
-  execSync(`powershell -EncodedCommand ${b64}`, { stdio: 'ignore' });
+  if (!fs.existsSync(outAudioPath) || fs.statSync(outAudioPath).size < 1000) {
+    throw new Error('微軟自然神經語音合成失敗 (zh-TW-YunJheNeural)。請檢查網絡連線或重試，嚴禁使用未授權的女聲或機械音！');
+  }
 }
 
 function vttTimeToAss(vttTime) {
