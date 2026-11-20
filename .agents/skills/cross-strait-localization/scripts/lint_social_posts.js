@@ -165,7 +165,7 @@ function lintDirectory(dirPath, repoRoot) {
     const hasBrand = xhsContent.includes('心茶記') || xhsContent.includes('心茶记');
     const hasSearch = xhsContent.includes('搜尋') || xhsContent.includes('搜索');
     if (!hasBrand || !hasSearch) {
-      warnings.push(`[小紅書導流提示] 06_小紅書.txt 未檢測到標準專欄搜尋引導語 (建議包含「心茶記 Sunny」搜尋指引)`);
+      warnings.push(`[小紅書導流提示] 06_小紅書.txt 未檢測到標準專欄搜尋引導語 (建議包含「心茶記 教練」或「心茶記 Sunny」搜尋指引)`);
     }
 
     // Title generic warning
