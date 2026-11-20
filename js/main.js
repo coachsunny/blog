@@ -9,14 +9,20 @@
   // ---------- 导航栏滚动效果 ----------
   const navbar = document.querySelector('.navbar');
   if (navbar) {
+    let ticking = false;
     const handleNavScroll = function () {
-      if (window.scrollY > 10) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
+      if (!ticking) {
+        window.requestAnimationFrame(function () {
+          if (window.scrollY > 10) {
+            navbar.classList.add('scrolled');
+          } else {
+            navbar.classList.remove('scrolled');
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
-    handleNavScroll();
     window.addEventListener('scroll', handleNavScroll, { passive: true });
   }
 
@@ -105,19 +111,15 @@
       function (entries) {
         entries.forEach(function (entry) {
           if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
+            entry.target.classList.add('is-visible');
             observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      { threshold: 0.05, rootMargin: '0px 0px -40px 0px' }
     );
 
     document.querySelectorAll('.scroll-fade').forEach(function (el) {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(20px)';
-      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
       observer.observe(el);
     });
   }

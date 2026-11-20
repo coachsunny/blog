@@ -80,7 +80,7 @@ description: 心茶記（心茶记 Mind Tea Journal）是由 ICF 國際教練聯
           {% endfor %}
         </div>
         {% endif %}
-        <a href="{{ post.url | relative_url }}" class="post-card-readmore">
+        <a href="{{ post.url | relative_url }}" class="post-card-readmore" aria-label="阅读全文：{{ post.title | escape }}">
           阅读全文
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14"/>

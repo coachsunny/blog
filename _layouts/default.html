@@ -11,7 +11,11 @@
   {% endif %}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" media="print" onload="this.media='all'" />
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" />
+  </noscript>
   <link rel="stylesheet" href="{{ '/css/style.css' | relative_url }}" />
   <style>
     .lang-switch-item {
@@ -251,104 +255,104 @@
   <script>
     window.siteBaseUrl = "{{ '' | relative_url }}";
   </script>
-  <script src="{{ '/js/main.js' | relative_url }}"></script>
+  <script src="{{ '/js/main.js' | relative_url }}" defer></script>
 
   {% if page.lang != 'en' %}
-  <!-- 繁简转换脚本（仅中文页面执行） -->
-  <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
+  <!-- 繁简转换脚本（仅中文页面，按需非阻塞加载） -->
   <script>
   (function() {
     'use strict';
 
-    // 等待 OpenCC 库加载完成
-    function waitForOpenCC(callback) {
-      if (typeof OpenCC !== 'undefined') {
-        callback();
-      } else {
-        setTimeout(function() { waitForOpenCC(callback); }, 50);
+    let currentLang = localStorage.getItem('blog_lang') || 'simplified';
+    const btnHant = document.getElementById('btnHant');
+    const btnHans = document.getElementById('btnHans');
+
+    function updateActiveButtons() {
+      if (btnHant && btnHans) {
+        if (currentLang === 'traditional') {
+          btnHant.classList.add('active');
+          btnHans.classList.remove('active');
+        } else {
+          btnHans.classList.add('active');
+          btnHant.classList.remove('active');
+        }
       }
     }
 
-    waitForOpenCC(function() {
-      const s2t = OpenCC.Converter({ from: 'cn', to: 'tw' });
-      const t2s = OpenCC.Converter({ from: 'tw', to: 'cn' });
+    function loadOpenCC(callback) {
+      if (typeof OpenCC !== 'undefined') {
+        callback();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js';
+      script.defer = true;
+      script.onload = callback;
+      document.head.appendChild(script);
+    }
 
-      let currentLang = localStorage.getItem('blog_lang') || 'simplified';
-      const btnHant = document.getElementById('btnHant');
-      const btnHans = document.getElementById('btnHans');
-
-      function updateActiveButtons() {
-        if (btnHant && btnHans) {
-          if (currentLang === 'traditional') {
-            btnHant.classList.add('active');
-            btnHans.classList.remove('active');
-          } else {
-            btnHans.classList.add('active');
-            btnHant.classList.remove('active');
-          }
+    function convertTextNodes(node, converter) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (node.nodeValue && node.nodeValue.trim()) {
+          node.nodeValue = converter(node.nodeValue);
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const tag = node.tagName.toLowerCase();
+        if (tag === 'script' || tag === 'style' || tag === 'textarea' || tag === 'input' || tag === 'code' || tag === 'pre') {
+          return;
+        }
+        if (node.id === 'btnHant' || node.id === 'btnHans' || (node.classList && node.classList.contains('lang-opt'))) {
+          return;
+        }
+        for (let i = 0; i < node.childNodes.length; i++) {
+          convertTextNodes(node.childNodes[i], converter);
         }
       }
+    }
 
-      // 递归处理所有文本节点
-      function convertTextNodes(node, converter) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          if (node.nodeValue && node.nodeValue.trim()) {
-            node.nodeValue = converter(node.nodeValue);
-          }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          // 跳过 script、style、textarea、input 等元素
-          const tag = node.tagName.toLowerCase();
-          if (tag === 'script' || tag === 'style' || tag === 'textarea' || tag === 'input' || tag === 'code' || tag === 'pre') {
-            return;
-          }
-          // 跳过语言切换按钮本身
-          if (node.id === 'btnHant' || node.id === 'btnHans' || (node.classList && node.classList.contains('lang-opt'))) {
-            return;
-          }
-          for (let i = 0; i < node.childNodes.length; i++) {
-            convertTextNodes(node.childNodes[i], converter);
-          }
+    function convertPage() {
+      if (typeof OpenCC === 'undefined') return;
+      const converter = currentLang === 'traditional'
+        ? OpenCC.Converter({ from: 'cn', to: 'tw' })
+        : OpenCC.Converter({ from: 'tw', to: 'cn' });
+      convertTextNodes(document.body, converter);
+      document.title = converter(document.title);
+    }
+
+    if (btnHant) {
+      btnHant.addEventListener('click', function() {
+        if (currentLang !== 'traditional') {
+          currentLang = 'traditional';
+          localStorage.setItem('blog_lang', 'traditional');
+          updateActiveButtons();
+          loadOpenCC(convertPage);
         }
-      }
+      });
+    }
 
-      function convertPage() {
-        const converter = currentLang === 'traditional' ? s2t : t2s;
-        convertTextNodes(document.body, converter);
-        // 也转换 title
-        document.title = converter(document.title);
-      }
+    if (btnHans) {
+      btnHans.addEventListener('click', function() {
+        if (currentLang !== 'simplified') {
+          currentLang = 'simplified';
+          localStorage.setItem('blog_lang', 'simplified');
+          updateActiveButtons();
+          loadOpenCC(convertPage);
+        }
+      });
+    }
 
-      if (btnHant) {
-        btnHant.addEventListener('click', function() {
-          if (currentLang !== 'traditional') {
-            currentLang = 'traditional';
-            localStorage.setItem('blog_lang', 'traditional');
-            location.reload();
-          }
+    updateActiveButtons();
+
+    // 仅当用户明确保存为繁体模式时，才异步加载 OpenCC，首屏完全不阻断
+    if (currentLang === 'traditional') {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          loadOpenCC(convertPage);
         });
+      } else {
+        loadOpenCC(convertPage);
       }
-
-      if (btnHans) {
-        btnHans.addEventListener('click', function() {
-          if (currentLang !== 'simplified') {
-            currentLang = 'simplified';
-            localStorage.setItem('blog_lang', 'simplified');
-            location.reload();
-          }
-        });
-      }
-
-      updateActiveButtons();
-
-      if (currentLang === 'traditional') {
-        // 等页面完全渲染后再转换
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', convertPage);
-        } else {
-          convertPage();
-        }
-      }
-    });
+    }
   })();
   </script>
   {% endif %}
@@ -375,13 +379,13 @@
       <div class="modal-qrs-wrapper">
         <div class="modal-qr-item">
           <div class="wechat-modal-qr">
-            <img src="{{ '/assets/line-qr.png' | relative_url }}" alt="Sunny 教练个人 LINE 二维码" />
+            <img src="{{ '/assets/line-qr.png' | relative_url }}" alt="Sunny 教练个人 LINE 二维码" loading="lazy" decoding="async" width="140" height="140" />
           </div>
           <p class="wechat-modal-hint">LINE · {% if page.lang == 'en' %}Add Coach Sunny{% else %}加好友邀请入群{% endif %}</p>
         </div>
         <div class="modal-qr-item">
           <div class="wechat-modal-qr">
-            <img src="{{ '/assets/wechat-qr.png' | relative_url }}" alt="Sunny 教练个人微信二维码" />
+            <img src="{{ '/assets/wechat-qr.png' | relative_url }}" alt="Sunny 教练个人微信二维码" loading="lazy" decoding="async" width="140" height="140" />
           </div>
           <p class="wechat-modal-hint">WeChat · {% if page.lang == 'en' %}Add Coach Sunny{% else %}加好友邀请入群{% endif %}</p>
         </div>
