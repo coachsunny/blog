@@ -101,28 +101,35 @@ function convertMermaidToHtml(mermaidCode, isTraditional = true) {
     return `<div style="background: rgba(230, 240, 232, 0.5); border: 1px solid #a3b899; border-radius: 12px; padding: 20px; margin: 24px 0;">\n  <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">\n    ${cardsHtml}\n  </div>\n</div>`;
   }
 
-  // Vertical Stepper Layout (Default & Universal)
+  // Vertical Stepper Layout (Default & Universal, using <table> for 100% WYSIWYG editor compatibility)
   if (!isBranching) {
-    const stepCards = [];
+    const tableRows = [];
     nodes.forEach((node, idx) => {
-      stepCards.push(renderNodeCard(node.text));
+      const parts = node.text.split(/<br\s*\/?>/i);
+      const title = parts[0] ? parts[0].trim() : '';
+      const sub = parts.slice(1).join('<br>').trim();
+      let inner = `<strong style="color: #2d4a3e; font-size: 15px;">${title}</strong>`;
+      if (sub) {
+        inner += `<div style="color: #556b5d; font-size: 13.5px; margin-top: 4px; line-height: 1.5;">${sub}</div>`;
+      }
+      tableRows.push(`    <tr>\n      <td style="background: #ffffff; border: 1px solid #cad5c5; border-radius: 8px; padding: 12px 16px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">${inner}</td>\n    </tr>`);
       if (idx < nodes.length - 1) {
-        stepCards.push(`<div style="color: #6b8e23; font-weight: bold; font-size: 18px; line-height: 1; margin: 4px 0; text-align: center;">↓</div>`);
+        tableRows.push(`    <tr>\n      <td style="text-align: center; padding: 3px 0; color: #6b8e23; font-weight: bold; font-size: 18px; line-height: 1;">↓</td>\n    </tr>`);
       }
     });
 
-    let loopHtml = '';
+    let loopRow = '';
     if (hasCycle) {
       const loopLabel = isTraditional
         ? '形成經驗學習的正向閉環（循環驅動下一輪具體行動）'
         : '形成经验学习的正向闭环（循环驱动下一轮具体行动）';
-      loopHtml = `\n    <div style="color: #6b8e23; font-weight: bold; font-size: 18px; line-height: 1; margin: 4px 0; text-align: center;">↓</div>\n    <div style="margin-top: 6px; padding: 7px 16px; background: #ffffff; border: 1.5px dashed #a3b899; border-radius: 20px; color: #2d4a3e; font-size: 13.5px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: inline-flex; align-items: center; justify-content: center; gap: 6px;">\n      <span style="color: #6b8e23; font-weight: bold; font-size: 1.15em;">↺</span>\n      <span><strong>${isTraditional ? '循環閉環' : '循环闭环'}</strong>：${loopLabel}</span>\n    </div>`;
+      loopRow = `\n    <tr>\n      <td style="text-align: center; padding: 3px 0; color: #6b8e23; font-weight: bold; font-size: 18px; line-height: 1;">↓</td>\n    </tr>\n    <tr>\n      <td style="background: #ffffff; border: 1.5px dashed #a3b899; border-radius: 20px; padding: 8px 16px; text-align: center; color: #2d4a3e; font-size: 13.5px;">\n        <span style="color: #6b8e23; font-weight: bold; font-size: 1.15em;">↺</span> <strong>${isTraditional ? '循環閉環' : '循环闭环'}</strong>：${loopLabel}\n      </td>\n    </tr>`;
     }
 
-    return `<div style="background: rgba(230, 240, 232, 0.5); border: 1px solid #a3b899; border-radius: 12px; padding: 22px 18px; margin: 24px 0;">\n  <div style="display: flex; flex-direction: column; align-items: center; max-width: 520px; margin: 0 auto; gap: 2px;">\n    ${stepCards.join('\n    ')}${loopHtml}\n  </div>\n</div>`;
+    return `<div style="background: rgba(230, 240, 232, 0.45); border: 1px solid #a3b899; border-radius: 12px; padding: 20px 16px; margin: 24px 0;">\n<table style="width: 100%; max-width: 520px; margin: 0 auto; border-collapse: separate; border-spacing: 0 4px; border: none;">\n  <tbody>\n${tableRows.join('\n')}${loopRow}\n  </tbody>\n</table>\n</div>`;
   }
 
-  // Branching Layout: Root node -> Parallel branch blocks
+  // Branching Layout: Converted into a high-compatibility native <table> for WYSIWYG editors
   const rootNode = nodes[0];
   const rootEdges = edges.filter(e => e.from === rootNode.id);
   const branchTargets = rootEdges.map(e => e.to);
@@ -145,38 +152,68 @@ function convertMermaidToHtml(mermaidCode, isTraditional = true) {
     return branchNodes;
   });
 
-  const branchBoxesHtml = branches.map((bNodes, bIdx) => {
-    const isPositive = bIdx === branches.length - 1;
-    const branchBg = isPositive ? '#f4f8f5' : '#fbf8f7';
-    const branchBorder = isPositive ? '#a3b899' : '#d8c8c5';
-    const tagText = isPositive 
-      ? (isTraditional ? '💡 破局路徑' : '💡 破局路径')
-      : (isTraditional ? `⚠️ 分支 ${bIdx + 1}` : `⚠️ 分支 ${bIdx + 1}`);
+  const allTexts = nodes.map(n => n.text).join(' ');
+  const isContrast = /反擊|退縮|攻擊|防禦|陷阱|對撞|肉搏|死局|破局|解決|借力打力|反击|退缩|防御|对撞|肉搏/.test(allTexts);
 
-    const innerCards = [];
-    bNodes.forEach((node, nIdx) => {
-      innerCards.push(renderNodeCard(node.text));
-      if (nIdx < bNodes.length - 1) {
-        innerCards.push(`<div style="color: ${isPositive ? '#6b8e23' : '#b27a76'}; font-weight: bold; font-size: 16px; line-height: 1; margin: 3px 0; text-align: center;">↓</div>`);
-      }
-    });
+  const rootParts = rootNode.text.split(/<br\s*\/?>/i);
+  const rootTitle = rootParts[0] ? rootParts[0].trim() : '';
+  const rootSub = rootParts.slice(1).join(' ').trim();
 
-    return `<div style="flex: 1; min-width: 240px; background: ${branchBg}; border: 1px solid ${branchBorder}; border-radius: 8px; padding: 12px; box-sizing: border-box;">
-      <div style="font-size: 13px; font-weight: bold; color: ${isPositive ? '#2d4a3e' : '#8c4e48'}; margin-bottom: 8px; text-align: center;">${tagText}</div>
-      <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
-        ${innerCards.join('\n        ')}
-      </div>
-    </div>`;
-  }).join('\n    ');
+  const rowsHtml = branches.map((bNodes, bIdx) => {
+    const isLastBranch = bIdx === branches.length - 1;
+    const isHighlight = isContrast && isLastBranch;
+    const rowBg = isHighlight ? '#f4f8f5' : (bIdx % 2 === 1 ? '#f9fbf9' : '#ffffff');
+    const borderColor = isHighlight ? '#a3b899' : '#e2ece5';
 
-  return `<div style="background: rgba(230, 240, 232, 0.5); border: 1px solid #a3b899; border-radius: 12px; padding: 22px 18px; margin: 24px 0;">
-  <div style="display: flex; flex-direction: column; align-items: center; max-width: 600px; margin: 0 auto; gap: 4px;">
-    ${renderNodeCard(rootNode.text)}
-    <div style="color: #6b8e23; font-weight: bold; font-size: 18px; line-height: 1; margin: 4px 0; text-align: center;">↓</div>
-    <div style="display: flex; flex-wrap: wrap; gap: 12px; width: 100%; justify-content: center;">
-    ${branchBoxesHtml}
-    </div>
-  </div>
+    const firstNode = bNodes[0];
+    const restNodes = bNodes.slice(1);
+
+    const firstParts = firstNode ? firstNode.text.split(/<br\s*\/?>/i) : [''];
+    const branchTitle = firstParts[0].trim();
+    const branchSub = firstParts.slice(1).join('<br>').trim();
+
+    let tagBadge = '';
+    if (isContrast) {
+      tagBadge = isHighlight
+        ? `<span style="display: inline-block; background: #eaf1ec; color: #2d4a3e; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px;">💡 ${isTraditional ? '破局路徑' : '破局路径'}</span><br>`
+        : `<span style="display: inline-block; background: #fdf2f0; color: #8c4e48; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px;">⚠️ ${isTraditional ? `路徑 ${bIdx + 1}` : `路径 ${bIdx + 1}`}</span><br>`;
+    }
+
+    const col1Content = `
+      ${tagBadge}<strong style="color: ${isHighlight ? '#2d4a3e' : '#1e3324'}; font-size: 15px;">${branchTitle}</strong>
+      ${branchSub ? `<div style="color: #556b5d; font-size: 13.5px; margin-top: 4px; line-height: 1.5;">${branchSub}</div>` : ''}
+    `;
+
+    const col2Content = restNodes.map(rn => {
+      const parts = rn.text.split(/<br\s*\/?>/i);
+      const t = parts[0].trim();
+      const s = parts.slice(1).join('<br>').trim();
+      return `<div style="margin: 4px 0;"><span style="color: #2c2523; font-weight: 500;">${t}</span>${s ? `<div style="color: #62786a; font-size: 13px;">${s}</div>` : ''}</div>`;
+    }).join('<div style="color: #a3b899; text-align: center; font-size: 13px; line-height: 1.2;">↓</div>') || '—';
+
+    return `    <tr style="background-color: ${rowBg}; border-bottom: 1px solid ${borderColor};">
+      <td style="padding: 14px 16px; border: 1px solid ${borderColor}; width: 45%; vertical-align: top;">
+        ${col1Content}
+      </td>
+      <td style="padding: 14px 16px; border: 1px solid ${borderColor}; width: 55%; vertical-align: top; line-height: 1.6;">
+        ${col2Content}
+      </td>
+    </tr>`;
+  }).join('\n');
+
+  return `<div style="overflow-x: auto; margin: 24px 0;">
+<table style="width: 100%; border-collapse: collapse; border: 1.5px solid #a3b899; border-radius: 8px; overflow: hidden; background: #ffffff;">
+  <thead>
+    <tr style="background-color: #eaf1ec; border-bottom: 2px solid #a3b899;">
+      <th colspan="2" style="padding: 14px 18px; color: #1e3324; font-weight: bold; border: 1px solid #d5e2d8; font-size: 15.5px; text-align: center;">
+        🌲 ${rootTitle}${rootSub ? ` <span style="font-weight: normal; font-size: 13.5px; color: #4a6654;">（${rootSub}）</span>` : ''}
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+${rowsHtml}
+  </tbody>
+</table>
 </div>`;
 }
 
