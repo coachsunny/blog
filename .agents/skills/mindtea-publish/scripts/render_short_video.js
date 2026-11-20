@@ -172,6 +172,9 @@ function createAssSubtitles(assPath, vttPath) {
       const text = s2tw(wrapCjkText(rawText, 16));
       dialogueEvents += `Dialogue: 0,${vttTimeToAss(start)},${vttTimeToAss(end)},Default,,0,0,0,,${text}\n`;
     }
+
+    // Always include top branding watermark
+    dialogueEvents = `Dialogue: 0,0:00:00.00,0:05:00.00,Watermark,,0,0,0,,🍵 心茶記 · 晨光微光 ｜ 30秒心智沈澱\n` + dialogueEvents;
   }
 
   if (!dialogueEvents) {
@@ -200,6 +203,7 @@ PlayResY: 1920
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Default,Microsoft JhengHei,54,&H00FFFFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,2,0,1,3.5,2,2,60,60,180,1
+Style: Watermark,Microsoft JhengHei,38,&H00EAF2EC,&H000000FF,&H00182C1F,&H80000000,-1,0,0,0,100,100,2,0,1,2.5,1.5,8,40,40,140,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -274,11 +278,35 @@ function renderShortVideo(targetFolder) {
   let cmd = '';
   if (sceneFiles.length > 1) {
     console.log(`🎞️ 偵測到 ${sceneFiles.length} 個分鏡素材，執行多場景混剪拼接...`);
-    // Multi-scene logic can be expanded here
-  }
+    // Determine audio duration
+    let dur = 55.0;
+    try {
+      const probeOut = execSync(`"${ffmpeg}" -i "${voiceFileName}" 2>&1`, { cwd: folder }).toString();
+      const m = probeOut.match(/Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/);
+      if (m) {
+        dur = parseInt(m[1]) * 3600 + parseInt(m[2]) * 60 + parseFloat(m[3]);
+      }
+    } catch(e) {}
 
-  // Full-Screen 9:16: Fill frame completely with subtle warm contrast and clean bottom subtitles
-  cmd = `"${ffmpeg}" -y -loop 1 -framerate 30 -i "${coverFileName}" -i "${voiceFileName}" -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,eq=contrast=1.04:brightness=0.01[bg];[bg]subtitles=${assFileName}[v]" -map "[v]" -map 1:a -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${outVideoFileName}"`;
+    const perScene = (dur / sceneFiles.length);
+    let inputArgs = '';
+    let filterPipes = '';
+    let concatInputs = '';
+
+    sceneFiles.forEach((file, idx) => {
+      const isLast = idx === sceneFiles.length - 1;
+      const sDur = isLast ? (dur - perScene * (sceneFiles.length - 1) + 1.0) : perScene;
+      inputArgs += `-loop 1 -t ${sDur.toFixed(2)} -i "${file}" `;
+      filterPipes += `[${idx}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,fps=30[v${idx}];`;
+      concatInputs += `[v${idx}]`;
+    });
+
+    const filterComplex = `${filterPipes}${concatInputs}concat=n=${sceneFiles.length}:v=1:a=0,eq=contrast=1.04:brightness=0.01,subtitles=${assFileName}[v]`;
+    cmd = `"${ffmpeg}" -y ${inputArgs}-i "${voiceFileName}" -filter_complex "${filterComplex}" -map "[v]" -map ${sceneFiles.length}:a -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${outVideoFileName}"`;
+  } else {
+    // Single image fallback
+    cmd = `"${ffmpeg}" -y -loop 1 -framerate 30 -i "${coverFileName}" -i "${voiceFileName}" -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,eq=contrast=1.04:brightness=0.01[bg];[bg]subtitles=${assFileName}[v]" -map "[v]" -map 1:a -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${outVideoFileName}"`;
+  }
 
   execSync(cmd, { cwd: folder, stdio: 'inherit' });
 
