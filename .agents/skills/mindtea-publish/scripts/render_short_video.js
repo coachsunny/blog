@@ -203,7 +203,7 @@ PlayResY: 1920
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Default,Microsoft JhengHei,54,&H00FFFFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,2,0,1,3.5,2,2,60,60,180,1
-Style: Watermark,Microsoft JhengHei,38,&H00EAF2EC,&H000000FF,&H00182C1F,&H80000000,-1,0,0,0,100,100,2,0,1,2.5,1.5,8,40,40,140,1
+Style: Watermark,Microsoft JhengHei,52,&H00EAF2EC,&H000000FF,&H00182C1F,&H80000000,-1,0,0,0,100,100,2,0,1,3.2,2,8,40,40,160,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
