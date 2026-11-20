@@ -288,20 +288,27 @@ function renderShortVideo(targetFolder) {
       }
     } catch(e) {}
 
-    const perScene = (dur / sceneFiles.length);
+    const transDur = 1.0; // 1.0s smooth crossfade transition
+    const extraTime = (sceneFiles.length - 1) * transDur;
+    const clipDur = (dur + extraTime) / sceneFiles.length;
+
     let inputArgs = '';
     let filterPipes = '';
-    let concatInputs = '';
 
     sceneFiles.forEach((file, idx) => {
-      const isLast = idx === sceneFiles.length - 1;
-      const sDur = isLast ? (dur - perScene * (sceneFiles.length - 1) + 1.0) : perScene;
-      inputArgs += `-loop 1 -t ${sDur.toFixed(2)} -i "${file}" `;
+      inputArgs += `-loop 1 -t ${clipDur.toFixed(3)} -i "${file}" `;
       filterPipes += `[${idx}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,fps=30[v${idx}];`;
-      concatInputs += `[v${idx}]`;
     });
 
-    const filterComplex = `${filterPipes}${concatInputs}concat=n=${sceneFiles.length}:v=1:a=0,eq=contrast=1.04:brightness=0.01,subtitles=${assFileName}[v]`;
+    let lastStream = 'v0';
+    for (let i = 1; i < sceneFiles.length; i++) {
+      const offset = (i * clipDur - i * transDur).toFixed(3);
+      const outStream = (i === sceneFiles.length - 1) ? 'vfade' : `f${i}`;
+      filterPipes += `[${lastStream}][v${i}]xfade=transition=fade:duration=${transDur}:offset=${offset}[${outStream}];`;
+      lastStream = outStream;
+    }
+
+    const filterComplex = `${filterPipes}[vfade]eq=contrast=1.04:brightness=0.01,subtitles=${assFileName}[v]`;
     cmd = `"${ffmpeg}" -y ${inputArgs}-i "${voiceFileName}" -filter_complex "${filterComplex}" -map "[v]" -map ${sceneFiles.length}:a -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${outVideoFileName}"`;
   } else {
     // Single image fallback
