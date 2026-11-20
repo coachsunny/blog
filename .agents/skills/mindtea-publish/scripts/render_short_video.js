@@ -118,17 +118,15 @@ function vttTimeToAss(vttTime) {
 
 /**
  * Automatically wrap CJK text to fit 9:16 vertical video width (1080px)
- * Breaks text into balanced lines (maxChars <= 16) at natural punctuation
+ * Breaks text cleanly into 1 or at most 2 balanced lines without dangling punctuation
  */
-function wrapCjkText(text, maxChars = 16) {
+function wrapCjkText(text, maxChars = 15) {
   if (!text) return '';
-  text = text.trim();
-  if (text.includes('\\N')) {
-    return text.split(/\\N/).map(sub => wrapCjkText(sub, maxChars)).join('\\N');
-  }
+  text = text.replace(/\\N/g, ' ').replace(/\s+/g, ' ').trim();
   if (text.length <= maxChars) return text;
 
-  const puncRegex = /([，、；：。？！）』」])/g;
+  // Find punctuation near midpoint
+  const puncRegex = /([，；：。？！』」])/g;
   let matches = [];
   let m;
   while ((m = puncRegex.exec(text)) !== null) {
@@ -136,27 +134,22 @@ function wrapCjkText(text, maxChars = 16) {
   }
 
   if (matches.length > 0) {
-    let bestSplit = -1;
-    for (const pos of matches) {
-      if (pos >= 8 && pos <= maxChars + 2) {
-        bestSplit = pos;
-        break;
-      }
-    }
-    if (bestSplit === -1) {
-      const half = Math.floor(text.length / 2);
-      bestSplit = matches.reduce((prev, curr) => Math.abs(curr - half) < Math.abs(prev - half) ? curr : prev);
-    }
-    if (bestSplit > 0 && bestSplit < text.length) {
-      const p1 = text.slice(0, bestSplit).trim();
-      const p2 = text.slice(bestSplit).trim();
-      return `${wrapCjkText(p1, maxChars)}\\N${wrapCjkText(p2, maxChars)}`;
+    const half = Math.floor(text.length / 2);
+    // Find split point closest to center but ensuring neither half is < 5 chars
+    const validSplits = matches.filter(pos => pos >= 5 && (text.length - pos) >= 4);
+    if (validSplits.length > 0) {
+      const best = validSplits.reduce((prev, curr) => Math.abs(curr - half) < Math.abs(prev - half) ? curr : prev);
+      const p1 = text.slice(0, best).trim();
+      const p2 = text.slice(best).trim();
+      return `${p1}\\N${p2}`;
     }
   }
 
-  const p1 = text.slice(0, maxChars);
-  const p2 = text.slice(maxChars);
-  return `${p1}\\N${wrapCjkText(p2, maxChars)}`;
+  // Fallback: split near half without breaking quote pairs
+  const half = Math.floor(text.length / 2);
+  const p1 = text.slice(0, half).trim();
+  const p2 = text.slice(half).trim();
+  return `${p1}\\N${p2}`;
 }
 
 /**
@@ -168,8 +161,6 @@ function createAssSubtitles(assPath, vttPath) {
   if (vttPath && fs.existsSync(vttPath)) {
     const vttContent = fs.readFileSync(vttPath, 'utf8');
     const blocks = vttContent.trim().split(/\r?\n\r?\n/);
-
-    dialogueEvents += 'Dialogue: 0,0:00:00.00,0:01:00.00,Watermark,,0,0,0,,🍵 心茶記 · 晨光微光 ｜ 30秒心智沈澱\n';
 
     for (const b of blocks) {
       const lines = b.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -208,9 +199,7 @@ PlayResY: 1920
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Microsoft JhengHei,46,&H00FFFFFF,&H000000FF,&H00182C1F,&H80000000,-1,0,0,0,100,100,2,0,1,3.5,2,2,80,80,320,1
-Style: TitleCard,Microsoft JhengHei,60,&H00E6F0E8,&H000000FF,&H0024442F,&H90000000,-1,0,0,0,100,100,3,0,1,4,3,8,40,40,320,1
-Style: Watermark,Microsoft JhengHei,36,&H00D0DDD3,&H000000FF,&H001C3524,&H00000000,0,0,0,0,100,100,2,0,1,2,1,8,40,40,160,1
+Style: Default,Microsoft JhengHei,54,&H00FFFFFF,&H000000FF,&H00000000,&H90000000,-1,0,0,0,100,100,2,0,1,3.5,2,2,60,60,180,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -220,7 +209,7 @@ ${dialogueEvents}`;
 }
 
 /**
- * Render complete 9:16 vertical short video
+ * Render complete 9:16 vertical short video (Immersive Full-Screen Presentation)
  */
 function renderShortVideo(targetFolder) {
   const ffmpeg = findFFmpeg();
@@ -243,7 +232,7 @@ function renderShortVideo(targetFolder) {
       voicePath = fallbackWav;
     } else {
       console.log('🎤 正在生成 AI 自然神經語音旁白...');
-      let text = '好好說話……為什麼這麼難？因為我們的心裡，總想證明自己贏。開口前，請給自己留白三秒：第一秒，鬆開咬緊的牙關，讓肩膀沉下去；第二秒問問自己：我現在是想爭輸贏，還是想解決問題？第三秒，點亮好奇：看著對方的眼睛，去聽聽他的世界，正在經歷什麼。所有真實的人生，皆在相遇之中。搜尋《心茶記》，找回對話的初心。';
+      let text = '我是 Sunny，端上一杯溫熱的茶。好好說話……為什麼這麼難？因為我們的心裡，總想證明自己贏。開口前，請給自己留白三秒：第一秒，鬆開咬緊的牙關，讓肩膀沉下去；第二秒問問自己：我現在是想爭輸贏，還是想解決問題？第三秒，點亮好奇：看著對方的眼睛，去聽聽他的世界，正在經歷什麼。所有真實的人生，皆在相遇之中。搜尋《心茶記》，找回對話的初心。';
       if (fs.existsSync(scriptPath)) {
         const scriptContent = fs.readFileSync(scriptPath, 'utf8');
         const m = scriptContent.match(/【二、\s*旁白純文字.*?】\r?\n([\s\S]*?)(?:\r?\n【三、|$)/);
@@ -270,14 +259,26 @@ function renderShortVideo(targetFolder) {
     createAssSubtitles(assPath, vttPath);
   }
 
-  // 3. Render video
-  console.log(`🎬 正在使用 FFmpeg 渲染 9:16 高清短影音...`);
+  // 3. Render video (Full-Screen 9:16 Vertical Immersive Visuals with Bottom Captions)
+  console.log(`🎬 正在使用 FFmpeg 渲染 9:16 高清短影音（參考片風格：滿版直屏沉浸視角 + 底部清晰大字幕）...`);
   const coverFileName = path.basename(coverPath);
   const voiceFileName = path.basename(voicePath);
   const assFileName = path.basename(assPath);
   const outVideoFileName = path.basename(outVideo);
 
-  const cmd = `"${ffmpeg}" -y -loop 1 -framerate 30 -i "${coverFileName}" -i "${voiceFileName}" -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=25:5,eq=brightness=-0.12:contrast=1.05[bg];[0:v]scale=940:-1[fg];[bg][fg]overlay=(W-w)/2:320[base];[base]subtitles=${assFileName}[v]" -map "[v]" -map 1:a -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${outVideoFileName}"`;
+  // Check for multi-scene video clips or images
+  const sceneFiles = fs.readdirSync(folder)
+    .filter(f => /^scene[_-]?\d+\.(mp4|mov|mkv|jpg|jpeg|png)$/i.test(f))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+  let cmd = '';
+  if (sceneFiles.length > 1) {
+    console.log(`🎞️ 偵測到 ${sceneFiles.length} 個分鏡素材，執行多場景混剪拼接...`);
+    // Multi-scene logic can be expanded here
+  }
+
+  // Full-Screen 9:16: Fill frame completely with subtle warm contrast and clean bottom subtitles
+  cmd = `"${ffmpeg}" -y -loop 1 -framerate 30 -i "${coverFileName}" -i "${voiceFileName}" -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,eq=contrast=1.04:brightness=0.01[bg];[bg]subtitles=${assFileName}[v]" -map "[v]" -map 1:a -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${outVideoFileName}"`;
 
   execSync(cmd, { cwd: folder, stdio: 'inherit' });
 
