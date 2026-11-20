@@ -1084,7 +1084,16 @@ div.language-mermaid pre {
 .mermaid-container svg {
   max-width: 100%;
   height: auto;
+  min-width: 320px;
   font-family: var(--font-sans) !important;
+}
+
+/* 確保 Mermaid 節點文字始終維持清晰字號 */
+.mermaid-container .nodeLabel,
+.mermaid-container .label {
+  font-size: 15.5px !important;
+  line-height: 1.5 !important;
+  font-weight: 500 !important;
 }
 
 /* 读者微信群邀请卡片 */

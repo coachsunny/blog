@@ -169,7 +169,7 @@
         theme: 'base',
         themeVariables: {
           fontFamily: "'Noto Sans TC', 'Noto Sans SC', sans-serif",
-          fontSize: '14.5px',
+          fontSize: '16px',
           primaryColor: '#eef4f0',
           primaryTextColor: '#2d4a3e',
           primaryBorderColor: '#a3b899',
@@ -180,7 +180,9 @@
         },
         flowchart: {
           htmlLabels: true,
-          curve: 'basis'
+          curve: 'basis',
+          nodeSpacing: 45,
+          rankSpacing: 45
         }
       });
 

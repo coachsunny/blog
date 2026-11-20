@@ -110,7 +110,11 @@ function lintDirectory(dirPath, repoRoot) {
 
         // Check unlocalized terms
         for (const term of UNLOCALIZED_TERMS) {
-          if (line.includes(term)) {
+          if (term === '算法') {
+            if (line.includes('算法') && !line.includes('演算法')) {
+              warnings.push(`[未在地化詞彙] ${fgFile} 第 ${idx + 1} 行包含大陸慣用詞「${term}」`);
+            }
+          } else if (line.includes(term)) {
             warnings.push(`[未在地化詞彙] ${fgFile} 第 ${idx + 1} 行包含大陸慣用詞「${term}」`);
           }
         }

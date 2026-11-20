@@ -15,11 +15,14 @@ description: "Why do so many of our best intentions fall apart? Deep psychologic
 
 My client sat across from me at the low tea table, holding a warm cup of tea with both hands. His eyes drifted slightly, showing a glimmer of hope, but also a hesitation he couldn't hide.
 
-I didn't jump in with advice. I simply lifted my cup and let the steam rise softly between us. After a quiet three-second pause, I looked into his eyes and asked gently:
+I didn't jump in with advice. I simply lifted my cup and let the steam rise softly between us. After a quiet three-second pause, I looked into his eyes and asked with warm curiosity:
 
-"When you tell yourself you're just going to 'give it a try,' does that mean your mind has already quietly left the backdoor open—so you can walk away whenever it gets hard?"
+"When you say 'I want to give it a try,' what does that phrase feel like inside your body? Behind those words, is there a small part of you quietly trying to protect you from something?"
 
-He froze for a second. His shoulders dropped, and his breathing slowed down. A moment later, he gave a quiet smile: "You caught me. Every time I say 'I'll try,' deep down I'm thinking, *'Well, if it doesn't work out, it's not a real failure because I only said I'd try.'*"
+He froze for a second. His shoulders dropped, and his breathing slowed down.
+
+He looked down at his tea in silence for a long moment. Then, he gave a quiet, honest smile:
+"I guess... if I only say 'I'll try,' then even if I mess up, it won't hurt as much. I wouldn't have to admit that I failed again."
 
 We see this everywhere in life and work. We want to switch careers, work out regularly, fix a strained relationship, or stop procrastinating. Yet, our very first step is almost always that polite, hesitant phrase: "Let me just give it a try."
 
@@ -43,18 +46,15 @@ Instead, we shift to a forward-looking **Solution Focus**:
 
 ```mermaid
 flowchart TD
-    subgraph DefeatPath["⚠️ The 'Try' Trap (The Escape Loop)"]
-        A1["Vague Wish: I'll give it a try"] --> A2["Low Commitment (Backdoor left open)"]
-        A2 --> A3["First Small Obstacle Appears"]
-        A3 --> A4["Trigger Excuse: Well, I only said I'd try"]
-        A4 --> A5["Give Up & Feel Defeated"]
-    end
-    subgraph SuccessPath["💡 The Ownership Path (The Growth Loop)"]
-        B1["Clear Vision: What I truly desire"] --> B2["100% Inner Ownership"]
-        B2 --> B3["Expect Obstacles & Prep Plans"]
-        B3 --> B4["Navigate Through Storms Calmly"]
-        B4 --> B5["Confidence Grows & Builds Momentum"]
-    end
+    Start["Facing a Desired Change"] --> Choice{"Which mindset do you set sail with?"}
+
+    Choice -->|"The 'Try' Mindset<br>(Guarded Exit)"| A1["Low Commitment (3~4/10)<br>Focusing on a graceful escape"]
+    A1 --> A2["Small Obstacle Appears<br>Magnifies doubt, triggers excuses"]
+    A2 --> A3["Quit Halfway<br>Reinforces feeling of defeat ⚠️"]
+
+    Choice -->|"The Ownership Mindset<br>(Vision Pull)"| B1["100% Inner Ownership<br>Pulled forward by a clear vision"]
+    B1 --> B2["Anticipate Hidden Reefs<br>Prepare simple backup plans"]
+    B2 --> B3["Self-Efficacy Grows<br>Creates a sustainable positive cycle 💡"]
 ```
 
 We ask clear, inspiring questions instead:
@@ -104,10 +104,10 @@ Talking about potential difficulties isn't negative thinking—**it's packing li
 Storms happen at sea; that's just nature, not proof that you're a bad captain. What matters is whether you saw the storm coming and prepared a simple game plan:
 
 ```mermaid
-flowchart LR
-    A["Spot the Reefs<br>Identify what easily disrupts you"] --> B["Build 'If... Then...' Plans<br>Automate your response in advance"]
-    B --> C["Line Up Support<br>Have people and tools ready"]
-    C --> D["Sail Through Smoothly<br>Zero panic, steady progress"]
+flowchart TD
+    A["1. Spot Hidden Reefs<br>Identify what easily disrupts your rhythm"] --> B["2. Build 'If... Then...' Formulas<br>Automate your response in advance"]
+    B --> C["3. Line Up Practical Resources<br>Have life jackets and support ready"]
+    C --> D["4. Sail Through with Ease<br>Zero panic, clear direction forward 🌿"]
 ```
 
 For instance, instead of making a dramatic vow like "I will never stay up late again," ask yourself calmly:
