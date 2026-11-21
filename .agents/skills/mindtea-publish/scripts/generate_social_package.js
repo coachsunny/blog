@@ -188,28 +188,47 @@ ICF 国际教练联盟认证专业教练（ACC）。专注于深层自我觉察�
   const secondParagraphSc = paragraphsSc[1] || '';
 
   // Extract core takeaways, blockquotes, and ending punchline
-  const quoteMatchesSc = Array.from(cleanBodySc.matchAll(/>\s*([^\r\n]+)/g))
-    .map(m => m[1].replace(/[*_`]/g, '').trim())
-    .filter(q => q.length > 8 && !q.startsWith('【') && !q.startsWith('http') && !q.includes('-->'));
-  
-  const boldMatchesSc = Array.from(cleanBodySc.matchAll(/\*\*([^\r\n*]{12,120})\*\*/g))
-    .map(m => m[1].trim())
-    .filter(b => !b.startsWith('【') && !b.includes('-->'));
+  const blockquoteLinesSc = Array.from(cleanBodySc.matchAll(/>\s*([^\r\n]+)/g))
+    .map(m => m[1].replace(/^[>\s*`_“"']+|[*\s`_”"']+$/g, '').trim())
+    .filter(q => q.length > 5 && !q.startsWith('http') && !q.includes('-->') && !q.includes('本文为') && !q.includes('本文為'));
 
-  const endingQuoteSc = boldMatchesSc[boldMatchesSc.length - 1] || quoteMatchesSc[quoteMatchesSc.length - 1] || '愿我们在喧嚣里，保有心中的宁静与澄澈。';
+  // Find pure coaching questions (under coaching inquiries section)
+  const questionCandidatesSc = blockquoteLinesSc
+    .filter(q => (q.includes('？') || q.includes('?')) && !q.includes('心茶记') && !q.includes('提问'))
+    .map(q => q.replace(/^\d+[\.、]\s*/, '').replace(/^[^：:]+[：:]\s*/, '').replace(/^[“”"']+|[“”"']+$/g, '').trim());
+
+  let questionMatchSc = questionCandidatesSc[0] || '面对当下的选择，如果换一个视角，你会怎么看待现在的自己？';
+  let questionMatchTc = s2tw(questionMatchSc);
+
+  // Ending quote: look at blockquotes at the bottom of the article (after the coaching questions)
+  const nonQuestionQuotesSc = blockquoteLinesSc.filter(q => 
+    !q.includes('？') && !q.includes('?') && !q.includes('心茶记') && !q.includes('提问') && !q.includes('教练') && q.length > 10
+  );
+
+  let endingQuoteSc = nonQuestionQuotesSc[nonQuestionQuotesSc.length - 1] || '愿我们在喧嚣里，保有心中的宁静与澄澈。';
+  endingQuoteSc = endingQuoteSc.replace(/^[>\s*`_“"']+|[*\s`_”"']+$/g, '').trim();
   const endingQuoteTc = s2tw(endingQuoteSc);
 
-  // Extract coaching question (look for question mark in blockquotes or reflection section)
-  let questionMatchSc = quoteMatchesSc.find(q => q.includes('？') || q.includes('?')) || '如果今天遇到一盆冷水，你愿不愿意试着不接招，借对方的挑剔替自己扫清盲区？';
-  questionMatchSc = questionMatchSc.replace(/^[“”"']+|[“”"']+$/g, '').trim();
-
-  // Extract steps or subheadings (prioritize 步骤 1, 步骤 2...)
-  let stepHeadingsSc = Array.from(cleanBodySc.matchAll(/###?\s+步骤\s*\d+[：: ]\s*([^\r\n]+)/gi))
+  // Extract core framework points (supports ## 开关 / ## 齿轮 / ## 阶段 / * **步骤 1【...】**)
+  let stepHeadingsSc = [];
+  
+  // Try matching ## 开关一 / ## 齿轮四 / ## 一、 ...
+  const h2Matches = Array.from(cleanBodySc.matchAll(/##\s+(?:开关|齿轮|关键|阶段|步骤)?[一二三四五六七八九十\d]+[：:、. ]\s*([^\r\n]+)/gi))
     .map(m => m[1].replace(/[*_`]/g, '').trim());
-
-  if (stepHeadingsSc.length === 0) {
-    stepHeadingsSc = Array.from(cleanBodySc.matchAll(/###?\s+(?:[一二三四五六七八九十]+[、. ]|\d+[.、])\s*([^\r\n]+)/gi))
-      .map(m => m[1].replace(/[*_`]/g, '').trim());
+  if (h2Matches.length > 0) {
+    stepHeadingsSc = h2Matches;
+  } else {
+    // Try matching * **步骤 1【...】**
+    const stepMatches = Array.from(cleanBodySc.matchAll(/\*\*\s*步骤\s*\d+【([^】]+)】\s*\*\*/gi))
+      .map(m => m[1].trim());
+    if (stepMatches.length > 0) {
+      stepHeadingsSc = stepMatches;
+    } else {
+      // General ## headings
+      stepHeadingsSc = Array.from(cleanBodySc.matchAll(/##\s+([^\r\n]+)/g))
+        .map(m => m[1].replace(/[*_`]/g, '').trim())
+        .filter(h => !h.includes('提问') && !h.includes('实验') && !h.includes('关于作者'));
+    }
   }
 
   // Parse tags
@@ -275,12 +294,9 @@ ${leadParagraphTc.slice(0, 110)}...
   // 6. 05_微信朋友圈與群.txt (Simplified Chinese, single best-in-class version)
   const wechatContent = `【晨光微光 · 心茶记】
 
-${leadParagraphSc.slice(0, 110)}...
+${leadParagraphSc}
 
-很多时候，带刺的否定并不是针对你，而是对方在失控恐惧下的粗糙防御。
-最高段位的沟通不是拔刀对撞，而是借力打力，把审判台换成合作桌。
-
-☕ 今日教练微思考：
+${secondParagraphSc ? secondParagraphSc + '\n\n' : ''}☕ 今日教练微思考：
 “${questionMatchSc}”
 
 ${endingQuoteSc} 🌿
@@ -289,39 +305,36 @@ ${endingQuoteSc} 🌿
   fs.writeFileSync(path.join(targetDir, '05_微信朋友圈與群.txt'), wechatContent, 'utf8');
 
   // 7. 06_小紅書.txt (Pain point, emoji, ZERO external URLs, search guidance, 3+2 tags)
-  const xhsTitleBase = titleSc.split(/[:：]/)[0].replace(/^[别不要如何为什么]+/, '');
   const xhsTitle = `${titleSc.split(/[:：]/)[0]}🌿｜心茶记`;
   
   let keyPointsText = '';
   if (stepHeadingsSc.length > 0) {
     keyPointsText = stepHeadingsSc.slice(0, 3).map((h, i) => `${i + 1}️⃣【${h}】`).join('\n');
   } else {
-    keyPointsText = `1️⃣ 卸下阻力：先接纳现实，拆解对抗张力\n2️⃣ 概念降级：将毒舌标签剥离为客观事实\n3️⃣ 反客为主：把审判裁判拉进共创席`;
+    keyPointsText = `1️⃣ 自我觉察：看见行为背后的真实需求\n2️⃣ 认知重塑：放下预设退路，收回拥有权\n3️⃣ 踏实微步：小到不可能失败的自律循环`;
   }
 
   // 3 specific context tags + 2 domain brand tags
   const specificTags = tagsSc.filter(t => !['心茶记', '心理学', 'ICF教练'].includes(t)).slice(0, 3);
   while (specificTags.length < 3) {
-    specificTags.push('沟通艺术');
+    specificTags.push('自我成长');
   }
   const xhsTagsFormatted = `#${specificTags.join(' #')} #心理学 #心茶记`;
 
   const xhsContent = `${xhsTitle}
 
-${leadParagraphSc.slice(0, 120)}...
+${leadParagraphSc}
 
-换作以前，你是不是心跳加速、要么拔刀互怼，要么委屈内耗一整晚？
-其实，最高段位的沟通不是证明自己对，而是借力打力，把审判台换成合作桌！
-
-💡 核心破局 3 步法：
+${secondParagraphSc ? secondParagraphSc + '\n\n' : ''}💡 核心启示与破局关键：
 ${keyPointsText}
 
-☕ 今日教练微行动：
-下次被泼冷水时，先深呼吸 3 秒：
-「${endingQuoteSc}」🔥
+☕ 今日教练微思考：
+“${questionMatchSc}”
+
+${endingQuoteSc} 🌿
 
 ---
-🔍 完整深度长文收录于个人专栏《心茶记》（浏览器搜索「心茶记 Sunny」即可阅读全篇 ☕）
+🔍 完整深度长文收录于个人专栏《心茶记》（浏览器搜索「心茶记 教练」即可阅读全篇 ☕）
 
 ${xhsTagsFormatted}
 `;
