@@ -3,6 +3,7 @@ const path = require('path');
 const { s2tw, tw2s } = require('../../cross-strait-localization/scripts/convert_text.js');
 const { renderMarkdownToHtmlFile } = require('./render_rich_text_html.js');
 const { createVideoScriptContent } = require('./generate_video_script.js');
+const { renderAllMermaidFromPost } = require('./render_mermaid_images.js');
 
 function findRepoRoot(startDir) {
   let cur = startDir;
@@ -132,6 +133,13 @@ function generateSocialPackage(postFilePath, customFolderName) {
 
   if (!fs.existsSync(targetDir)) {
     fs.mkdirSync(targetDir, { recursive: true });
+  }
+
+  // 0. Auto-render all Mermaid flowcharts into high-DPI Zen Tea infographic PNG images
+  try {
+    renderAllMermaidFromPost(fullPostPath, targetDir, true);
+  } catch (err) {
+    console.warn('⚠️ 流程圖圖片產製略過或失敗:', err.message);
   }
 
   console.log(`\n📦 開始為《${postTitle}》建立 12 項社群分發資產...`);

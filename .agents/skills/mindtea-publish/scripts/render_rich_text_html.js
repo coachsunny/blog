@@ -253,7 +253,7 @@ function convertTableToHtml(tableLines) {
   return `<div style="overflow-x: auto; margin: 24px 0;">\n<table style="width: 100%; border-collapse: collapse; border: 1px solid #d5e2d8; border-radius: 6px; overflow: hidden; background: #ffffff;">\n${theadHtml}\n${tbodyHtml}\n</table>\n</div>`;
 }
 
-function parseMarkdown(md, lang = 'zh-TW') {
+function parseMarkdown(md, lang = 'zh-TW', assetDir = null) {
   // Pre-process any raw HTML coaching boxes into clean markdown blockquotes
   const normalizedMd = convertCoachingBoxes(md || '');
   const lines = normalizedMd.split(/\r?\n/);
@@ -262,6 +262,7 @@ function parseMarkdown(md, lang = 'zh-TW') {
   let listType = '';
   let inBlockquote = false;
   let blockquoteLines = [];
+  let diagramCount = 0;
 
   function flushList() {
     if (inList) {
@@ -352,7 +353,20 @@ function parseMarkdown(md, lang = 'zh-TW') {
       }
       const codeContent = codeLines.join('\n');
       if (codeLang === 'mermaid' || codeLang === 'flowchart') {
-        html.push(convertMermaidToHtml(codeContent, lang === 'zh-TW'));
+        diagramCount++;
+        let imgEmbedded = false;
+        if (assetDir) {
+          const imgName = `diagram_${diagramCount}.png`;
+          const imgPath = path.join(assetDir, imgName);
+          if (fs.existsSync(imgPath)) {
+            const b64 = fs.readFileSync(imgPath).toString('base64');
+            html.push(`<div style="text-align: center; margin: 28px 0;">\n  <img src="data:image/png;base64,${b64}" alt="心茶記 · 流程圖" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 16px rgba(45, 74, 62, 0.08); display: block; margin: 0 auto;">\n</div>`);
+            imgEmbedded = true;
+          }
+        }
+        if (!imgEmbedded) {
+          html.push(convertMermaidToHtml(codeContent, lang === 'zh-TW'));
+        }
       } else {
         html.push(`<pre style="background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 14px; overflow-x: auto; font-size: 14px;"><code>${codeContent}</code></pre>`);
       }
@@ -625,7 +639,8 @@ function fallbackCopy(content, btn) {
 }
 
 function renderMarkdownToHtmlFile(markdownContent, outputPath, title = '心茶記專欄', lang = 'zh-TW') {
-  const bodyHtml = parseMarkdown(markdownContent, lang);
+  const assetDir = path.dirname(outputPath);
+  const bodyHtml = parseMarkdown(markdownContent, lang, assetDir);
   const fullHtml = generateHtmlPage(title, bodyHtml, lang);
   fs.writeFileSync(outputPath, fullHtml, 'utf8');
 }
