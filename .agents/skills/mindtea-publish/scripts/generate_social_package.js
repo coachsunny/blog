@@ -162,7 +162,7 @@ ICF 國際教練聯盟認證專業教練（ACC）。專注於深層自我覺察�
   const fanggeziMd = `# ${titleTc}\n\n${bodyTc.trim()}${fanggeziFooter}`;
   fs.writeFileSync(path.join(targetDir, '04_方格子.md'), fanggeziMd, 'utf8');
   fs.writeFileSync(path.join(targetDir, '04_方格子.txt'), fanggeziMd, 'utf8');
-  renderMarkdownToHtmlFile(fanggeziMd, path.join(targetDir, '04_方格子_富文本預覽.html'), titleTc, 'zh-TW');
+  renderMarkdownToHtmlFile(fanggeziMd, path.join(targetDir, '04_方格子_富文本預覽.html'), titleTc, 'zh-TW', postSlug);
 
   // 2. 07_知乎 (Simplified Chinese for Mainland high-depth readers)
   const zhihuFooter = `
@@ -180,7 +180,7 @@ ICF 国际教练联盟认证专业教练（ACC）。专注于深层自我觉察�
   const zhihuMd = `# ${titleSc}\n\n${bodySc.trim()}${zhihuFooter}`;
   fs.writeFileSync(path.join(targetDir, '07_知乎.md'), zhihuMd, 'utf8');
   fs.writeFileSync(path.join(targetDir, '07_知乎.txt'), zhihuMd, 'utf8');
-  renderMarkdownToHtmlFile(zhihuMd, path.join(targetDir, '07_知乎_富文本預覽.html'), titleSc, 'zh-CN');
+  renderMarkdownToHtmlFile(zhihuMd, path.join(targetDir, '07_知乎_富文本預覽.html'), titleSc, 'zh-CN', postSlug);
 
   // Strip code blocks and mermaid diagrams for clean text extraction
   const cleanBodySc = bodySc.replace(/```[\s\S]*?```/g, '');

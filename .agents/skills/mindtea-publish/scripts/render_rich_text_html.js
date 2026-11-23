@@ -253,7 +253,7 @@ function convertTableToHtml(tableLines) {
   return `<div style="overflow-x: auto; margin: 24px 0;">\n<table style="width: 100%; border-collapse: collapse; border: 1px solid #d5e2d8; border-radius: 6px; overflow: hidden; background: #ffffff;">\n${theadHtml}\n${tbodyHtml}\n</table>\n</div>`;
 }
 
-function parseMarkdown(md, lang = 'zh-TW', assetDir = null) {
+function parseMarkdown(md, lang = 'zh-TW', assetDir = null, postSlug = '') {
   // Pre-process any raw HTML coaching boxes into clean markdown blockquotes
   const normalizedMd = convertCoachingBoxes(md || '');
   const lines = normalizedMd.split(/\r?\n/);
@@ -360,7 +360,8 @@ function parseMarkdown(md, lang = 'zh-TW', assetDir = null) {
           const imgPath = path.join(assetDir, imgName);
           if (fs.existsSync(imgPath)) {
             const b64 = fs.readFileSync(imgPath).toString('base64');
-            html.push(`<div style="text-align: center; margin: 28px 0;">\n  <img src="data:image/png;base64,${b64}" alt="心茶記 · 流程圖" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 16px rgba(45, 74, 62, 0.08); display: block; margin: 0 auto;">\n</div>`);
+            const webUrl = postSlug ? `https://blog.portal-coachsunny.com/assets/images/flowcharts/${postSlug}-diagram-${diagramCount}.png` : '';
+            html.push(`<div style="text-align: center; margin: 28px 0; padding: 18px 14px; background: #fafbfa; border: 1.5px solid #d5e2d8; border-radius: 12px;">\n  <img id="diagram-img-${diagramCount}" src="${webUrl || `data:image/png;base64,${b64}`}" data-b64="data:image/png;base64,${b64}" alt="心茶記 · 流程圖" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(45, 74, 62, 0.08); display: block; margin: 0 auto;">\n  <div style="margin-top: 14px; text-align: center;">\n    <button type="button" onclick="copyDiagramToClipboard('diagram-img-${diagramCount}', this)" style="background: #eaf1ec; color: #1e3324; border: 1.5px solid #a3b899; padding: 8px 18px; border-radius: 6px; font-size: 13.5px; font-weight: bold; cursor: pointer; transition: all 0.2s;">📋 點此單獨複製這張圖（直接至方格子按 Ctrl+V 貼上）</button>\n    <div style="margin-top: 6px; color: #62786a; font-size: 12px;">💡 提示：方格子編輯器若未隨全篇自動貼入圖檔，點擊上方按鈕即可將真實圖檔放入剪貼簿，直接在文章段落按 Ctrl+V 貼上！亦可直接將檔案 <code>${imgName}</code> 拖曳進編輯器</div>\n  </div>\n</div>`);
             imgEmbedded = true;
           }
         }
@@ -633,14 +634,45 @@ function fallbackCopy(content, btn) {
     alert('${copyAlertFail}');
   }
 }
+
+async function copyDiagramToClipboard(imgId, btn) {
+  try {
+    const img = document.getElementById(imgId);
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth || img.width || 800;
+    canvas.height = img.naturalHeight || img.height || 600;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    canvas.toBlob(async (blob) => {
+      if (!blob) throw new Error('Blob creation failed');
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      const oldText = btn.innerText;
+      btn.innerText = '✅ 圖檔已成功複製！請切換到方格子按 Ctrl+V 貼上';
+      btn.style.background = '#d4edda';
+      btn.style.color = '#155724';
+      setTimeout(() => {
+        btn.innerText = oldText;
+        btn.style.background = '#eaf1ec';
+        btn.style.color = '#1e3324';
+      }, 3500);
+    }, 'image/png');
+  } catch (err) {
+    console.error(err);
+    alert('瀏覽器權限限制，請直接拖曳目錄內的圖片檔案貼入方格子！');
+  }
+}
 </script>
 </body>
 </html>`;
 }
 
-function renderMarkdownToHtmlFile(markdownContent, outputPath, title = '心茶記專欄', lang = 'zh-TW') {
+function renderMarkdownToHtmlFile(markdownContent, outputPath, title = '心茶記專欄', lang = 'zh-TW', postSlug = '') {
   const assetDir = path.dirname(outputPath);
-  const bodyHtml = parseMarkdown(markdownContent, lang, assetDir);
+  const bodyHtml = parseMarkdown(markdownContent, lang, assetDir, postSlug);
   const fullHtml = generateHtmlPage(title, bodyHtml, lang);
   fs.writeFileSync(outputPath, fullHtml, 'utf8');
 }

@@ -165,6 +165,22 @@ function renderAllMermaidFromPost(postFilePath, targetSocialDir, isTraditional =
     const ok = renderMermaidToPng(localizedCode, imgPath, { title: diagramTitle, isTraditional });
     if (ok) {
       console.log(`  ✅ 成功產製圖表: ${imgName} (${diagramTitle})`);
+      
+      // Also copy to assets/images/flowcharts/ for permanent official HTTPS hosting
+      try {
+        const repoRoot = path.resolve(__dirname, '../../../../');
+        const flowchartsDir = path.join(repoRoot, 'assets', 'images', 'flowcharts');
+        if (!fs.existsSync(flowchartsDir)) {
+          fs.mkdirSync(flowchartsDir, { recursive: true });
+        }
+        const postSlug = path.basename(postFilePath, '.md').replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/-en$/, '');
+        const hostedImgName = `${postSlug}-diagram-${idx + 1}.png`;
+        const hostedImgPath = path.join(flowchartsDir, hostedImgName);
+        fs.copyFileSync(imgPath, hostedImgPath);
+      } catch (copyErr) {
+        console.warn('  ⚠️ 同步至 assets/images/flowcharts 略過:', copyErr.message);
+      }
+
       generatedImages.push({
         index: idx + 1,
         title: diagramTitle,
