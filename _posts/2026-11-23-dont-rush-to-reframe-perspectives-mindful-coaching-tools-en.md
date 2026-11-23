@@ -6,7 +6,8 @@ title: "Don't Rush to Change Their Mind: The Hidden Pride of Helping and 4 Gentl
 date: 2026-11-23
 tags: [Self-Awareness, Reframing, ICF Coaching, Listening, Communication, Relationships]
 read_time: 7
-description: "Why are you being so negative? Look at the bright side!" When a friend vents and you offer well-meaning advice, why do they pull away with a cold "never mind"? In professional coaching, uninvited reframing is often a subtle form of arrogance. Discover how to check the door before entering, and learn 4 graceful perspective tools that truly heal.
+description: >-
+  "Why are you being so negative? Look at the bright side!" When a friend vents and you offer well-meaning advice, why do they pull away with a cold "never mind"? In professional coaching, uninvited reframing is often a subtle form of arrogance. Discover how to check the door before entering, and learn 4 graceful perspective tools that truly heal.
 ---
 
 # Don't Rush to Change Their Mind: The Hidden Pride of Helping and 4 Gentle Coaching Tools

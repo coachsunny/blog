@@ -265,6 +265,35 @@ function lintDirectory(dirPath, repoRoot) {
               }
             });
           }
+
+          // Check YAML Frontmatter validity for both Chinese and English posts to prevent Jekyll ghost empty cards
+          const candidatesToCheck = [mainPostName, mainPostName.replace(/\.md$/, '-en.md')];
+          for (const cand of candidatesToCheck) {
+            const cPath = path.join(postsDir, cand);
+            if (fs.existsSync(cPath)) {
+              const cContent = fs.readFileSync(cPath, 'utf8');
+              const parts = cContent.split(/^---[\r\n]+/m);
+              if (parts.length < 3) {
+                errors.push(`[YAML格式錯誤] _posts/${cand} 缺少完整的 Frontmatter (---) 標頭`);
+              } else {
+                const fm = parts[1];
+                const tMatch = fm.match(/^title:\s*(.*)$/m);
+                if (tMatch) {
+                  const val = tMatch[1].trim();
+                  if (val.includes(': ') && !val.startsWith('"') && !val.startsWith("'")) {
+                    errors.push(`[YAML格式錯誤] _posts/${cand} title 包含半形冒號 ': ' 但未以雙引號包裹，將導致 Jekyll 解析失敗與空卡片崩壞！`);
+                  }
+                }
+                const dMatch = fm.match(/^description:\s*(.*)$/m);
+                if (dMatch) {
+                  const dVal = dMatch[1].trim();
+                  if (dVal.startsWith('"') && !dVal.endsWith('"')) {
+                    errors.push(`[YAML格式錯誤] _posts/${cand} description 雙引號未成對閉合，將導致 Jekyll 解析失敗！建議改用 block scalar '>-'`);
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

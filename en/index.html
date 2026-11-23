@@ -52,6 +52,7 @@ permalink: /en/
     <div class="post-list">
       {% assign en_posts = site.posts | where: "lang", "en" %}
       {% for post in en_posts %}
+      {% if post.title and post.title != "" %}
       <div class="post-card scroll-fade">
         <div class="post-card-meta">
           <span>
@@ -90,6 +91,7 @@ permalink: /en/
           </svg>
         </a>
       </div>
+      {% endif %}
       {% endfor %}
     </div>
   </div>

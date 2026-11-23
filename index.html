@@ -50,6 +50,7 @@ description: 心茶記（心茶记 Mind Tea Journal）是由 ICF 國際教練聯
     <div class="post-list">
       {% assign zh_posts = site.posts | where_exp: "item", "item.lang != 'en'" %}
       {% for post in zh_posts %}
+      {% if post.title and post.title != "" %}
       <div class="post-card scroll-fade">
         <div class="post-card-meta">
           <span>
@@ -88,6 +89,7 @@ description: 心茶記（心茶记 Mind Tea Journal）是由 ICF 國際教練聯
           </svg>
         </a>
       </div>
+      {% endif %}
       {% endfor %}
     </div>
   </div>

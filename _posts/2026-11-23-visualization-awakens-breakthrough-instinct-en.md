@@ -2,11 +2,12 @@
 layout: post
 lang: en
 ref: visualization-awakens-breakthrough-instinct
-title: Stop Arguing with the Fallen Tree: How Visualization Unlocks Your Natural Breakthrough Power
+title: "Stop Arguing with the Fallen Tree: How Visualization Unlocks Your Natural Breakthrough Power"
 date: 2026-11-23
 tags: [Self-Awareness, Visualization, ICF Coaching, Personal Growth, Reframing]
 read_time: 7
-description: If a giant tree fell and blocked your road home, you wouldn't sit in the dirt and argue with it. You would simply walk around it. Why do we freeze and argue with life's obstacles for months or years? In professional coaching, the truth is clear: the problem is rarely too big; it is that we have lost the vivid picture of "Home." Discover how simple visualization turns on your natural breakthrough instinct.
+description: >-
+  If a giant tree fell and blocked your road home, you wouldn't sit in the dirt and argue with it. You would simply walk around it. Why do we freeze and argue with life's obstacles for months or years? In professional coaching, the truth is clear: the problem is rarely too big; it is that we have lost the vivid picture of "Home." Discover how simple visualization turns on your natural breakthrough instinct.
 ---
 
 # Stop Arguing with the Fallen Tree: How Visualization Unlocks Your Natural Breakthrough Power
