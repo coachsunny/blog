@@ -71,7 +71,7 @@ function cleanParentheses(text) {
 function convertMermaidToHtml(mermaidCode, isTraditional = true) {
   const { direction, nodes, edges } = parseMermaid(mermaidCode);
   if (!nodes.length) {
-    return `<pre style="background: rgba(230, 240, 232, 0.45); border: 1px solid #c8d8cf; border-radius: 8px; padding: 14px; overflow-x: auto; font-size: 14px;"><code>${mermaidCode.trim()}</code></pre>`;
+    return '';
   }
 
   // Detect loop back to the first node
@@ -89,43 +89,40 @@ function convertMermaidToHtml(mermaidCode, isTraditional = true) {
   // Find fork node (node with multiple outgoing edges)
   const forkNode = nodes.find(n => (outgoing.get(n.id) || []).length > 1);
 
-  // 1. Universal Rich-Text Safe Blockquote: Single-line Linear Stepper (!forkNode)
+  // 1. Single-line Linear Stepper (!forkNode): Clean Semantic Step List
   if (!forkNode) {
-    const stepsHtml = [];
+    const listItems = [];
     nodes.forEach((n, idx) => {
       const parts = n.text.split(/<br\s*\/?>/i);
       const title = parts[0].trim().replace(/^\d+[\.、\s]+/, '');
-      const sub = parts.slice(1).join('<br>').trim();
-      const numEmoji = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣'][idx] || `Step ${idx + 1}`;
+      const sub = parts.slice(1).join(' ').trim();
+      const num = idx + 1;
       
-      let stepStr = `<p style="margin: 6px 0; font-size: 15px; line-height: 1.6;"><strong style="color: #2d4a3e;">${numEmoji} ${title}</strong>`;
+      let item = `<strong>${num}. ${title}</strong>`;
       if (sub) {
-        stepStr += `<br><span style="color: #556b5d; font-size: 13.5px; padding-left: 24px; display: inline-block;">${sub}</span>`;
+        item += ` —— <span style="color: #556b5d;">${sub}</span>`;
       }
-      stepStr += `</p>`;
-      stepsHtml.push(stepStr);
-
-      if (idx < nodes.length - 1) {
-        stepsHtml.push(`<p style="margin: 2px 0 2px 14px; color: #6b8e23; font-weight: bold; font-size: 16px; line-height: 1;">↓</p>`);
-      }
+      listItems.push(`<li style="margin: 6px 0;">${item}</li>`);
     });
 
-    let loopHtml = '';
+    let loopText = '';
     if (hasCycle) {
       const loopLabel = isTraditional
-        ? '形成經驗學習的正向閉環（循環驅動下一輪具體行動）'
-        : '形成经验学习的正向闭环（循环驱动下一轮具体行动）';
-      loopHtml = `\n  <p style="margin: 10px 0 0 0; padding-top: 10px; border-top: 1px dashed #a3b899; color: #2d4a3e; font-size: 13.5px;"><span style="color: #6b8e23; font-weight: bold; font-size: 1.15em;">↺</span> <strong>${isTraditional ? '循環閉環' : '循环闭环'}</strong>：${loopLabel}</p>`;
+        ? '形成經驗學習的正向閉環（循環驅動下一輪微步行動）'
+        : '形成经验学习的正向闭环（循环驱动下一轮微步行动）';
+      loopText = `<p style="margin: 10px 0 0 0; font-size: 14px; color: #4a7c59;">↺ <strong>${isTraditional ? '正向閉環' : '正向闭环'}</strong>：${loopLabel}</p>`;
     }
 
-    return `<blockquote style="background: rgba(230, 240, 232, 0.45); border-left: 4px solid #a3b899; padding: 16px 20px; margin: 24px 0; border-radius: 4px; color: #2d4a3e;">
-  <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 15.5px; color: #1e3324;">🧭 <strong>${isTraditional ? '流程推演' : '流程推演'}：</strong></p>
-  ${stepsHtml.join('\n  ')}${loopHtml}
+    return `<blockquote style="margin: 20px 0; padding: 16px 22px; background: #f4f8f5; border-left: 4px solid #4a7c59; border-radius: 0 8px 8px 0; color: #2d4533; font-size: 15px; line-height: 1.8;">
+  <p style="margin: 0 0 10px 0; font-weight: bold; color: #1e3324; font-size: 15.5px;">🧭 <strong>${isTraditional ? '核心步驟推演' : '核心步骤推演'}：</strong></p>
+  <ul style="margin: 0; padding-left: 20px;">
+    ${listItems.join('\n    ')}
+  </ul>
+  ${loopText}
 </blockquote>`;
   }
 
-  // 2. Universal Rich-Text Safe Blockquote: Branching / Decision Flowcharts
-  // Prelude nodes (nodes preceding the fork)
+  // 2. Branching / Decision Flowcharts: Clean Contrast Cards
   const preludeNodes = [];
   let curr = nodes[0];
   while (curr && curr.id !== forkNode.id) {
@@ -136,23 +133,21 @@ function convertMermaidToHtml(mermaidCode, isTraditional = true) {
 
   let headerHtml = '';
   if (preludeNodes.length > 0) {
-    const pTexts = preludeNodes.map(p => {
+    const pTitle = preludeNodes.map(p => {
       const parts = p.text.split(/<br\s*\/?>/i);
       const cleanSub = cleanParentheses(parts.slice(1).join(' ').trim());
-      return `<strong>${parts[0].trim()}</strong>${cleanSub ? ` <span style="font-weight: normal; font-size: 13.5px; color: #556b5d;">（${cleanSub}）</span>` : ''}`;
+      return `${parts[0].trim()}${cleanSub ? ` <span style="font-weight: normal; font-size: 13.5px; color: #556b5d;">（${cleanSub}）</span>` : ''}`;
     }).join(' ➔ ');
-    headerHtml = `<p style="margin: 0 0 6px 0; font-weight: bold; font-size: 15.5px; color: #1e3324;">🌲 ${pTexts}</p>`;
     const forkParts = forkNode.text.split(/<br\s*\/?>/i);
-    headerHtml += `<p style="margin: 0 0 14px 0; font-size: 14px; color: #4a6654; font-weight: 500;">${isTraditional ? '決策焦點' : '决策焦点'}：${forkParts[0].trim()}</p>`;
+    headerHtml = `<p style="margin: 0 0 6px 0; font-weight: bold; font-size: 15.5px; color: #1e3324;">🌲 <strong>【${pTitle}】</strong></p><p style="margin: 0 0 10px 0; font-size: 14px; color: #4a6654; font-weight: 500;">${isTraditional ? '決策思維焦點' : '决策思维焦点'}：${forkParts[0].trim()}</p>`;
   } else {
     const forkParts = forkNode.text.split(/<br\s*\/?>/i);
     const cleanSub = cleanParentheses(forkParts.slice(1).join(' ').trim());
-    headerHtml = `<p style="margin: 0 0 14px 0; font-weight: bold; font-size: 15.5px; color: #1e3324;">🌲 <strong>${forkParts[0].trim()}</strong>${cleanSub ? ` <span style="font-weight: normal; font-size: 13.5px; color: #556b5d;">（${cleanSub}）</span>` : ''}</p>`;
+    headerHtml = `<p style="margin: 0 0 10px 0; font-weight: bold; font-size: 15.5px; color: #1e3324;">🌲 <strong>【${forkParts[0].trim()}】</strong>${cleanSub ? ` <span style="font-weight: normal; font-size: 13.5px; color: #556b5d;">（${cleanSub}）</span>` : ''}</p>`;
   }
 
-  // Follow each branch emerging from forkNode
   const forkEdges = outgoing.get(forkNode.id) || [];
-  const branchSections = [];
+  const branchLines = [];
 
   forkEdges.forEach((edge, bIdx) => {
     const branchNodes = [];
@@ -166,38 +161,35 @@ function convertMermaidToHtml(mermaidCode, isTraditional = true) {
     const bAllText = (edge.label + ' ' + branchNodes.map(n => n.text).join(' '));
     const isPositive = /增量|破局|解決|渴望|動態|校準|微步|保護|春天|持續|🌿|✅|💡|增量|破局|解决|渴望|动态|校准|微步|保护|持续/.test(bAllText) || bIdx === forkEdges.length - 1;
 
-    const badgeIcon = isPositive ? '💡' : '⚠️';
-    const badgeName = isPositive
+    const icon = isPositive ? '💡' : '⚠️';
+    const badge = isPositive
       ? (isTraditional ? '破局路徑' : '破局路径')
-      : (isTraditional ? `路徑 ${bIdx + 1}` : `路径 ${bIdx + 1}`);
-    const badgeColor = isPositive ? '#2d4a3e' : '#8c4e48';
-    const arrowColor = isPositive ? '#6b8e23' : '#b27a76';
+      : (isTraditional ? '慣性路徑' : '惯性路径');
 
-    const branchLines = [];
+    let branchText = '';
     if (edge.label) {
-      const cleanEdgeLabel = edge.label.replace(/^[⚠️💡❌🌿✅\s]+/, '').trim();
-      branchLines.push(`<p style="margin: 8px 0 4px 0; font-size: 15px; line-height: 1.6;"><strong style="color: ${badgeColor};">${badgeIcon} ${badgeName}：${cleanEdgeLabel}</strong></p>`);
+      const cleanLabel = edge.label.replace(/^[⚠️💡❌🌿✅\s]+/, '').trim();
+      branchText = `<strong>${cleanLabel}</strong> ➔ `;
     }
 
-    branchNodes.forEach((bn, bnIdx) => {
+    const nodeFlow = branchNodes.map(bn => {
       const parts = bn.text.split(/<br\s*\/?>/i);
       let t = parts[0].trim().replace(/^[⚠️💡❌🌿✅\s]+/, '').trim();
-      let s = parts.slice(1).join('<br>').trim();
+      let s = parts.slice(1).join(' ').trim();
+      return `${t}${s ? `（${s}）` : ''}`;
+    }).join(' ➔ ');
 
-      if (!edge.label && bnIdx === 0) {
-        branchLines.push(`<p style="margin: 8px 0 4px 0; font-size: 15px; line-height: 1.6;"><strong style="color: ${badgeColor};">${badgeIcon} ${badgeName}：${t}</strong>${s ? `<br><span style="color: #556b5d; font-size: 13.5px; padding-left: 24px; display: inline-block;">${s}</span>` : ''}</p>`);
-      } else {
-        branchLines.push(`<p style="margin: 2px 0 2px 14px; color: ${arrowColor}; font-weight: bold; font-size: 15px; line-height: 1;">↓</p>`);
-        branchLines.push(`<p style="margin: 4px 0; font-size: 14.5px; line-height: 1.5; padding-left: 24px; color: ${isPositive ? '#2d4a3e' : '#5c3a36'};"><strong>${t}</strong>${s ? `<br><span style="color: #62786a; font-size: 13px;">${s}</span>` : ''}</p>`);
-      }
-    });
+    branchText += nodeFlow;
+    const hasTrailingIcon = /[❌🌿✅💡]/.test(branchText);
+    const endIcon = hasTrailingIcon ? '' : (isPositive ? ' 🌿' : ' ❌');
+    const textColor = isPositive ? '#1e3324' : '#5c3a36';
 
-    branchSections.push(branchLines.join('\n  '));
+    branchLines.push(`<p style="margin: 8px 0; color: ${textColor}; line-height: 1.7;">${icon} <strong>【${badge}】</strong> ${branchText}${endIcon}</p>`);
   });
 
-  return `<blockquote style="background: rgba(230, 240, 232, 0.45); border-left: 4px solid #a3b899; padding: 16px 20px; margin: 24px 0; border-radius: 4px; color: #2d4a3e;">
+  return `<blockquote style="margin: 20px 0; padding: 16px 22px; background: #f4f8f5; border-left: 4px solid #4a7c59; border-radius: 0 8px 8px 0; font-size: 15px; line-height: 1.8;">
   ${headerHtml}
-  ${branchSections.join('\n\n  <hr style="border: none; border-top: 1px dashed #cad5c5; margin: 14px 0;">\n\n  ')}
+  ${branchLines.join('\n  ')}
 </blockquote>`;
 }
 
@@ -353,21 +345,7 @@ function parseMarkdown(md, lang = 'zh-TW', assetDir = null, postSlug = '') {
       }
       const codeContent = codeLines.join('\n');
       if (codeLang === 'mermaid' || codeLang === 'flowchart') {
-        diagramCount++;
-        let imgEmbedded = false;
-        if (assetDir) {
-          const imgName = `diagram_${diagramCount}.png`;
-          const imgPath = path.join(assetDir, imgName);
-          if (fs.existsSync(imgPath)) {
-            const b64 = fs.readFileSync(imgPath).toString('base64');
-            const webUrl = postSlug ? `https://blog.portal-coachsunny.com/assets/images/flowcharts/${postSlug}-diagram-${diagramCount}.png` : '';
-            html.push(`<div style="text-align: center; margin: 28px 0; padding: 18px 14px; background: #fafbfa; border: 1.5px solid #d5e2d8; border-radius: 12px;">\n  <img id="diagram-img-${diagramCount}" src="${webUrl || `data:image/png;base64,${b64}`}" data-b64="data:image/png;base64,${b64}" alt="心茶記 · 流程圖" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 12px rgba(45, 74, 62, 0.08); display: block; margin: 0 auto;">\n  <div style="margin-top: 14px; text-align: center;">\n    <button type="button" onclick="copyDiagramToClipboard('diagram-img-${diagramCount}', this)" style="background: #eaf1ec; color: #1e3324; border: 1.5px solid #a3b899; padding: 8px 18px; border-radius: 6px; font-size: 13.5px; font-weight: bold; cursor: pointer; transition: all 0.2s;">📋 點此單獨複製這張圖（直接至方格子按 Ctrl+V 貼上）</button>\n    <div style="margin-top: 6px; color: #62786a; font-size: 12px;">💡 提示：方格子編輯器若未隨全篇自動貼入圖檔，點擊上方按鈕即可將真實圖檔放入剪貼簿，直接在文章段落按 Ctrl+V 貼上！亦可直接將檔案 <code>${imgName}</code> 拖曳進編輯器</div>\n  </div>\n</div>`);
-            imgEmbedded = true;
-          }
-        }
-        if (!imgEmbedded) {
-          html.push(convertMermaidToHtml(codeContent, lang === 'zh-TW'));
-        }
+        html.push(convertMermaidToHtml(codeContent, lang === 'zh-TW'));
       } else {
         html.push(`<pre style="background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 14px; overflow-x: auto; font-size: 14px;"><code>${codeContent}</code></pre>`);
       }
