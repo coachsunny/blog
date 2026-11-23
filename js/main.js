@@ -205,7 +205,7 @@
               let n;
               while ((n = walker.nextNode())) {
                 if (n.nodeValue && n.nodeValue.trim()) {
-                  n.nodeValue = s2t(n.nodeValue);
+                  n.nodeValue = s2t(n.nodeValue).replace(/倒黴/g, '倒楣').replace(/復盤/g, '覆盤').replace(/毫發/g, '毫髮');
                 }
               }
             } catch (err) {

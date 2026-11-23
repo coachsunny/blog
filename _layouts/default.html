@@ -312,9 +312,22 @@
 
     function convertPage() {
       if (typeof OpenCC === 'undefined') return;
-      const converter = currentLang === 'traditional'
+      const rawConverter = currentLang === 'traditional'
         ? OpenCC.Converter({ from: 'cn', to: 'tw' })
         : OpenCC.Converter({ from: 'tw', to: 'cn' });
+
+      // 台灣教育部標準正字防呆校正（修正 OpenCC 預設辭典之選錯字）
+      const converter = function(text) {
+        let result = rawConverter(text);
+        if (currentLang === 'traditional') {
+          result = result
+            .replace(/倒黴/g, '倒楣')
+            .replace(/復盤/g, '覆盤')
+            .replace(/毫發/g, '毫髮');
+        }
+        return result;
+      };
+
       convertTextNodes(document.body, converter);
       document.title = converter(document.title);
     }
