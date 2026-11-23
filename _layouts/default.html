@@ -291,10 +291,20 @@
       document.head.appendChild(script);
     }
 
-    function convertTextNodes(node, converter) {
+    const originalTitle = document.title;
+
+    function applyTextConversion(node, converter) {
       if (node.nodeType === Node.TEXT_NODE) {
         if (node.nodeValue && node.nodeValue.trim()) {
-          node.nodeValue = converter(node.nodeValue);
+          // 首次快取原生初始簡體文字，切換繁簡時永遠以原生文字為準，徹底杜絕多次雙向往返轉換帶來的字元失真與語意漂移
+          if (node._origText === undefined) {
+            node._origText = node.nodeValue;
+          }
+          if (currentLang === 'traditional') {
+            node.nodeValue = converter(node._origText);
+          } else {
+            node.nodeValue = node._origText;
+          }
         }
       } else if (node.nodeType === Node.ELEMENT_NODE) {
         const tag = node.tagName.toLowerCase();
@@ -305,31 +315,34 @@
           return;
         }
         for (let i = 0; i < node.childNodes.length; i++) {
-          convertTextNodes(node.childNodes[i], converter);
+          applyTextConversion(node.childNodes[i], converter);
         }
       }
     }
 
     function convertPage() {
+      if (currentLang === 'simplified') {
+        // 切換回簡體：直接 100% 還原初始原生文字，零轉換損耗，永不失真
+        applyTextConversion(document.body, null);
+        document.title = originalTitle;
+        return;
+      }
+
       if (typeof OpenCC === 'undefined') return;
-      const rawConverter = currentLang === 'traditional'
-        ? OpenCC.Converter({ from: 'cn', to: 'tw' })
-        : OpenCC.Converter({ from: 'tw', to: 'cn' });
+      const rawConverter = OpenCC.Converter({ from: 'cn', to: 'tw' });
 
       // 台灣教育部標準正字防呆校正（修正 OpenCC 預設辭典之選錯字）
       const converter = function(text) {
         let result = rawConverter(text);
-        if (currentLang === 'traditional') {
-          result = result
-            .replace(/倒黴/g, '倒楣')
-            .replace(/復盤/g, '覆盤')
-            .replace(/毫發/g, '毫髮');
-        }
+        result = result
+          .replace(/倒黴/g, '倒楣')
+          .replace(/復盤/g, '覆盤')
+          .replace(/毫發/g, '毫髮');
         return result;
       };
 
-      convertTextNodes(document.body, converter);
-      document.title = converter(document.title);
+      applyTextConversion(document.body, converter);
+      document.title = converter(originalTitle);
     }
 
     if (btnHant) {
