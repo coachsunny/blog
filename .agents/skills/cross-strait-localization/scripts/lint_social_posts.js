@@ -34,6 +34,25 @@ const UNLOCALIZED_TERMS = [
   '视频', '屏幕', '项目', '软件', '硬件', '算法', '移动端', '数据库', '程序员', '内存', '高清'
 ];
 
+// Common typo / misconverted words in Taiwan Traditional Chinese
+const TW_TYPO_TERMS = [
+  { wrong: '倒黴', correct: '倒楣' },
+  { wrong: '復盤', correct: '覆盤' },
+  { wrong: '毫發', correct: '毫髮' },
+  { wrong: '頭發', correct: '頭髮' },
+  { wrong: '理發', correct: '理髮' },
+  { wrong: '准備', correct: '準備' },
+  { wrong: '標准', correct: '標準' },
+  { wrong: '分鍾', correct: '分鐘' },
+  { wrong: '老板', correct: '老闆' },
+  { wrong: '細致', correct: '細緻' },
+  { wrong: '幹淨', correct: '乾淨' },
+  { wrong: '標簽', correct: '標籤' },
+  { wrong: '經曆', correct: '經歷' },
+  { wrong: '這里', correct: '這裡' },
+  { wrong: '心里', correct: '心裡' }
+];
+
 // Hallucinated / prohibited domains
 const PROHIBITED_DOMAINS = [
   'sunnycoach.com',
@@ -116,6 +135,13 @@ function lintDirectory(dirPath, repoRoot) {
             }
           } else if (line.includes(term)) {
             warnings.push(`[未在地化詞彙] ${fgFile} 第 ${idx + 1} 行包含大陸慣用詞「${term}」`);
+          }
+        }
+
+        // Check common wrong / typo characters in Taiwan Traditional Chinese
+        for (const typo of TW_TYPO_TERMS) {
+          if (line.includes(typo.wrong)) {
+            errors.push(`[繁體選錯字] ${fgFile} 第 ${idx + 1} 行發現選錯字「${typo.wrong}」，應更正為標準正字「${typo.correct}」`);
           }
         }
       });

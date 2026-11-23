@@ -237,6 +237,40 @@ if (fs.existsSync(socialDir)) {
   }
 }
 
+// 4. Audit Typo and Misconverted Characters across All Posts & Social Packages
+try {
+  const { TYPO_RULES, scanFiles } = require('./audit_typos.js');
+  const allAuditedFiles = scanFiles(repoRoot);
+  for (const f of allAuditedFiles) {
+    const relPath = path.relative(repoRoot, f);
+    if (relPath.startsWith('scripts') || relPath.endsWith('AGENTS.md') || relPath.endsWith('GEMINI.md') || relPath.endsWith('QA_CHECKLIST.md')) continue;
+
+    let isTW = false;
+    let isCN = false;
+    if (relPath.includes('04_方格子') || relPath.includes('01_Facebook') || relPath.includes('02_LinkedIn') || relPath.includes('03_Threads')) {
+      isTW = true;
+    } else if (relPath.startsWith('_posts') || relPath.includes('07_知乎') || relPath.includes('05_微信') || relPath.includes('06_小紅書')) {
+      if (relPath.endsWith('-en.md')) continue;
+      isCN = true;
+    }
+
+    const fileContent = fs.readFileSync(f, 'utf8');
+    for (const rule of TYPO_RULES) {
+      if (rule.scope === 'tw' && !isTW) continue;
+      if (rule.scope === 'cn' && !isCN) continue;
+
+      rule.pattern.lastIndex = 0;
+      const matches = fileContent.match(rule.pattern);
+      if (matches) {
+        const unique = Array.from(new Set(matches)).join(', ');
+        addIssue('P0', relPath, `發現選錯字/誤轉字 [${unique}] - ${rule.suggestion}`, '修正為標準正字');
+      }
+    }
+  }
+} catch (e) {
+  console.error('Typo audit warning:', e.message);
+}
+
 // Generate Markdown QA Report
 let mdReport = `# 🍵 《心茶記》每日品質管理稽核報告 (QA Daily Report)
 **巡檢時間**：${report.timestamp} (${report.inspectedDate})
