@@ -36,18 +36,23 @@ function parseMermaid(code) {
       continue;
     }
 
-    const nodeMatches = line.matchAll(/([A-Za-z0-9_]+)\["([^"]+)"\]|([A-Za-z0-9_]+)\[([^\]]+)\]/g);
-    for (const m of nodeMatches) {
-      const id = m[1] || m[3];
-      const text = m[2] || m[4];
+    // Match nodes with brackets: ["..."], [...], {"..."}, {...}, (("...")), ((...)), ("..."), (...)
+    const nodeRegex = /([A-Za-z0-9_]+)\s*(?:\["([^"]+)"\]|\[([^\]]+)\]|\{"([^"]+)"\}|\{([^}]+)\}|\(\("([^"]+)"\)\)|\(\(([^)]+)\)\)|\("([^"]+)"\)|\(([^)]+)\))/g;
+    let m;
+    while ((m = nodeRegex.exec(line)) !== null) {
+      const id = m[1];
+      let text = m[2] || m[3] || m[4] || m[5] || m[6] || m[7] || m[8] || m[9] || id;
+      text = text.replace(/^["']+|["']+$/g, '').trim();
       if (!nodeMap.has(id)) {
         nodeMap.set(id, text);
         orderedNodes.push({ id, text });
       }
     }
 
-    const edgeMatches = line.matchAll(/([A-Za-z0-9_]+)(?:\[[^\]]*\])?\s*(?:-->|--[^-]+-->)\s*(?:\|([^|]*)\|\s*)?([A-Za-z0-9_]+)/g);
-    for (const em of edgeMatches) {
+    // Match edges: A --> B, A -->|label| B, A -->|"label"| B
+    const edgeRegex = /([A-Za-z0-9_]+)\s*(?:\[[^\]]*\]|\{[^}]*\}|\([^)]*\))?\s*(?:-->|--[^-]+-->)\s*(?:\|"?([^"|]*)"?\|\s*)?([A-Za-z0-9_]+)/g;
+    let em;
+    while ((em = edgeRegex.exec(line)) !== null) {
       edges.push({ from: em[1], to: em[3], label: em[2] ? em[2].trim() : '' });
     }
   }
@@ -55,15 +60,12 @@ function parseMermaid(code) {
   return { direction, nodes: orderedNodes, edges, nodeMap };
 }
 
-function renderNodeCard(text) {
-  const parts = text.split(/<br\s*\/?>/i);
-  const title = parts[0] ? parts[0].trim() : '';
-  const sub = parts.slice(1).join('<br>').trim();
-  let inner = `<strong style="color: #2d4a3e; font-size: 15px;">${title}</strong>`;
-  if (sub) {
-    inner += `<div style="color: #556b5d; font-size: 13.5px; margin-top: 4px; line-height: 1.5;">${sub}</div>`;
-  }
-  return `<div style="width: 100%; box-sizing: border-box; background: #ffffff; border: 1px solid #cad5c5; border-radius: 8px; padding: 12px 16px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">${inner}</div>`;
+function cleanParentheses(text) {
+  if (!text) return '';
+  return text
+    .replace(/^\s*[（(]+\s*/, '')
+    .replace(/\s*[）)]+\s*$/, '')
+    .trim();
 }
 
 function convertMermaidToHtml(mermaidCode, isTraditional = true) {
@@ -77,144 +79,126 @@ function convertMermaidToHtml(mermaidCode, isTraditional = true) {
   const lastNode = nodes[nodes.length - 1];
   const hasCycle = edges.some(e => e.to === firstNode.id && nodes.some(n => n.id === e.from));
 
-  // Check if it's a simple chain vs branching
-  const outgoingCount = {};
+  // Outgoing edges per node
+  const outgoing = new Map();
   edges.forEach(e => {
-    outgoingCount[e.from] = (outgoingCount[e.from] || 0) + 1;
+    if (!outgoing.has(e.from)) outgoing.set(e.from, []);
+    outgoing.get(e.from).push(e);
   });
-  const maxOutgoing = Math.max(0, ...Object.values(outgoingCount));
-  const isBranching = maxOutgoing > 1;
 
-  // Horizontal layout is strictly reserved for short single-line LR flows
-  const allShort = nodes.every(n => !n.text.includes('<br>') && n.text.length < 15);
-  const useHorizontal = direction === 'LR' && nodes.length <= 3 && !isBranching && !hasCycle && allShort;
+  // Find fork node (node with multiple outgoing edges)
+  const forkNode = nodes.find(n => (outgoing.get(n.id) || []).length > 1);
 
-  if (useHorizontal) {
-    const cardsHtml = nodes.map((node, idx) => {
-      let card = renderNodeCard(node.text);
-      if (idx < nodes.length - 1) {
-        card += `\n    <span style="color: #6b8e23; font-weight: bold; font-size: 1.2em; flex-shrink: 0;">➔</span>`;
-      }
-      return card;
-    }).join('\n    ');
-
-    return `<div style="background: rgba(230, 240, 232, 0.5); border: 1px solid #a3b899; border-radius: 12px; padding: 20px; margin: 24px 0;">\n  <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">\n    ${cardsHtml}\n  </div>\n</div>`;
-  }
-
-  // Vertical Stepper Layout (Default & Universal, using <table> for 100% WYSIWYG editor compatibility)
-  if (!isBranching) {
-    const tableRows = [];
-    nodes.forEach((node, idx) => {
-      const parts = node.text.split(/<br\s*\/?>/i);
-      const title = parts[0] ? parts[0].trim() : '';
+  // 1. Universal Rich-Text Safe Blockquote: Single-line Linear Stepper (!forkNode)
+  if (!forkNode) {
+    const stepsHtml = [];
+    nodes.forEach((n, idx) => {
+      const parts = n.text.split(/<br\s*\/?>/i);
+      const title = parts[0].trim().replace(/^\d+[\.、\s]+/, '');
       const sub = parts.slice(1).join('<br>').trim();
-      let inner = `<strong style="color: #2d4a3e; font-size: 15px;">${title}</strong>`;
+      const numEmoji = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣'][idx] || `Step ${idx + 1}`;
+      
+      let stepStr = `<p style="margin: 6px 0; font-size: 15px; line-height: 1.6;"><strong style="color: #2d4a3e;">${numEmoji} ${title}</strong>`;
       if (sub) {
-        inner += `<div style="color: #556b5d; font-size: 13.5px; margin-top: 4px; line-height: 1.5;">${sub}</div>`;
+        stepStr += `<br><span style="color: #556b5d; font-size: 13.5px; padding-left: 24px; display: inline-block;">${sub}</span>`;
       }
-      tableRows.push(`    <tr>\n      <td style="background: #ffffff; border: 1px solid #cad5c5; border-radius: 8px; padding: 12px 16px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">${inner}</td>\n    </tr>`);
+      stepStr += `</p>`;
+      stepsHtml.push(stepStr);
+
       if (idx < nodes.length - 1) {
-        tableRows.push(`    <tr>\n      <td style="text-align: center; padding: 3px 0; color: #6b8e23; font-weight: bold; font-size: 18px; line-height: 1;">↓</td>\n    </tr>`);
+        stepsHtml.push(`<p style="margin: 2px 0 2px 14px; color: #6b8e23; font-weight: bold; font-size: 16px; line-height: 1;">↓</p>`);
       }
     });
 
-    let loopRow = '';
+    let loopHtml = '';
     if (hasCycle) {
       const loopLabel = isTraditional
         ? '形成經驗學習的正向閉環（循環驅動下一輪具體行動）'
         : '形成经验学习的正向闭环（循环驱动下一轮具体行动）';
-      loopRow = `\n    <tr>\n      <td style="text-align: center; padding: 3px 0; color: #6b8e23; font-weight: bold; font-size: 18px; line-height: 1;">↓</td>\n    </tr>\n    <tr>\n      <td style="background: #ffffff; border: 1.5px dashed #a3b899; border-radius: 20px; padding: 8px 16px; text-align: center; color: #2d4a3e; font-size: 13.5px;">\n        <span style="color: #6b8e23; font-weight: bold; font-size: 1.15em;">↺</span> <strong>${isTraditional ? '循環閉環' : '循环闭环'}</strong>：${loopLabel}\n      </td>\n    </tr>`;
+      loopHtml = `\n  <p style="margin: 10px 0 0 0; padding-top: 10px; border-top: 1px dashed #a3b899; color: #2d4a3e; font-size: 13.5px;"><span style="color: #6b8e23; font-weight: bold; font-size: 1.15em;">↺</span> <strong>${isTraditional ? '循環閉環' : '循环闭环'}</strong>：${loopLabel}</p>`;
     }
 
-    return `<div style="background: rgba(230, 240, 232, 0.45); border: 1px solid #a3b899; border-radius: 12px; padding: 20px 16px; margin: 24px 0;">\n<table style="width: 100%; max-width: 520px; margin: 0 auto; border-collapse: separate; border-spacing: 0 4px; border: none;">\n  <tbody>\n${tableRows.join('\n')}${loopRow}\n  </tbody>\n</table>\n</div>`;
+    return `<blockquote style="background: rgba(230, 240, 232, 0.45); border-left: 4px solid #a3b899; padding: 16px 20px; margin: 24px 0; border-radius: 4px; color: #2d4a3e;">
+  <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 15.5px; color: #1e3324;">🧭 <strong>${isTraditional ? '流程推演' : '流程推演'}：</strong></p>
+  ${stepsHtml.join('\n  ')}${loopHtml}
+</blockquote>`;
   }
 
-  // Branching Layout: Converted into a high-compatibility native <table> for WYSIWYG editors
-  const rootNode = nodes[0];
-  const rootEdges = edges.filter(e => e.from === rootNode.id);
-  const branchTargets = rootEdges.map(e => e.to);
+  // 2. Universal Rich-Text Safe Blockquote: Branching / Decision Flowcharts
+  // Prelude nodes (nodes preceding the fork)
+  const preludeNodes = [];
+  let curr = nodes[0];
+  while (curr && curr.id !== forkNode.id) {
+    preludeNodes.push(curr);
+    const nextEdge = (outgoing.get(curr.id) || [])[0];
+    curr = nextEdge ? nodes.find(n => n.id === nextEdge.to) : null;
+  }
 
-  const branches = branchTargets.map(targetId => {
-    const branchNodes = [nodes.find(n => n.id === targetId)].filter(Boolean);
-    let curr = targetId;
-    while (true) {
-      const nextEdge = edges.find(e => e.from === curr && e.to !== rootNode.id);
-      if (nextEdge) {
-        const nextNode = nodes.find(n => n.id === nextEdge.to);
-        if (nextNode && !branchNodes.some(bn => bn.id === nextNode.id)) {
-          branchNodes.push(nextNode);
-          curr = nextNode.id;
-          continue;
-        }
-      }
-      break;
+  let headerHtml = '';
+  if (preludeNodes.length > 0) {
+    const pTexts = preludeNodes.map(p => {
+      const parts = p.text.split(/<br\s*\/?>/i);
+      const cleanSub = cleanParentheses(parts.slice(1).join(' ').trim());
+      return `<strong>${parts[0].trim()}</strong>${cleanSub ? ` <span style="font-weight: normal; font-size: 13.5px; color: #556b5d;">（${cleanSub}）</span>` : ''}`;
+    }).join(' ➔ ');
+    headerHtml = `<p style="margin: 0 0 6px 0; font-weight: bold; font-size: 15.5px; color: #1e3324;">🌲 ${pTexts}</p>`;
+    const forkParts = forkNode.text.split(/<br\s*\/?>/i);
+    headerHtml += `<p style="margin: 0 0 14px 0; font-size: 14px; color: #4a6654; font-weight: 500;">${isTraditional ? '決策焦點' : '决策焦点'}：${forkParts[0].trim()}</p>`;
+  } else {
+    const forkParts = forkNode.text.split(/<br\s*\/?>/i);
+    const cleanSub = cleanParentheses(forkParts.slice(1).join(' ').trim());
+    headerHtml = `<p style="margin: 0 0 14px 0; font-weight: bold; font-size: 15.5px; color: #1e3324;">🌲 <strong>${forkParts[0].trim()}</strong>${cleanSub ? ` <span style="font-weight: normal; font-size: 13.5px; color: #556b5d;">（${cleanSub}）</span>` : ''}</p>`;
+  }
+
+  // Follow each branch emerging from forkNode
+  const forkEdges = outgoing.get(forkNode.id) || [];
+  const branchSections = [];
+
+  forkEdges.forEach((edge, bIdx) => {
+    const branchNodes = [];
+    let bCurr = nodes.find(n => n.id === edge.to);
+    while (bCurr) {
+      branchNodes.push(bCurr);
+      const nextEdge = (outgoing.get(bCurr.id) || [])[0];
+      bCurr = nextEdge ? nodes.find(n => n.id === nextEdge.to) : null;
     }
-    return branchNodes;
+
+    const bAllText = (edge.label + ' ' + branchNodes.map(n => n.text).join(' '));
+    const isPositive = /增量|破局|解決|渴望|動態|校準|微步|保護|春天|持續|🌿|✅|💡|增量|破局|解决|渴望|动态|校准|微步|保护|持续/.test(bAllText) || bIdx === forkEdges.length - 1;
+
+    const badgeIcon = isPositive ? '💡' : '⚠️';
+    const badgeName = isPositive
+      ? (isTraditional ? '破局路徑' : '破局路径')
+      : (isTraditional ? `路徑 ${bIdx + 1}` : `路径 ${bIdx + 1}`);
+    const badgeColor = isPositive ? '#2d4a3e' : '#8c4e48';
+    const arrowColor = isPositive ? '#6b8e23' : '#b27a76';
+
+    const branchLines = [];
+    if (edge.label) {
+      const cleanEdgeLabel = edge.label.replace(/^[⚠️💡❌🌿✅\s]+/, '').trim();
+      branchLines.push(`<p style="margin: 8px 0 4px 0; font-size: 15px; line-height: 1.6;"><strong style="color: ${badgeColor};">${badgeIcon} ${badgeName}：${cleanEdgeLabel}</strong></p>`);
+    }
+
+    branchNodes.forEach((bn, bnIdx) => {
+      const parts = bn.text.split(/<br\s*\/?>/i);
+      let t = parts[0].trim().replace(/^[⚠️💡❌🌿✅\s]+/, '').trim();
+      let s = parts.slice(1).join('<br>').trim();
+
+      if (!edge.label && bnIdx === 0) {
+        branchLines.push(`<p style="margin: 8px 0 4px 0; font-size: 15px; line-height: 1.6;"><strong style="color: ${badgeColor};">${badgeIcon} ${badgeName}：${t}</strong>${s ? `<br><span style="color: #556b5d; font-size: 13.5px; padding-left: 24px; display: inline-block;">${s}</span>` : ''}</p>`);
+      } else {
+        branchLines.push(`<p style="margin: 2px 0 2px 14px; color: ${arrowColor}; font-weight: bold; font-size: 15px; line-height: 1;">↓</p>`);
+        branchLines.push(`<p style="margin: 4px 0; font-size: 14.5px; line-height: 1.5; padding-left: 24px; color: ${isPositive ? '#2d4a3e' : '#5c3a36'};"><strong>${t}</strong>${s ? `<br><span style="color: #62786a; font-size: 13px;">${s}</span>` : ''}</p>`);
+      }
+    });
+
+    branchSections.push(branchLines.join('\n  '));
   });
 
-  const allTexts = nodes.map(n => n.text).join(' ');
-  const isContrast = /反擊|退縮|攻擊|防禦|陷阱|對撞|肉搏|死局|破局|解決|借力打力|反击|退缩|防御|对撞|肉搏/.test(allTexts);
-
-  const rootParts = rootNode.text.split(/<br\s*\/?>/i);
-  const rootTitle = rootParts[0] ? rootParts[0].trim() : '';
-  const rootSub = rootParts.slice(1).join(' ').trim();
-
-  const rowsHtml = branches.map((bNodes, bIdx) => {
-    const isLastBranch = bIdx === branches.length - 1;
-    const isHighlight = isContrast && isLastBranch;
-    const rowBg = isHighlight ? '#f4f8f5' : (bIdx % 2 === 1 ? '#f9fbf9' : '#ffffff');
-    const borderColor = isHighlight ? '#a3b899' : '#e2ece5';
-
-    const firstNode = bNodes[0];
-    const restNodes = bNodes.slice(1);
-
-    const firstParts = firstNode ? firstNode.text.split(/<br\s*\/?>/i) : [''];
-    const branchTitle = firstParts[0].trim();
-    const branchSub = firstParts.slice(1).join('<br>').trim();
-
-    let tagBadge = '';
-    if (isContrast) {
-      tagBadge = isHighlight
-        ? `<span style="display: inline-block; background: #eaf1ec; color: #2d4a3e; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px;">💡 ${isTraditional ? '破局路徑' : '破局路径'}</span><br>`
-        : `<span style="display: inline-block; background: #fdf2f0; color: #8c4e48; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px;">⚠️ ${isTraditional ? `路徑 ${bIdx + 1}` : `路径 ${bIdx + 1}`}</span><br>`;
-    }
-
-    const col1Content = `
-      ${tagBadge}<strong style="color: ${isHighlight ? '#2d4a3e' : '#1e3324'}; font-size: 15px;">${branchTitle}</strong>
-      ${branchSub ? `<div style="color: #556b5d; font-size: 13.5px; margin-top: 4px; line-height: 1.5;">${branchSub}</div>` : ''}
-    `;
-
-    const col2Content = restNodes.map(rn => {
-      const parts = rn.text.split(/<br\s*\/?>/i);
-      const t = parts[0].trim();
-      const s = parts.slice(1).join('<br>').trim();
-      return `<div style="margin: 4px 0;"><span style="color: #2c2523; font-weight: 500;">${t}</span>${s ? `<div style="color: #62786a; font-size: 13px;">${s}</div>` : ''}</div>`;
-    }).join('<div style="color: #a3b899; text-align: center; font-size: 13px; line-height: 1.2;">↓</div>') || '—';
-
-    return `    <tr style="background-color: ${rowBg}; border-bottom: 1px solid ${borderColor};">
-      <td style="padding: 14px 16px; border: 1px solid ${borderColor}; width: 45%; vertical-align: top;">
-        ${col1Content}
-      </td>
-      <td style="padding: 14px 16px; border: 1px solid ${borderColor}; width: 55%; vertical-align: top; line-height: 1.6;">
-        ${col2Content}
-      </td>
-    </tr>`;
-  }).join('\n');
-
-  return `<div style="overflow-x: auto; margin: 24px 0;">
-<table style="width: 100%; border-collapse: collapse; border: 1.5px solid #a3b899; border-radius: 8px; overflow: hidden; background: #ffffff;">
-  <thead>
-    <tr style="background-color: #eaf1ec; border-bottom: 2px solid #a3b899;">
-      <th colspan="2" style="padding: 14px 18px; color: #1e3324; font-weight: bold; border: 1px solid #d5e2d8; font-size: 15.5px; text-align: center;">
-        🌲 ${rootTitle}${rootSub ? ` <span style="font-weight: normal; font-size: 13.5px; color: #4a6654;">（${rootSub}）</span>` : ''}
-      </th>
-    </tr>
-  </thead>
-  <tbody>
-${rowsHtml}
-  </tbody>
-</table>
-</div>`;
+  return `<blockquote style="background: rgba(230, 240, 232, 0.45); border-left: 4px solid #a3b899; padding: 16px 20px; margin: 24px 0; border-radius: 4px; color: #2d4a3e;">
+  ${headerHtml}
+  ${branchSections.join('\n\n  <hr style="border: none; border-top: 1px dashed #cad5c5; margin: 14px 0;">\n\n  ')}
+</blockquote>`;
 }
 
 function inlineFormat(text) {
