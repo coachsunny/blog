@@ -44,18 +44,15 @@ In professional coaching, we don't dwell on past excuses or ask, "Why couldn't y
 
 Instead, we shift to a forward-looking **Solution Focus**:
 
-```mermaid
-flowchart TD
-    Start["Facing a Desired Change"] --> Choice{"Which mindset do you set sail with?"}
-
-    Choice -->|"The 'Try' Mindset<br>(Guarded Exit)"| A1["Low Commitment (3~4/10)<br>Focusing on a graceful escape"]
-    A1 --> A2["Small Obstacle Appears<br>Magnifies doubt, triggers excuses"]
-    A2 --> A3["Quit Halfway<br>Reinforces feeling of defeat ⚠️"]
-
-    Choice -->|"The Ownership Mindset<br>(Vision Pull)"| B1["100% Inner Ownership<br>Pulled forward by a clear vision"]
-    B1 --> B2["Anticipate Hidden Reefs<br>Prepare simple backup plans"]
-    B2 --> B3["Self-Efficacy Grows<br>Creates a sustainable positive cycle 💡"]
-```
+> 🌲 **Mental Framework: Two Mindsets When Starting Change**
+>
+> ❌ **"Just Try It" Mindset (Looking for Exit Doors)**
+> ・Commitment: Low (3-5/10), looking for safe excuses to quit.
+> ・When hurdles hit: Small hiccups feel huge, leading to giving up.
+>
+> 💡 **"Ownership" Mindset (Driven by Clear Vision)**
+> ・Commitment: 100% inside, clearly seeing the better tomorrow.
+> ・When hurdles hit: Anticipates obstacles, prepares backup cushions.
 
 We ask clear, inspiring questions instead:
 * "If this change actually happens, what sweet rewards and real freedom will it bring to your daily life?"
@@ -103,12 +100,12 @@ Talking about potential difficulties isn't negative thinking—**it's packing li
 
 Storms happen at sea; that's just nature, not proof that you're a bad captain. What matters is whether you saw the storm coming and prepared a simple game plan:
 
-```mermaid
-flowchart TD
-    A["1. Spot Hidden Reefs<br>Identify what easily disrupts your rhythm"] --> B["2. Build 'If... Then...' Formulas<br>Automate your response in advance"]
-    B --> C["3. Line Up Practical Resources<br>Have life jackets and support ready"]
-    C --> D["4. Sail Through with Ease<br>Zero panic, clear direction forward 🌿"]
-```
+> 🌲 **Action Steps: 4 Steps to Navigate Hurdles**
+>
+> 1. **Spot Hidden Reefs**: Identify what usually throws you off track.  
+> 2. **Use "If-Then" Plans**: Automate your response before stress hits.  
+> 3. **Build Safety Airbags**: Gather people and quiet spaces to support you.  
+> 4. **Sail Through Smoothly**: Treat bumps as normal road conditions, not failure.
 
 For instance, instead of making a dramatic vow like "I will never stay up late again," ask yourself calmly:
 * "If I have to work late next week and feel completely drained, what is one tiny, gentle ritual I can do instead so I don't lose my momentum?"

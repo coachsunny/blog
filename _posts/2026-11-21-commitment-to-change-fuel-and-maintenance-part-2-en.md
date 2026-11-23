@@ -40,14 +40,15 @@ They compare where they are today—still clumsy, still making mistakes—with a
 
 To break free, we must shift to **"The Gain"**—measuring backward from where you started rather than measuring forward against perfection:
 
-```mermaid
-flowchart TD
-    Focus["Measuring Your Progress"] --> Gap["⚠️ The Gap Mindset<br>Compare clumsy today against distant perfection"]
-    Gap --> G1["Magnifies mistakes & triggers shame<br>Emotional fuel drains completely ❌"]
-    
-    Focus --> Gain["💡 The Gain Mindset<br>Compare today against who you were before"]
-    Gain --> N1["Acknowledge awareness & small wins<br>Brain stays energized to keep moving forward 🌿"]
-```
+> 🌲 **Mental Framework: Two Ways to Look at Progress**
+>
+> ❌ **The Gap Mindset (Running Out of Energy)**
+> ・Focus: Comparing today's messy effort against an impossible perfect goal.
+> ・Result: Feeling behind, anxious, and beating yourself up.
+>
+> 💡 **The Gain Mindset (Building Real Confidence)**
+> ・Focus: Comparing today with where you started before you made this choice.
+> ・Result: Real pride in small steps, giving your mind steady fuel.
 
 In coaching sessions, clients often tell me: *"Sunny, I messed up again this week. I lost my patience with my team."*
 
@@ -66,12 +67,10 @@ Many people try to fight distraction with strict force: deleting apps, locking t
 
 The secret is not fighting the noise; it is **reconnecting with the deeper vision you set during Step 1 (Ownership)**.
 
-```mermaid
-flowchart TD
-    A["Endless notifications & daily chores<br>（External attention pull）"] --> Choice{"How do you respond to noise?"}
-    Choice -->|"Brute-force resistance"| B["Willpower drains quickly & pushes back ❌"]
-    Choice -->|"Reconnect with core vision"| C["Create a 10-minute Focus Island<br>Find calm inside a busy day 💡"]
-```
+> 🌲 **Mental Framework: Two Ways to Handle Distractions**
+>
+> ❌ **Pure Willpower Battle**: Trying to force yourself to ignore all pings, ending in burnout.  
+> 💡 **Reconnecting with Vision**: Creating a 10-minute quiet island each day to grow steadily.
 
 When your inner vision is clear, small distractions naturally fade into the background. You don't need a month off from life to grow. Instead, you develop the ability to find quiet pockets inside a busy day.
 
@@ -92,13 +91,10 @@ Pushing through blindly often leads to burnout and self-blame.
 Remember this:
 **When your life changes, pausing to review your path and adjusting your goal is not giving up. It is the highest form of self-responsibility.**
 
-```mermaid
-flowchart TD
-    A["Life circumstances change<br>(Health, career, or family needs)"] --> B{"How will you handle your goal?"}
-    B -->|"Cling blindly to the old plan"| C["Exhaustion and self-blame ❌"]
-    B -->|"Adjust your compass"| D["Acknowledge your current capacity<br>Reset a realistic micro-step ✅"]
-    D --> E["Protect your confidence<br>Keep growing with joy 🌿"]
-```
+> 🌲 **Mental Framework: Adjusting When Life Changes**
+>
+> ❌ **Rigid Targets**: Forcing yourself through illness or chaos, feeling like a failure.  
+> 💡 **Flexible Targets**: Honestly adjusting your daily steps to protect your confidence.
 
 Replacing a goal that suffocates you rescues you from the trap of feeling like a failure.
 

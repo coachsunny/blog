@@ -81,18 +81,12 @@ For example, asking nervous parents for bold startup advice often gets you worry
 
 Here is a simple map we use in coaching to organize your circle:
 
-```mermaid
-flowchart TD
-    Core["Your Core Goals & Life Direction"] --> D1["1. Emotional & Mindset Support<br>(Holding Space & Deep Reflection)"]
-    Core --> D2["2. Strategic & Professional Support<br>(Spotting Pitfalls & Saving Time)"]
-    Core --> D3["3. Operational Support<br>(Complementary Skills & Daily Teamwork)"]
-    Core --> D4["4. Habit & Peer Support<br>(Positive Energy & Mutual Accountability)"]
-    
-    D1 --> R1["Certified Coach / Close Friend / Therapist"]
-    D2 --> R2["Industry Mentor / Lawyer / Financial Advisor"]
-    D3 --> R3["Teammate / Assistant / Project Collaborator"]
-    D4 --> R4["Gym Buddy / Study Partner / Learning Group"]
-```
+> 🌲 **Mental Framework: 4 Kinds of People Support**
+>
+> ・**1. Emotional Support** (Listening & feeling understood) $\rightarrow$ Coaches, close friends, counselors  
+> ・**2. Expert Advice** (Making good choices & avoiding pitfalls) $\rightarrow$ Mentors, lawyers, advisors  
+> ・**3. Teamwork Support** (Sharing tasks & strengths) $\rightarrow$ Teammates, assistants, partners  
+> ・**4. Habit Support** (Growing together in a good environment) $\rightarrow$ Study buddies, workout partners
 
 ### 1. Emotional & Mindset Support
 * **What they do**: They don't jump in with quick fixes. They listen without judgment, giving your heart and mind a safe room to breathe.

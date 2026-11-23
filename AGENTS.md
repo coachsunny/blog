@@ -120,9 +120,14 @@
 
 ---
 
-## 🛠️ 五、 專案核心工作區技能 (Workspace Skills)
+## 🛠️ 五、 專案核心工作區技能 (Workspace Skills) 與品質管理 (QA)
 
-本專案於 `.agents/skills/` 內建 3 套全自動化工作區技能，供 AI 助理隨時調用：
+本專案配置有常態化品質管理守門人機制與工作區技能：
+
+0. **品質管理守門人 (QA Gatekeeper)**：
+   - 參照 [`QA_CHECKLIST.md`](file:///d:/blog/QA_CHECKLIST.md) 六大核心稽核維度。
+   - 每日巡檢執行腳本：`node scripts/daily_qa_audit.js`。
+   - 自動產出並維護最新品管日報 [`QA_REPORT_LATEST.md`](file:///d:/blog/QA_REPORT_LATEST.md)。
 
 1. **`mindtea-publish`** ([`SKILL.md`](file:///d:/blog/.agents/skills/mindtea-publish/SKILL.md))：
    - 統籌「文章撰寫 $\rightarrow$ 封面生成 $\rightarrow$ 13 項社群分發包產製 $\rightarrow$ 9:16 短影音渲染 $\rightarrow$ 兩岸防呆檢驗 $\rightarrow$ Git 部署」端到端全流程。

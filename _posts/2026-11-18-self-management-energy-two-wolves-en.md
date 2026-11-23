@@ -132,11 +132,11 @@ Pause for two seconds and ask yourself these two questions:
 
 Real self-management doesn't require giant speeches. It only needs you to shift your attention at key moments during the day:
 
-```mermaid
-flowchart LR
-    A["Step 1: Catch<br>(Notice the fear wolf begging for food)"] --> B["Step 2: Starve<br>(Cut off the attention to bad thoughts)"]
-    B --> C["Step 3: Feed<br>(Take a tiny action to feed the peace wolf)"]
-```
+> 🌲 **Steps: 3 Steps of Inner Energy Management**
+>
+> ・**Step 1: Catch** (Notice when the fearful wolf is asking for negative thoughts)  
+> ・**Step 2: Starve** (Gently stop feeding it worry, blame, and victim stories)  
+> ・**Step 3: Feed** (Take a small, positive action to feed the wise wolf inside)
 
 ### Step 1: Catch — Notice Your Body's Alarm
 When the negative wolf wants attention, your body knows before your brain does:

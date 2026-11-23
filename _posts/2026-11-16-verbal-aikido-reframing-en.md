@@ -36,17 +36,19 @@ In life and communication, this quiet skill is called **"Verbal Aikido."**
 
 When someone throws a harsh remark at us, our brains usually choose one of two reflexes: **Fight** or **Freeze**.
 
-```mermaid
-flowchart TD
-    Attack["Someone shuts you down:<br>'That idea is stupid, it will never work!'"] --> Reaction1["【Reflex 1: Fight Back】<br>'Who are you to talk? You do it then!'"]
-    Attack --> Reaction2["【Reflex 2: Freeze & Cave In】<br>'Maybe they're right... I'm just terrible.'"]
-    
-    Reaction1 --> Trap1["They get defensive; turns into an exhausting ego tug-of-war"]
-    Reaction2 --> Trap2["You feel small, lose confidence, and give up your voice"]
-    
-    Attack --> Aikido["【Verbal Aikido: Ride the Momentum】<br>1. Agree with the difficulty<br>2. Reframe harsh words<br>3. Invite their advice"]
-    Aikido --> Solution["Turns a harsh judge into a helpful problem solver"]
-```
+> 🌲 **Mental Framework: 3 Ways to Handle Harsh Criticism**
+>
+> ❌ **Fight Back (Anger & Clashing)**
+> ・Reaction: "What do you know? If you're so smart, you do it!"
+> ・Result: Causes a power struggle and emotional fight.
+>
+> ❌ **Shrink Back (Self-Blame & Retreat)**
+> ・Reaction: "Maybe I really am just stupid..."
+> ・Result: Gives away your power and confidence.
+>
+> 💡 **Verbal Aikido (Using Their Energy to Step Forward)**
+> ・Reaction: ① Accept the difficulty $\rightarrow$ ② Lower the extreme words $\rightarrow$ ③ Invite them to help solve it.
+> ・Result: Turns a harsh critic into a teammate working with you.
 
 ### 1. Fighting Back: Stepping Straight into Their Trap
 When you shout back, *"No, it's not impossible!"*, you enter an ego tug-of-war. 
@@ -64,11 +66,11 @@ In the martial art of Aikido, you never block a punch head-on. You step aside, c
 
 In conversation, you can do this with three simple moves:
 
-```mermaid
-flowchart LR
-    Step1["Step 1: Disarm<br>'You're right'"] --> Step2["Step 2: Reframe<br>Turn 'impossible' into 'hard'<br>Turn 'stupid' into 'unwise'"]
-    Step2 --> Step3["Step 3: Invite Help<br>'What needs to happen?'<br>'What would you do instead?'"]
-```
+> 🌲 **Action Steps: The 3 Steps of Verbal Aikido**
+>
+> ・**Step 1: Release Resistance** ("You're right, this is tricky")  
+> ・**Step 2: Soften Harsh Words** (Turn "impossible" into "challenging", turn "stupid" into "needs more thought")  
+> ・**Step 3: Invite Them in** ("What would make it work? If you were in my shoes, what would you try?")
 
 ### Step 1: Agree First, So the Punch Hits Thin Air
 * They say: *"This will never work in a million years!"*

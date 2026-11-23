@@ -91,12 +91,12 @@ When you feel bad about yourself, big lectures don't help.
 
 You need four simple, practical steps you can use right away:
 
-```mermaid
-flowchart LR
-    A["Step 1: Pause & Breathe<br>(Care for your feelings)"] --> B["Step 2: Step Back<br>(Be the clock on the wall)"]
-    B --> C["Step 3: Drop the Standard<br>(Let go of the Gap)"]
-    C --> D["Step 4: Notice Your Gains<br>(Today's me vs. Yesterday's me)"]
-```
+> 🌲 **Mental Framework: 4 Steps of Self-Acknowledgement**
+>
+> ・**Step 1: Pause and Reset** (Take care of your feelings first)  
+> ・**Step 2: Step Back** (Look at yourself like a quiet clock on the wall)  
+> ・**Step 3: Drop Perfect Standards** (Let go of the Gap, allow imperfection)  
+> ・**Step 4: Focus on the Gain** (Compare today with yesterday, celebrate small steps)
 
 ### Step 1: Pause and Breathe — Care for Your Feelings First
 When self-blame is running wild, you can't think clearly.

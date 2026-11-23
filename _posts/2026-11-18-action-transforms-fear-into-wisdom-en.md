@@ -49,12 +49,15 @@ Think of anxiety through the lens of basic physics. Energy cannot be created or 
 
 This energy is neutral. What matters is where it goes:
 
-```mermaid
-flowchart LR
-    A["Floating Fear of Unknown<br>(Trapped in the head)"] --> B["Mental Burnout<br>(Friction and exhaustion)"]
-    A --> C["Tiny Micro-Action<br>(Grounding lightning rod)"]
-    C --> D["Real Physical Feedback<br>(Fear melts into wisdom)"]
-```
+> 🌲 **Mental Framework: Two Paths When Facing Fear**
+>
+> ❌ **Waiting and Overthinking (Inner Exhaustion)**
+> ・Focus: Brain pictures the worst disaster while sitting still.
+> ・Result: High friction, zero movement, draining your energy.
+>
+> 💡 **Tiny Action Steps (Grounding Your Energy)**
+> ・Focus: Acts like a lightning rod, grounding anxiety into reality.
+> ・Result: Collects real physical feedback, melting fear into wisdom.
 
 * **Thinking without doing creates internal friction**: When you lock this high-powered energy inside your skull, trying to "think your way out of uncertainty," it has nowhere to go. It turns inward, showing up as tight muscles, a sour stomach, and endless self-criticism.
 * **Action acts like a grounding wire**: Taking real, physical action gives that trapped energy a healthy exit into the physical world.
@@ -70,13 +73,12 @@ That wasn't magic. It is basic biology: **When your body starts moving in the re
 
 The famous educator David Kolb created what is known as the **Experiential Learning Cycle**. He showed that true growth and understanding must go through a complete four-step circle:
 
-```mermaid
-flowchart TD
-    Act["1. Concrete Action"] --> Exp["2. Real Experience"]
-    Exp --> Ref["3. Reflection"]
-    Ref --> Wis["4. Inner Wisdom"]
-    Wis --> Act
-```
+> 🌲 **Action Loop: Turning Fear into Wisdom in 4 Steps**
+>
+> 1. **Concrete Action**: Take one tiny step with zero pressure.  
+> 2. **Real Experience**: Feel what actually happens in reality.  
+> 3. **Quiet Reflection**: Step back and see: "The worst scenario didn't happen."  
+> 4. **Inner Wisdom**: Turn the experience into real confidence for next time.
 
 In this circle, **action is the only spark that gets the engine running**.
 
