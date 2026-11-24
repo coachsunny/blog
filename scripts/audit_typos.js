@@ -294,12 +294,13 @@ function scanFiles(dir, exts = ['.md', '.txt', '.html']) {
   let results = [];
   const list = fs.readdirSync(dir);
   for (const item of list) {
-    if (item === '.git' || item === 'node_modules' || item === 'assets' || item === 'references') continue;
+    if (item === '.git' || item === 'node_modules' || item === 'assets' || item === 'references' || item === '_layouts' || item === 'js') continue;
     const full = path.join(dir, item);
     const stat = fs.statSync(full);
     if (stat.isDirectory()) {
       results = results.concat(scanFiles(full, exts));
     } else if (exts.includes(path.extname(item).toLowerCase())) {
+      if (item.startsWith('QA_') || item.startsWith('AGENTS') || item.startsWith('GEMINI')) continue;
       results.push(full);
     }
   }

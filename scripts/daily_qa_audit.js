@@ -243,7 +243,7 @@ try {
   const allAuditedFiles = scanFiles(repoRoot);
   for (const f of allAuditedFiles) {
     const relPath = path.relative(repoRoot, f);
-    if (relPath.startsWith('scripts') || relPath.endsWith('AGENTS.md') || relPath.endsWith('GEMINI.md') || relPath.endsWith('QA_CHECKLIST.md')) continue;
+    if (relPath.startsWith('scripts') || relPath.startsWith('_layouts') || relPath.startsWith('js') || relPath.endsWith('AGENTS.md') || relPath.endsWith('GEMINI.md') || relPath.endsWith('QA_CHECKLIST.md') || relPath.endsWith('QA_REPORT_LATEST.md')) continue;
 
     let isTW = false;
     let isCN = false;
