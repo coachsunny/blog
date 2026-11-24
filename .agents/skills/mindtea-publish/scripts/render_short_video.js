@@ -324,25 +324,28 @@ function renderShortVideo(targetFolder) {
     const transDur = 1.0; // 1.0s smooth crossfade transition
     const extraTime = (sceneFiles.length - 1) * transDur;
     const clipDur = (dur + extraTime) / sceneFiles.length;
+    const totalLoopTime = Math.ceil(dur + 10);
+    const step = clipDur - transDur;
 
     let inputArgs = '';
     let filterPipes = '';
 
     sceneFiles.forEach((file, idx) => {
-      inputArgs += `-loop 1 -t ${clipDur.toFixed(3)} -i "${file}" `;
+      // Loop for full video length so later inputs don't reach EOF before their transition offset
+      inputArgs += `-loop 1 -t ${totalLoopTime} -i "${file}" `;
       filterPipes += `[${idx}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,fps=30[v${idx}];`;
     });
 
     let lastStream = 'v0';
     for (let i = 1; i < sceneFiles.length; i++) {
-      const offset = (i * clipDur - i * transDur).toFixed(3);
+      const offset = (i * step).toFixed(3);
       const outStream = (i === sceneFiles.length - 1) ? 'vfade' : `f${i}`;
       filterPipes += `[${lastStream}][v${i}]xfade=transition=fade:duration=${transDur}:offset=${offset}[${outStream}];`;
       lastStream = outStream;
     }
 
     const filterComplex = `${filterPipes}[vfade]eq=contrast=1.04:brightness=0.01,subtitles=${assFileName}[v]`;
-    cmd = `"${ffmpeg}" -y ${inputArgs}-i "${voiceFileName}" -filter_complex "${filterComplex}" -map "[v]" -map ${sceneFiles.length}:a -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${outVideoFileName}"`;
+    cmd = `"${ffmpeg}" -y ${inputArgs}-i "${voiceFileName}" -filter_complex "${filterComplex}" -map "[v]" -map ${sceneFiles.length}:a -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -t ${dur} "${outVideoFileName}"`;
   } else {
     // Single image fallback
     cmd = `"${ffmpeg}" -y -loop 1 -framerate 30 -i "${coverFileName}" -i "${voiceFileName}" -filter_complex "[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,eq=contrast=1.04:brightness=0.01[bg];[bg]subtitles=${assFileName}[v]" -map "[v]" -map 1:a -c:v libx264 -preset fast -crf 22 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest "${outVideoFileName}"`;
