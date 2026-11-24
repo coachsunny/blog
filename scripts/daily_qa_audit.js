@@ -234,6 +234,15 @@ if (fs.existsSync(socialDir)) {
         addIssue('P0', `${d}/04_方格子.md`, `方格子專欄檢測到殘留簡體字: [${leakedChars.join(', ')}]`, '執行繁體化轉換與在地化辭庫校對');
       }
     }
+
+    // short_video.mp4 multi-scene check
+    const videoPath = path.join(fullDirPath, 'short_video.mp4');
+    if (fs.existsSync(videoPath)) {
+      const scenes = fs.readdirSync(fullDirPath).filter(f => /^scene[_-]?\d+\.(mp4|mov|mkv|jpg|jpeg|png)$/i.test(f));
+      if (scenes.length <= 1) {
+        addIssue('P1', `${d}/short_video.mp4`, '短影音缺少多分鏡素材 (scene_1~scene_5)，可能降級為單圖播放', '補充分鏡素材並重新渲染多圖平滑轉場');
+      }
+    }
   }
 }
 

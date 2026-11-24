@@ -3,6 +3,17 @@ const path = require('path');
 const { execSync } = require('child_process');
 const { s2tw, tw2s } = require('../../cross-strait-localization/scripts/convert_text.js');
 
+function findRepoRoot(startDir) {
+  let cur = startDir;
+  while (cur && path.dirname(cur) !== cur) {
+    if (fs.existsSync(path.join(cur, '_posts')) || fs.existsSync(path.join(cur, '.git'))) {
+      return cur;
+    }
+    cur = path.dirname(cur);
+  }
+  return path.resolve(startDir, '../../../..');
+}
+
 function findFFmpeg() {
   try {
     execSync('ffmpeg -version', { stdio: 'ignore' });
@@ -271,9 +282,31 @@ function renderShortVideo(targetFolder) {
   const outVideoFileName = path.basename(outVideo);
 
   // Check for multi-scene video clips or images
-  const sceneFiles = fs.readdirSync(folder)
+  let sceneFiles = fs.readdirSync(folder)
     .filter(f => /^scene[_-]?\d+\.(mp4|mov|mkv|jpg|jpeg|png)$/i.test(f))
     .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+  // Auto-provision scenes if missing: scene_1 from cover.jpg, scene_2-5 from shared assets
+  if (sceneFiles.length <= 1) {
+    const defaultScenesDir = path.join(findRepoRoot(__dirname), 'assets', 'default_scenes');
+    const scene1Dest = path.join(folder, 'scene_1.jpg');
+    if (fs.existsSync(coverPath) && !fs.existsSync(scene1Dest)) {
+      fs.copyFileSync(coverPath, scene1Dest);
+    }
+    if (fs.existsSync(defaultScenesDir)) {
+      const defaults = fs.readdirSync(defaultScenesDir).filter(f => /^scene[_-]?\d+\.jpg$/i.test(f));
+      for (const df of defaults) {
+        const dest = path.join(folder, df);
+        if (!fs.existsSync(dest)) {
+          fs.copyFileSync(path.join(defaultScenesDir, df), dest);
+        }
+      }
+    }
+    // Re-scan scene files
+    sceneFiles = fs.readdirSync(folder)
+      .filter(f => /^scene[_-]?\d+\.(mp4|mov|mkv|jpg|jpeg|png)$/i.test(f))
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+  }
 
   let cmd = '';
   if (sceneFiles.length > 1) {
