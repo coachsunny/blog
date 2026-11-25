@@ -4,6 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="edsjHGU0Vtj9R9wCr5uRTG4Z6zdJnh82LEmosTNpZ4Y" />
+  {% if site.google_analytics %}
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', '{{ site.google_analytics }}');
+  </script>
+  {% endif %}
   {% if page.lang == 'en' %}
   <meta name="keywords" content="Mind Tea Journal, Coach Sunny, ICF Coach, Psychological Safety, The Gap and The Gain, Self-Awareness, Executive Coaching, Life Coaching" />
   {% else %}

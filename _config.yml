@@ -20,6 +20,9 @@ timezone: Asia/Taipei
 url: "https://blog.portal-coachsunny.com"
 baseurl: ""
 
+# Google Analytics 4 (GA4)
+google_analytics: "G-SCM5P2VM8G"
+
 # 构建设置
 markdown: kramdown
 highlighter: rouge
