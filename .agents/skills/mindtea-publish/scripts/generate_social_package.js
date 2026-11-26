@@ -95,7 +95,8 @@ function generateSocialPackage(postFilePath, customFolderName) {
 
   // Extract date and slug
   const dateMatch = fileName.match(/^(\d{4}-\d{2}-\d{2})-(.*)$/);
-  const postDate = metadata.date || (dateMatch ? dateMatch[1] : '2026-10-29');
+  const rawDateStr = metadata.date ? String(metadata.date).split(' ')[0].trim() : '';
+  const postDate = (rawDateStr && /^\d{4}-\d{2}-\d{2}$/.test(rawDateStr)) ? rawDateStr : (dateMatch ? dateMatch[1] : '2026-10-29');
   const postSlug = dateMatch ? dateMatch[2] : fileName;
   const postTitle = metadata.title || fileName;
 

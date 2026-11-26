@@ -76,20 +76,18 @@ function synthesizeVoice(text, outAudioPath) {
 
   const textForTts = tw2s(text);
   const utf8Env = { ...process.env, PYTHONUTF8: '1', PYTHONIOENCODING: 'utf-8' };
-  const edgeTts = findEdgeTTS();
-  if (edgeTts) {
-    console.log('🎤 使用微軟自然神經語音 CLI (zh-TW-YunJheNeural，作者 Sunny 男性沉穩教練音質)...');
+  // Priority: Use synthesize_voice.py which supports dual-voice fallback (zh-TW-YunJheNeural -> zh-CN-YunyangNeural)
+  if (fs.existsSync(pyScript)) {
+    console.log('🎤 使用微軟自然神經教練男聲合成語音 (zh-TW-YunJheNeural / zh-CN-YunyangNeural)...');
     fs.writeFileSync(tmpTextFile, textForTts, 'utf8');
     try {
-      // 依作者性別規範：嚴格限定微軟自然神經教練男聲 zh-TW-YunJheNeural
-      // 留白語速 -15%；微軟 API 不支援同時調整 rate 與 pitch，pitch 保持自然頻率以防 NoAudioReceived
-      const cmd = `"${edgeTts}" --voice zh-TW-YunJheNeural --rate="-15%" -f "${tmpTextFile}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
+      const cmd = `python "${pyScript}" "${tmpTextFile}" "${outAudioPath}" "${vttPath}"`;
       execSync(cmd, { stdio: 'inherit', env: utf8Env });
       if (fs.existsSync(outAudioPath) && fs.statSync(outAudioPath).size > 1000) {
         return;
       }
     } catch (err) {
-      console.warn('⚠️ edge-tts CLI 失敗，嘗試調用 Python 腳本...', err.message);
+      console.warn('⚠️ Python 腳本合成中斷，嘗試 CLI...', err.message);
     } finally {
       if (fs.existsSync(tmpTextFile)) {
         fs.unlinkSync(tmpTextFile);
@@ -97,15 +95,18 @@ function synthesizeVoice(text, outAudioPath) {
     }
   }
 
-  if (fs.existsSync(pyScript)) {
-    console.log('🎤 使用微軟自然神經語音 Python 腳本 (zh-TW-YunJheNeural)...');
+  const edgeTts = findEdgeTTS();
+  if (edgeTts) {
+    console.log('🎤 使用微軟自然神經語音 CLI (zh-CN-YunyangNeural)...');
     fs.writeFileSync(tmpTextFile, textForTts, 'utf8');
     try {
-      const cmd = `python "${pyScript}" "${tmpTextFile}" "${outAudioPath}" "${vttPath}"`;
+      const cmd = `"${edgeTts}" --voice zh-CN-YunyangNeural -f "${tmpTextFile}" --write-media "${outAudioPath}" --write-subtitles "${vttPath}"`;
       execSync(cmd, { stdio: 'inherit', env: utf8Env });
-      return;
+      if (fs.existsSync(outAudioPath) && fs.statSync(outAudioPath).size > 1000) {
+        return;
+      }
     } catch (err) {
-      console.warn('⚠️ Python 腳本失敗，切換至 SAPI...', err.message);
+      console.warn('⚠️ edge-tts CLI 失敗...', err.message);
     } finally {
       if (fs.existsSync(tmpTextFile)) {
         fs.unlinkSync(tmpTextFile);
