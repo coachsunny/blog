@@ -14,10 +14,11 @@ description: "Memorizing coaching models and four-step frameworks often turns si
 
 Across the tea table, a newly promoted manager looked deeply discouraged. He had tried to use a textbook coaching model (GROW) to support an overwhelmed teammate. But right after asking, "What is your goal, and what is your current reality?", the teammate snapped, "Are you interrogating me?", and walked away.
 
-I poured him another cup of warm tea, watched the quiet steam rise, and asked gently:  
-"While your brain was busy searching for the next formula to say, did your eyes actually see the living human being in front of you who felt hurt and scared?"
+I poured him another cup of warm tea, watched the quiet steam rise, paused for a moment, and asked with gentle curiosity:  
+"In that moment, while your mind was focused on what coaching model to use next, where did you notice your attention was resting?"
 
-He paused, holding his cup still in the air.
+He paused, looking down at his tea. After a quiet breath, he said softly:  
+"My attention was entirely on myself. I was so worried about saying the wrong thing and proving I knew the framework, that I left no room to simply feel where he was."
 
 <!--more-->
 
