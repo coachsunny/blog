@@ -190,6 +190,55 @@ async function startListeningForApproval(onApprove) {
               );
             }
           }
+
+          // 處理教練文字訊息與指示 (Text Messages)
+          if (update.message && update.message.text) {
+            const userText = update.message.text.trim();
+            const fromId = update.message.from ? String(update.message.from.id) : '';
+            const msgChatId = update.message.chat ? update.message.chat.id : CHAT_ID;
+
+            if (fromId === String(CHAT_ID) || String(msgChatId) === String(CHAT_ID)) {
+              console.log(`[Telegram] 收到 Sunny 教練手機反饋: "${userText}"`);
+
+              // 記錄至反饋學習日誌
+              const feedbackLogPath = path.resolve(__dirname, '../_drafts/coach_feedback.jsonl');
+              const draftsDir = path.dirname(feedbackLogPath);
+              if (!fs.existsSync(draftsDir)) fs.mkdirSync(draftsDir, { recursive: true });
+              const logEntry = JSON.stringify({
+                timestamp: new Date().toISOString(),
+                coachText: userText
+              }) + '\n';
+              fs.appendFileSync(feedbackLogPath, logEntry, 'utf8');
+
+              // 智慧語意回應用
+              const lower = userText.toLowerCase();
+              if (lower === 'ok' || lower === '核准' || lower === '發布' || lower === '通過' || lower === '可以') {
+                await sendMessage(`🚀 收到教練核准指令，正在為您發布官網...`);
+                try {
+                  const releaseResult = await onApprove();
+                  await sendMessage(
+                    `✅ *【心茶記 · 官網發布完成】*\n\n` +
+                    `🔗 正式網址：${releaseResult.url}\n` +
+                    `📦 本地目錄：\`${releaseResult.localDir}\``
+                  );
+                } catch (err) {
+                  await sendMessage(`❌ 部署失敗：\`${err.message}\``);
+                }
+              } else if (lower.includes('暫停') || lower.includes('先不要') || lower.includes('等等')) {
+                await sendMessage(`⏸️ 收到！已為您暫緩發布，保留於本地草稿。`);
+              } else {
+                // 收到教練的觀點與指導
+                await sendMessage(
+                  `☕ *【已接收 Sunny 教練的看法與指示】*\n\n` +
+                  `您說：「_${userText}_」\n\n` +
+                  `💡 *處理進度*：\n` +
+                  `1. 觀點已記入團隊學習庫（\`_drafts/coach_feedback.jsonl\`）\n` +
+                  `2. 團隊將依據您的指示調整內容與心智模型！\n` +
+                  `_如需進一步調整或換題，隨時在 Telegram 直接吩咐即可。_`
+                );
+              }
+            }
+          }
         }
       }
     } catch (err) {
