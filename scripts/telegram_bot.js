@@ -31,7 +31,50 @@ loadEnv();
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const API_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`;
+
+/**
+ * 調用 Google 官方 Gemini 2.5 Flash 大腦進行即時語意推理
+ */
+async function callGemini(userPrompt, systemPrompt = '') {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+    return null;
+  }
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const payload = {
+    contents: [
+      {
+        role: 'user',
+        parts: [{ text: userPrompt }]
+      }
+    ]
+  };
+
+  if (systemPrompt) {
+    payload.systemInstruction = {
+      parts: [{ text: systemPrompt }]
+    };
+  }
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+      return data.candidates[0].content.parts.map(p => p.text).join('\n');
+    }
+    return null;
+  } catch (err) {
+    console.error('[Gemini API] 呼叫失敗:', err.message);
+    return null;
+  }
+}
 
 /**
  * 發送 Markdown 格式文字訊息
@@ -248,15 +291,45 @@ async function startListeningForApproval(onApprove) {
               } else if (lower.includes('暫停') || lower.includes('先不要') || lower.includes('等等')) {
                 await sendMessage(`⏸️ 收到！已為您暫緩發布，保留於本地草稿。`);
               } else {
-                // 收到教練的觀點與指導
-                await sendMessage(
-                  `☕ *【已接收 Sunny 教練的看法與指示】*\n\n` +
-                  `您說：「_${userText}_」\n\n` +
-                  `💡 *處理進度*：\n` +
-                  `1. 觀點已記入團隊學習庫（\`_drafts/coach_feedback.jsonl\`）\n` +
-                  `2. 團隊將依據您的指示調整內容與心智模型！\n` +
-                  `_如需進一步調整或換題，隨時在 Telegram 直接吩咐即可。_`
-                );
+                // 調用 Gemini 即時大腦進行深度理解與回覆
+                let intelligentReply = null;
+                try {
+                  const latestPostFile = fs.readdirSync(path.resolve(__dirname, '../_posts'))
+                    .filter(f => f.endsWith('.md') && !f.endsWith('-en.md'))
+                    .sort().reverse()[0];
+                  const slug = latestPostFile.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '');
+                  const postContent = fs.readFileSync(path.resolve(__dirname, `../_posts/${latestPostFile}`), 'utf8');
+                  const titleMatch = postContent.match(/title:\s*["']?([^"'\r\n]+)["']?/);
+                  const postTitle = titleMatch ? titleMatch[1] : slug;
+                  const postUrl = `https://blog.portal-coachsunny.com/post/${slug}/`;
+
+                  const systemPrompt = 
+                    `你是《心茶記》(Mind Tea Journal) 的 AI 執行長。你的對話對象是專欄創辦人 Sunny 教練 (ICF 專業教練)。\n` +
+                    `專案規範：\n` +
+                    `- 官網網址只能是 https://blog.portal-coachsunny.com/post/<slug>/\n` +
+                    `- 嚴格遵守 ICF 不批判、不預設立場的夥伴關係與覺察原則\n` +
+                    `- 今日最新專欄文章：《${postTitle}》\n` +
+                    `- 永久連結：${postUrl}\n\n` +
+                    `請以謙遜、專業、懂 ICF 教練藝術的執行長口氣，直接回答或回應 Sunny 教練的話。格式使用 Telegram Markdown。`;
+
+                  intelligentReply = await callGemini(userText, systemPrompt);
+                } catch (e) {
+                  console.warn('[Gemini] 推理略過:', e.message);
+                }
+
+                if (intelligentReply) {
+                  await sendMessage(intelligentReply);
+                } else {
+                  // 備用模板
+                  await sendMessage(
+                    `☕ *【已接收 Sunny 教練的看法與指示】*\n\n` +
+                    `您說：「_${userText}_」\n\n` +
+                    `💡 *處理進度*：\n` +
+                    `1. 觀點已記入團隊學習庫（\`_drafts/coach_feedback.jsonl\`）\n` +
+                    `2. 團隊將依據您的指示調整內容與心智模型！\n` +
+                    `_如需進一步調整或換題，隨時在 Telegram 直接吩咐即可。_`
+                  );
+                }
               }
             }
           }
