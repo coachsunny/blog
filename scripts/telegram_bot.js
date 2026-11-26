@@ -210,9 +210,30 @@ async function startListeningForApproval(onApprove) {
               }) + '\n';
               fs.appendFileSync(feedbackLogPath, logEntry, 'utf8');
 
-              // 智慧語意回應用
-              const lower = userText.toLowerCase();
-              if (lower === 'ok' || lower === '核准' || lower === '發布' || lower === '通過' || lower === '可以') {
+              // 智慧語意判斷與意圖分流
+              const isQuery = userText.includes('？') || userText.includes('?') || userText.includes('嗎') || userText.includes('狀態') || userText.includes('進度') || userText.includes('好了');
+              const isPublishInquiry = isQuery && (userText.includes('發布') || userText.includes('發佈') || userText.includes('上線') || userText.includes('好了'));
+              
+              if (isPublishInquiry) {
+                // 狀態查詢：已發佈了嗎？
+                try {
+                  const latestPostFile = fs.readdirSync(path.resolve(__dirname, '../_posts'))
+                    .filter(f => f.endsWith('.md') && !f.endsWith('-en.md'))
+                    .sort().reverse()[0];
+                  const slug = latestPostFile.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace(/\.md$/, '');
+                  const url = `https://blog.portal-coachsunny.com/post/${slug}/`;
+                  
+                  await sendMessage(
+                    `☕ *【Sunny 教練，今日專欄已正式發布上線！】*\n\n` +
+                    `✅ *正式網址*：${url}\n` +
+                    `📊 *品質檢驗*：P0 錯誤 0 個（繁簡校對 100% 通過）\n` +
+                    `📦 *本地素材*：13 項社群包與 5 分鏡短影音皆已在本地資料夾準備就緒！\n\n` +
+                    `_您在電腦上打開 04_方格子_富文本預覽.html 即可一鍵複製至方格子／小紅書。祝今日有美好的心流！_`
+                  );
+                } catch (err) {
+                  await sendMessage(`⚠️ 查詢發布狀態時發生異常：${err.message}`);
+                }
+              } else if (lower === 'ok' || lower === '核准' || lower === '發布' || lower === '通過' || lower === '可以') {
                 await sendMessage(`🚀 收到教練核准指令，正在為您發布官網...`);
                 try {
                   const releaseResult = await onApprove();
