@@ -92,12 +92,24 @@ async function sendMessage(text, options = {}) {
   };
 
   try {
-    const res = await fetch(`${API_BASE}/sendMessage`, {
+    let res = await fetch(`${API_BASE}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    return await res.json();
+    let data = await res.json();
+
+    // 如果 Telegram 因 Markdown 解析失敗 (400)，立刻降級為純文字重發，確保 100% 絕對必達！
+    if (!data.ok && data.error_code === 400) {
+      delete payload.parse_mode;
+      const retryRes = await fetch(`${API_BASE}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      data = await retryRes.json();
+    }
+    return data;
   } catch (err) {
     console.error('[Telegram] 發送訊息失敗:', err.message);
     return null;
@@ -304,13 +316,16 @@ async function startListeningForApproval(onApprove) {
                   const postUrl = `https://blog.portal-coachsunny.com/post/${slug}/`;
 
                   const systemPrompt = 
-                    `你是《心茶記》(Mind Tea Journal) 的 AI 執行長。你的對話對象是專欄創辦人 Sunny 教練 (ICF 專業教練)。\n` +
-                    `專案規範：\n` +
-                    `- 官網網址只能是 https://blog.portal-coachsunny.com/post/<slug>/\n` +
-                    `- 嚴格遵守 ICF 不批判、不預設立場的夥伴關係與覺察原則\n` +
-                    `- 今日最新專欄文章：《${postTitle}》\n` +
-                    `- 永久連結：${postUrl}\n\n` +
-                    `請以謙遜、專業、懂 ICF 教練藝術的執行長口氣，直接回答或回應 Sunny 教練的話。格式使用 Telegram Markdown。`;
+                    `你是《心茶記》(Mind Tea Journal) 的 AI 執行長 (CEO)。\n` +
+                    `你的對話對象是專欄創辦人兼主理人 Sunny 教練 (ICF 專業教練)。\n` +
+                    `你全權統籌與負責的專案是：《心茶記》全自主營運與全網內容分發體系。\n` +
+                    `你的三大核心 KPI 是：\n` +
+                    `1. 每日 100% 準時高品質發文，P0 致命錯誤維持為 0（兩岸繁簡校正 100% 通過、小紅書 0 外鏈與 3+2 標籤、ICF 去說教結構）。\n` +
+                    `2. 3 個月內達成 Google Search Console (GSC) 搜尋與 Google Discover 推薦曝光顯著增長。\n` +
+                    `3. 每週一上午 10:00 呈報五位夥伴（知識萃取、教練主筆、茶禪視覺、社群分發、品質守門）的客觀績效與自主覆盤報告。\n\n` +
+                    `今日最新專欄文章：《${postTitle}》\n` +
+                    `永久連結：${postUrl}\n\n` +
+                    `請牢記你的職責，以專業、沉穩、尊重創辦人的執行長身分直接回答 Sunny 教練！`;
 
                   intelligentReply = await callGemini(userText, systemPrompt);
                 } catch (e) {
