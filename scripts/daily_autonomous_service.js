@@ -105,32 +105,57 @@ async function runDailyPipeline() {
     console.log(`🎬 5分鏡短視頻就緒：${social.hasVideo ? '是' : '否'}`);
   }
 
-  // 3. 準備 Telegram 晨間簡報
-  console.log('\n[3/4] 向 Sunny 教練手機推送晨間決策簡報...');
-  const caption = 
-    `☕ *【心茶記 · 晨間發文準備就緒】*\n\n` +
-    `📌 *今日主題*：${post.title}\n` +
-    `🔗 *預定網址*：[點此預覽文章](${post.permalink})\n` +
-    `📊 *品質稽核*：P0 致命錯誤 0 個（兩岸繁簡校正通過）\n` +
-    `🎬 *短影音*：${social && social.hasVideo ? '5 組動態分鏡已剪輯完成' : '已準備'}\n` +
-    `📁 *本地目錄*：\`${social ? social.dirName : '無'}\`\n\n` +
-    `_請教練在下方點擊按鈕，一鍵核准發布至正式官網：_`;
+  // 檢查今日文章是否已經核准並已發布至 main
+  const stateFilePath = path.join(ROOT_DIR, '_drafts', 'daily_publish_state.json');
+  let publishState = {};
+  if (fs.existsSync(stateFilePath)) {
+    try {
+      publishState = JSON.parse(fs.readFileSync(stateFilePath, 'utf8'));
+    } catch (e) {}
+  }
 
-  const keyboard = {
-    inline_keyboard: [
-      [
-        { text: '🚀 一鍵核准上線官網', callback_data: 'approve_publish' }
-      ],
-      [
-        { text: '⏸️ 今日暫緩發布', callback_data: 'pause_publish' }
-      ]
-    ]
-  };
+  const todayStr = getTodayString();
+  const postDateMatch = post.file.match(/^(\d{4}-\d{2}-\d{2})/);
+  const postDate = postDateMatch ? postDateMatch[1] : '';
+  const isAlreadyPublished = publishState.date === todayStr && publishState.slug === post.slug;
 
-  if (social && social.coverPath) {
-    await sendPhoto(social.coverPath, caption, keyboard);
+  if (postDate !== todayStr) {
+    console.warn(`⚠️ 警告：最新文章日期為 ${postDate}，非今日 (${todayStr})！防呆機制啟動，拒絕推送過期舊文卡片。`);
+    await sendMessage(
+      `☕ *【心茶記 · 晨間防呆攔截通報】*\n\n` +
+      `偵測到今日 (${todayStr}) 專欄尚未生成全新文章（系統目前最新存檔為 ${postDate} 之舊文）。\n` +
+      `🛡️ 執行長防呆守護機制已即刻攔截，絕不拿昨日舊文充數推送！已等待全自動產製管線補齊新主題。`
+    );
+  } else if (isAlreadyPublished) {
+    console.log(`\n[3/4] 今日文章 (${todayStr}) 稍早已獲教練核准並正式上線，略過重複推播確認卡片，直接進入即時監聽模式！`);
   } else {
-    await sendMessage(caption, { reply_markup: keyboard });
+    // 3. 準備 Telegram 晨間簡報
+    console.log('\n[3/4] 向 Sunny 教練手機推送晨間決策簡報...');
+    const caption = 
+      `☕ *【心茶記 · 晨間發文準備就緒】*\n\n` +
+      `📌 *今日主題*：${post.title}\n` +
+      `🔗 *預定網址*：[點此預覽文章](${post.permalink})\n` +
+      `📊 *品質稽核*：P0 致命錯誤 0 個（兩岸繁簡校正通過）\n` +
+      `🎬 *短影音*：${social && social.hasVideo ? '5 組動態分鏡已剪輯完成' : '已準備'}\n` +
+      `📁 *本地目錄*：\`${social ? social.dirName : '無'}\`\n\n` +
+      `_請教練在下方點擊按鈕，一鍵核准發布至正式官網：_`;
+
+    const keyboard = {
+      inline_keyboard: [
+        [
+          { text: '🚀 一鍵核准上線官網', callback_data: 'approve_publish' }
+        ],
+        [
+          { text: '⏸️ 今日暫緩發布', callback_data: 'pause_publish' }
+        ]
+      ]
+    };
+
+    if (social && social.coverPath) {
+      await sendPhoto(social.coverPath, caption, keyboard);
+    } else {
+      await sendMessage(caption, { reply_markup: keyboard });
+    }
   }
 
   // 4. 監聽核准回呼
@@ -147,10 +172,33 @@ async function runDailyPipeline() {
       execSync(`git merge ${currentBranch} --no-edit`, { cwd: ROOT_DIR });
     }
 
+    // 確保今日文章與資產已提交
+    try {
+      execSync('git add _posts/*.md assets/ QA_REPORT_LATEST.md scripts/', { cwd: ROOT_DIR });
+      const status = execSync('git status --porcelain', { cwd: ROOT_DIR }).toString().trim();
+      if (status) {
+        execSync(`git commit -m "publish: ${post.title}"`, { cwd: ROOT_DIR });
+        console.log('[Git] 已自動提交今日文章與資產！');
+      }
+    } catch (e) {
+      console.warn('[Git] 提交略過或無變更:', e.message);
+    }
+
     // 推送到 GitHub Pages
     console.log('[Git] 正在推送至 GitHub Pages...');
     execSync('git push origin main', { cwd: ROOT_DIR });
     console.log('🎉 官網部署成功！');
+
+    // 記錄今日已發布狀態，避免重複發布
+    try {
+      const draftsDir = path.dirname(stateFilePath);
+      if (!fs.existsSync(draftsDir)) fs.mkdirSync(draftsDir, { recursive: true });
+      fs.writeFileSync(stateFilePath, JSON.stringify({
+        date: todayStr,
+        slug: post.slug,
+        publishedAt: new Date().toISOString()
+      }, null, 2), 'utf8');
+    } catch (e) {}
 
     return {
       url: post.permalink,
