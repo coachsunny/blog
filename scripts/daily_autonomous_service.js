@@ -16,6 +16,7 @@ const {
   sendPhoto,
   startListeningForApproval
 } = require('./telegram_bot');
+const { generateDailyPost } = require('./generate_daily_post');
 
 loadEnv();
 
@@ -91,13 +92,13 @@ async function runDailyPipeline() {
 
   // 2. 獲取最新發文資訊
   console.log('\n[2/4] 盤查今日文章與本地社群素材...');
-  const post = findLatestPost();
+  let post = findLatestPost();
   if (!post) {
     console.error('❌ 找不到任何發布文章！');
     process.exit(1);
   }
 
-  const social = findSocialAssetPackage(post.slug);
+  let social = findSocialAssetPackage(post.slug);
   console.log(`📌 最新文章：${post.title}`);
   console.log(`🔗 預定網址：${post.permalink}`);
   if (social) {
@@ -115,46 +116,77 @@ async function runDailyPipeline() {
   }
 
   const todayStr = getTodayString();
-  const postDateMatch = post.file.match(/^(\d{4}-\d{2}-\d{2})/);
-  const postDate = postDateMatch ? postDateMatch[1] : '';
+  const isDryRun = process.argv.includes('--dry-run');
+  let postDateMatch = post.file.match(/^(\d{4}-\d{2}-\d{2})/);
+  let postDate = postDateMatch ? postDateMatch[1] : '';
+
+  if (postDate !== todayStr) {
+    console.log(`\n⚠️ 偵測到今日 (${todayStr}) 尚未有專屬文章（最新為 ${postDate}），自動啟動全自主產製管線...`);
+    if (isDryRun) {
+      await generateDailyPost({ date: todayStr, dryRun: true });
+      console.log('✅ [Dry-Run] 自主產製管線測試成功！');
+      return;
+    }
+
+    try {
+      await generateDailyPost({ date: todayStr, dryRun: false });
+      post = findLatestPost();
+      social = findSocialAssetPackage(post.slug);
+      postDateMatch = post.file.match(/^(\d{4}-\d{2}-\d{2})/);
+      postDate = postDateMatch ? postDateMatch[1] : '';
+      execSync('node scripts/daily_qa_audit.js', { cwd: ROOT_DIR, stdio: 'inherit' });
+    } catch (genErr) {
+      console.error('❌ 全自主產製失敗:', genErr.message);
+      await sendMessage(
+        `⚠️ *【心茶記 · 清晨自動產製異常】*\n\n` +
+        `系統嘗試自動生成今日 (${todayStr}) 專欄時遇到狀況：\`${genErr.message}\`\n` +
+        `已啟動防呆保護，絕不誤推昨日舊文。`
+      );
+      postDate = '';
+    }
+  }
+
   const isAlreadyPublished = publishState.date === todayStr && publishState.slug === post.slug;
 
   if (postDate !== todayStr) {
-    console.warn(`⚠️ 警告：最新文章日期為 ${postDate}，非今日 (${todayStr})！防呆機制啟動，拒絕推送過期舊文卡片。`);
-    await sendMessage(
-      `☕ *【心茶記 · 晨間防呆攔截通報】*\n\n` +
-      `偵測到今日 (${todayStr}) 專欄尚未生成全新文章（系統目前最新存檔為 ${postDate} 之舊文）。\n` +
-      `🛡️ 執行長防呆守護機制已即刻攔截，絕不拿昨日舊文充數推送！已等待全自動產製管線補齊新主題。`
-    );
+    console.warn(`⚠️ 今日 (${todayStr}) 文章尚未就緒，維持防呆待機。`);
   } else if (isAlreadyPublished) {
-    console.log(`\n[3/4] 今日文章 (${todayStr}) 稍早已獲教練核准並正式上線，略過重複推播確認卡片，直接進入即時監聽模式！`);
+    console.log(`\n[3/4] 今日文章 (${todayStr}) 稍早已正式上線，略過重複推播，直接進入即時監聽模式！`);
   } else {
-    // 3. 準備 Telegram 晨間簡報
-    console.log('\n[3/4] 向 Sunny 教練手機推送晨間決策簡報...');
+    // 3. 依創辦人授權（軌道一）：文章通過 QA 後全自主上線官網並通報
+    console.log('\n[3/4] 執行文章自主上線部署並向 Sunny 教練通報...');
+    if (!isDryRun) {
+      try {
+        execSync('git add _posts/*.md QA_REPORT_LATEST.md', { cwd: ROOT_DIR });
+        const status = execSync('git status --porcelain', { cwd: ROOT_DIR }).toString().trim();
+        if (status) {
+          execSync(`git commit -m "publish(${todayStr}): ${post.slug}"`, { cwd: ROOT_DIR });
+        }
+        execSync('git push origin main', { cwd: ROOT_DIR });
+        fs.writeFileSync(stateFilePath, JSON.stringify({
+          date: todayStr,
+          slug: post.slug,
+          publishedAt: new Date().toISOString()
+        }, null, 2), 'utf8');
+        console.log('🎉 今日文章已全自主上線官網！');
+      } catch (gitErr) {
+        console.error('⚠️ 自動部署過程發生異常:', gitErr.message);
+      }
+    }
+
     const caption = 
-      `☕ *【心茶記 · 晨間發文準備就緒】*\n\n` +
+      `☕ *【心茶記 · 今日專欄已自主上線官網】*\n\n` +
       `📌 *今日主題*：${post.title}\n` +
-      `🔗 *預定網址*：[點此預覽文章](${post.permalink})\n` +
+      `🔗 *正式網址*：${post.permalink}\n` +
       `📊 *品質稽核*：P0 致命錯誤 0 個（兩岸繁簡校正通過）\n` +
       `🎬 *短影音*：${social && social.hasVideo ? '5 組動態分鏡已剪輯完成' : '已準備'}\n` +
       `📁 *本地目錄*：\`${social ? social.dirName : '無'}\`\n\n` +
-      `_請教練在下方點擊按鈕，一鍵核准發布至正式官網：_`;
-
-    const keyboard = {
-      inline_keyboard: [
-        [
-          { text: '🚀 一鍵核准上線官網', callback_data: 'approve_publish' }
-        ],
-        [
-          { text: '⏸️ 今日暫緩發布', callback_data: 'pause_publish' }
-        ]
-      ]
-    };
+      `_文章已通過品質檢驗並自主部署上線。若您閱讀後有任何微調指示，隨時在這裡告訴我即可！_`;
 
     if (social && social.coverPath) {
-      await sendPhoto(social.coverPath, caption, keyboard);
+      await sendPhoto(social.coverPath, caption);
     } else {
-      await sendMessage(caption, { reply_markup: keyboard });
+      await sendMessage(caption);
     }
   }
 

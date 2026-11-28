@@ -35,9 +35,9 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const API_BASE = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 /**
- * 調用 Google 官方 Gemini 2.5 Flash 大腦進行即時語意推理
+ * 調用 Google 官方 Gemini 2.5 Flash 大腦進行即時語意推理（含 45s 超時與自動重試）
  */
-async function callGemini(userPrompt, systemPrompt = '') {
+async function callGemini(userPrompt, systemPrompt = '', retries = 1) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'your_gemini_api_key_here') {
     return null;
@@ -59,22 +59,25 @@ async function callGemini(userPrompt, systemPrompt = '') {
     };
   }
 
-  try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(20000)
-    });
-    const data = await res.json();
-    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-      return data.candidates[0].content.parts.map(p => p.text).join('\n');
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(45000)
+      });
+      const data = await res.json();
+      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+        return data.candidates[0].content.parts.map(p => p.text).join('\n');
+      }
+      return null;
+    } catch (err) {
+      console.error(`[Gemini API] 呼叫失敗 (第 ${attempt + 1} 次):`, err.message);
+      if (attempt === retries) return null;
     }
-    return null;
-  } catch (err) {
-    console.error('[Gemini API] 呼叫失敗:', err.message);
-    return null;
   }
+  return null;
 }
 
 /**
@@ -439,6 +442,7 @@ async function startListeningForApproval(onApprove) {
 
 module.exports = {
   loadEnv,
+  callGemini,
   sendMessage,
   sendPhoto,
   answerCallbackQuery,
