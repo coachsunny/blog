@@ -190,6 +190,11 @@ async function runDailyPipeline() {
     }
   }
 
+  if (process.argv.includes('--once')) {
+    console.log('\n[4/4] 單次排程任務執行完畢 (--once)，不佔用背景鎖定，安全退出。');
+    return;
+  }
+
   // 4. 監聽核准回呼
   console.log('\n[4/4] 進入背景監聽模式，等待手機端指令...');
   startListeningForApproval(async () => {
